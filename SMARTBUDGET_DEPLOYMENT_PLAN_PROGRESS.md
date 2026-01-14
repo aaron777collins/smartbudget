@@ -210,12 +210,22 @@ The deployment plan requires:
 
 ### Phase 3: Database Setup (Supabase)
 
-- [ ] **Task 3.1**: Verify Supabase project and connection
-  - List Supabase projects: supabase projects list
-  - Get connection strings (pooled + direct)
-  - Test connection with psql or Prisma Studio
-  - Verify database is empty or understand existing schema
-  - Document project ID and region
+- [x] **Task 3.1**: Verify Supabase project and connection
+  - ✅ List Supabase projects: returnzie (cwrtmqnepuvgofifvmux)
+  - ✅ Connection strings documented in .env (password placeholder added)
+  - ✅ Verified database connection via Supabase CLI (CLI can connect)
+  - ⚠️ Database is NOT empty - contains existing returnzie schema with migrations
+  - ✅ Project details documented:
+    - Project ID: cwrtmqnepuvgofifvmux
+    - Region: us-east-1 (East US - North Virginia)
+    - Database: PostgreSQL 17.6.1.063
+    - Host: db.cwrtmqnepuvgofifvmux.supabase.co
+    - Status: ACTIVE_HEALTHY
+    - Created: 2026-01-12
+  - ⚠️ **BLOCKER**: Database password needed for Prisma connection
+    - Password must be retrieved from Supabase Dashboard
+    - Location: Project Settings → Database → Connection String
+    - Update placeholders in .env: [YOUR_DB_PASSWORD]
 
 - [ ] **Task 3.2**: Run Prisma migrations on Supabase
   - Generate Prisma client: npx prisma generate
@@ -515,6 +525,37 @@ The deployment plan requires:
 
 ## Completed This Iteration
 
+**Task 3.1: Verify Supabase Project and Connection**
+- ✅ Verified Supabase project exists and is healthy
+- Project details:
+  - Name: returnzie
+  - Project ID: cwrtmqnepuvgofifvmux
+  - Region: us-east-1 (East US - North Virginia)
+  - Database: PostgreSQL 17.6.1.063
+  - Host: db.cwrtmqnepuvgofifvmux.supabase.co
+  - Status: ACTIVE_HEALTHY
+  - Created: 2026-01-12T14:25:32Z
+- ✅ Updated .env file with correct connection string format:
+  - Pooled connection: postgresql://postgres.cwrtmqnepuvgofifvmux:[YOUR_DB_PASSWORD]@aws-0-us-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true
+  - Direct connection: postgresql://postgres.cwrtmqnepuvgofifvmux:[YOUR_DB_PASSWORD]@aws-0-us-east-1.pooler.supabase.com:5432/postgres
+- ✅ Verified Supabase CLI can connect to database
+- ⚠️ **CRITICAL DISCOVERY**: Database is NOT empty
+  - Contains existing returnzie project schema
+  - Has 30+ migration files from returnzie project
+  - This is a SHARED database, not dedicated to SmartBudget
+  - **DECISION REQUIRED**: User must decide whether to:
+    - Option A: Use this shared database (SmartBudget tables will coexist with returnzie tables)
+    - Option B: Create a new dedicated Supabase project for SmartBudget
+  - Recommendation: Create new dedicated project to avoid schema conflicts
+- ⚠️ **BLOCKER for Tasks 3.2-3.3**: Database password needed
+  - Must be retrieved from Supabase Dashboard
+  - Location: Dashboard → Project Settings → Database → Connection String
+  - Update [YOUR_DB_PASSWORD] placeholders in .env file
+- Status: Task 3.1 complete, Tasks 3.2-3.3 blocked pending password
+- Next: Skip to Task 7.1 (container deployment) OR wait for user to provide password
+
+**Previous Iterations:**
+
 **Task 6.1 & 6.2: Verify Container Networking**
 - ✅ Verified "internal" Docker network exists and is healthy
 - Network details:
@@ -606,7 +647,19 @@ The deployment plan requires:
 - Image ready for deployment testing
 
 **Blockers/Manual Steps Required:**
-- **CRITICAL**: Task 3.1-3.3: Supabase DATABASE_URL and DIRECT_URL need actual connection strings with password
+- **CRITICAL - NEW DISCOVERY**: Shared Database Issue (Task 3.1)
+  - The returnzie Supabase project (cwrtmqnepuvgofifvmux) already contains returnzie schema
+  - SmartBudget schema would need to coexist with returnzie tables in the same database
+  - This creates risk of schema conflicts and data mixing
+  - **RECOMMENDED ACTION**: Create a new dedicated Supabase project for SmartBudget
+    - Run: `supabase projects create smartbudget --region us-east-1`
+    - Get new connection strings from new project
+    - Update .env with new project credentials
+  - **ALTERNATIVE**: Use shared database (not recommended)
+    - Higher risk of schema conflicts
+    - Tables from both apps in same database
+    - Requires careful migration management
+- **CRITICAL**: Task 3.2-3.3: Supabase DATABASE_URL and DIRECT_URL need actual password
   - Linked project reference: cwrtmqnepuvgofifvmux (returnzie)
   - Database connection is blocked until user provides password
   - User must either: (1) Get DB password for returnzie project from Supabase dashboard, OR (2) Create new SmartBudget Supabase project
