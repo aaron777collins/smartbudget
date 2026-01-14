@@ -164,15 +164,15 @@ The deployment plan requires:
 
 ### Phase 2: Docker Infrastructure
 
-- [ ] **Task 2.1**: Create Dockerfile (multi-stage build)
-  - Base stage: node:20-alpine
-  - Deps stage: Copy package*.json and run npm ci
-  - Builder stage: Copy source, generate Prisma client, build Next.js
-  - Runner stage: Copy standalone build, Prisma files, create uploads dir
-  - Setup non-root user (nextjs:nodejs, uid 1001, gid 1001)
-  - Expose port 3000
-  - Set ENV variables (NODE_ENV=production, PORT=3000, HOSTNAME=0.0.0.0)
-  - CMD: ["node", "server.js"]
+- [x] **Task 2.1**: Create Dockerfile (multi-stage build)
+  - ✅ Base stage: node:20-alpine
+  - ✅ Deps stage: Copy package*.json and run npm ci
+  - ✅ Builder stage: Copy source, generate Prisma client, build Next.js
+  - ✅ Runner stage: Copy standalone build, Prisma files, create uploads dir
+  - ✅ Setup non-root user (nextjs:nodejs, uid 1001, gid 1001)
+  - ✅ Expose port 3000
+  - ✅ Set ENV variables (NODE_ENV=production, PORT=3000, HOSTNAME=0.0.0.0)
+  - ✅ CMD: ["node", "server.js"]
 
 - [ ] **Task 2.2**: Create .dockerignore file
   - Exclude node_modules/, .next/, .git/
@@ -501,15 +501,16 @@ The deployment plan requires:
 
 ## Completed This Iteration
 
-**Phase 1 Tasks (1.1, 1.2, 1.3):**
-- Created production .env file with all required configuration values
-- Generated secure NEXTAUTH_SECRET (32 bytes, base64 encoded)
-- Configured GitHub OAuth credentials from deployment plan
-- Set up Anthropic API key for Claude AI integration
-- Created uploads directory structure (csv/, ofx/, temp/) with proper permissions
-- Added .gitkeep files to preserve directory structure in git
-- Updated .gitignore to exclude uploads/
-- Modified next.config.js to add `output: 'standalone'` for Docker deployment
+**Task 2.1: Create Dockerfile (multi-stage build)**
+- Created multi-stage Dockerfile with 4 stages (base, deps, builder, runner)
+- Base stage: node:20-alpine for minimal image size
+- Deps stage: Install dependencies with npm ci
+- Builder stage: Generate Prisma client and build Next.js with standalone output
+- Runner stage: Copy standalone build, static files, and Prisma artifacts
+- Configured non-root user (nextjs:nodejs, uid 1001, gid 1001)
+- Created uploads directory with proper ownership
+- Set environment variables (NODE_ENV=production, PORT=3000, HOSTNAME=0.0.0.0)
+- Configured CMD to run standalone server.js
 
 **Blockers/Manual Steps Required:**
 - Task 1.1: Supabase DATABASE_URL and DIRECT_URL need actual connection strings with password
