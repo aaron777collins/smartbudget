@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, DollarSign, Store, FileText, Tag, Trash2 } from 'lucide-react';
+import { CategorySelector } from './category-selector';
 
 interface Transaction {
   id: string;
@@ -113,6 +114,8 @@ export function TransactionDetailDialog({
           merchantName: formData.merchantName,
           amount: formData.amount,
           notes: formData.notes,
+          categoryId: formData.category?.id,
+          subcategoryId: formData.subcategory?.id,
         }),
       });
 
@@ -127,6 +130,25 @@ export function TransactionDetailDialog({
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCategoryChange = (categoryId: string | null, subcategoryId: string | null) => {
+    // Update formData with new category selection
+    setFormData((prev) => ({
+      ...prev,
+      category: categoryId ? {
+        id: categoryId,
+        name: prev.category?.name || '',
+        slug: prev.category?.slug || '',
+        icon: prev.category?.icon || '',
+        color: prev.category?.color || '',
+      } as any : undefined,
+      subcategory: subcategoryId ? {
+        id: subcategoryId,
+        name: prev.subcategory?.name || '',
+        slug: prev.subcategory?.slug || '',
+      } as any : undefined,
+    }));
   };
 
   const handleDelete = async () => {
@@ -288,7 +310,18 @@ export function TransactionDetailDialog({
             </div>
 
             {/* Category */}
-            {transaction.category && (
+            {editing ? (
+              <CategorySelector
+                categoryId={formData.category?.id}
+                subcategoryId={formData.subcategory?.id}
+                onCategoryChange={handleCategoryChange}
+                transactionId={transactionId || undefined}
+                transactionDescription={formData.description}
+                transactionMerchant={formData.merchantName}
+                transactionAmount={formData.amount ? parseFloat(formData.amount) : undefined}
+                showAutoCategorize={true}
+              />
+            ) : transaction.category ? (
               <div className="space-y-2">
                 <Label className="flex items-center gap-2">
                   <Tag className="h-4 w-4" />
@@ -305,6 +338,21 @@ export function TransactionDetailDialog({
                   {transaction.subcategory &&
                     ` → ${transaction.subcategory.name}`}
                 </Badge>
+                {transaction.confidenceScore && (
+                  <div className="text-xs text-muted-foreground">
+                    Confidence: {Math.round(transaction.confidenceScore * 100)}%
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Tag className="h-4 w-4" />
+                  Category
+                </Label>
+                <div className="text-sm text-muted-foreground">
+                  No category assigned
+                </div>
               </div>
             )}
 

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import type { AccountType, TransactionType } from '@prisma/client';
+import { categorizeTransaction, getCategoryAndSubcategoryIds } from '@/lib/rule-based-categorizer';
 
 interface ParsedTransaction {
   date: Date;
@@ -161,24 +162,61 @@ export async function POST(request: NextRequest) {
       return true;
     });
 
-    // Import transactions
+    // Categorize transactions before import
+    const categorizedData = await Promise.all(
+      newTransactions.map(async (t) => {
+        // Categorize transaction using rule-based engine
+        const categorizationResult = categorizeTransaction({
+          description: t.description,
+          merchantName: t.merchantName,
+          amount: t.amount,
+          date: t.date
+        });
+
+        // Get category and subcategory IDs if categorized
+        let categoryId = null;
+        let subcategoryId = null;
+        let confidenceScore = null;
+
+        if (categorizationResult.categorySlug && categorizationResult.subcategorySlug) {
+          const ids = await getCategoryAndSubcategoryIds(
+            categorizationResult.categorySlug,
+            categorizationResult.subcategorySlug,
+            prisma
+          );
+          categoryId = ids.categoryId;
+          subcategoryId = ids.subcategoryId;
+          confidenceScore = categorizationResult.confidence;
+        }
+
+        return {
+          userId,
+          accountId: account.id,
+          date: t.date,
+          postedDate: t.postedDate,
+          description: t.description,
+          merchantName: t.merchantName,
+          amount: t.amount,
+          type: t.type,
+          fitid: t.fitid,
+          rawData: t.rawData as any,
+          categoryId,
+          subcategoryId,
+          confidenceScore,
+          isReconciled: false,
+          isRecurring: false,
+          userCorrected: false
+        };
+      })
+    );
+
+    // Import transactions with categorization
     const importedTransactions = await prisma.transaction.createMany({
-      data: newTransactions.map(t => ({
-        userId,
-        accountId: account.id,
-        date: t.date,
-        postedDate: t.postedDate,
-        description: t.description,
-        merchantName: t.merchantName,
-        amount: t.amount,
-        type: t.type,
-        fitid: t.fitid,
-        rawData: t.rawData as any,
-        isReconciled: false,
-        isRecurring: false,
-        userCorrected: false
-      }))
+      data: categorizedData
     });
+
+    // Count how many were auto-categorized
+    const categorizedCount = categorizedData.filter(t => t.categoryId !== null).length;
 
     // Update account balance (use the latest balance from the import if available)
     const latestTransaction = transactions
@@ -200,7 +238,9 @@ export async function POST(request: NextRequest) {
       accountName: account.name,
       totalTransactions: transactions.length,
       importedCount: importedTransactions.count,
-      duplicatesSkipped: transactions.length - importedTransactions.count
+      duplicatesSkipped: transactions.length - importedTransactions.count,
+      categorizedCount,
+      uncategorizedCount: importedTransactions.count - categorizedCount
     });
 
   } catch (error) {

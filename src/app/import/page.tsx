@@ -207,10 +207,15 @@ export default function ImportPage() {
         if (!response.ok) {
           throw new Error(result.error || 'Failed to import transactions');
         }
+
+        // Log categorization stats
+        if (result.categorizedCount > 0) {
+          console.log(`Auto-categorized ${result.categorizedCount} of ${result.importedCount} transactions`);
+        }
       }
 
       // Success! Show message and redirect
-      alert(`Successfully imported ${totalTransactions} transactions!`);
+      alert(`Successfully imported ${totalTransactions} transactions! Auto-categorization applied where possible.`);
       // Redirect to transactions page
       window.location.href = '/transactions';
     } catch (error) {
