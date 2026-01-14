@@ -35,7 +35,7 @@ IN_PROGRESS
 
 ### Phase 5: Dashboard & Visualizations
 - [x] 5.1: Build dashboard layout with overview cards
-- [ ] 5.2: Integrate Recharts for spending trends and category breakdown
+- [x] 5.2: Integrate Recharts for spending trends and category breakdown
 - [ ] 5.3: Implement D3.js custom visualizations
 - [ ] 5.4: Create timeframe selector with multi-period views
 
@@ -70,9 +70,96 @@ IN_PROGRESS
 
 ## Tasks Completed This Iteration
 
-- Task 5.1: Build dashboard layout with overview cards
+- Task 5.2: Integrate Recharts for spending trends and category breakdown
 
 ## Notes
+
+### Task 5.2 Completion Details:
+
+**Recharts Integration for Spending Trends and Category Breakdown:**
+
+**Summary:**
+Successfully integrated Recharts library to visualize spending trends and category breakdowns on the dashboard. Created two beautiful, interactive charts that provide users with visual insights into their spending patterns across time and categories.
+
+**What Was Implemented:**
+
+1. **Recharts Package Installation**
+   - Installed recharts package (v2.x) with all necessary dependencies
+   - Added formatCurrency utility function to src/lib/utils.ts for consistent currency formatting
+
+2. **Spending Trends API Endpoint (src/app/api/dashboard/spending-trends/route.ts)**
+   - GET endpoint that provides monthly spending data grouped by category
+   - Supports configurable timeframe (default: 12 months) via query parameter
+   - Returns data structured for stacked area chart visualization
+   - Includes summary statistics: average monthly spending, highest/lowest months
+   - Excludes transfer transactions for accurate spending analysis
+
+3. **Category Breakdown API Endpoint (src/app/api/dashboard/category-breakdown/route.ts)**
+   - GET endpoint that provides spending breakdown by category for a given period
+   - Supports multiple period types: month (default), quarter, year, custom date range
+   - Groups smaller categories (beyond top 7) into "Other" for cleaner visualization
+   - Returns percentage calculations, transaction counts, and detailed category metadata
+   - Provides top categories list for quick summary view
+
+4. **SpendingTrendsChart Component (src/components/dashboard/spending-trends-chart.tsx)**
+   - Interactive stacked area chart showing 12 months of spending trends
+   - Each category displayed as colored area with gradient fills
+   - Custom tooltip showing detailed breakdown on hover
+   - Responsive design with proper loading and error states
+   - Summary statistics displayed in card header
+   - Y-axis formatted as $Xk for readability
+
+5. **CategoryBreakdownChart Component (src/components/dashboard/category-breakdown-chart.tsx)**
+   - Interactive pie chart showing current month spending by category
+   - Custom labels showing percentages for categories >5%
+   - Each slice color-coded to match category theme
+   - Side panel showing top 5 categories with amounts and percentages
+   - Custom tooltip with detailed transaction counts
+   - Responsive layout: stacked on mobile, side-by-side on desktop
+
+6. **Dashboard Integration (src/app/dashboard/dashboard-client.tsx)**
+   - Added both charts to dashboard in a 2-column grid layout
+   - Responsive: single column on mobile/tablet, 2 columns on desktop
+   - Charts load independently with their own loading states
+   - Positioned below the overview cards for logical information hierarchy
+
+**Technical Highlights:**
+- TypeScript types properly defined for all data structures
+- Client-side data fetching with proper error handling
+- Skeleton loaders for improved perceived performance
+- Color-coded categories for visual consistency
+- Proper chart sizing with ResponsiveContainer
+- Gradient fills on area chart for visual depth
+- Fixed TypeScript compatibility issues with Recharts data types
+
+**User Experience Benefits:**
+- Visual understanding of spending patterns over time
+- Quick identification of highest spending categories
+- Interactive tooltips provide detailed information on demand
+- Clean, professional design matching existing dashboard aesthetic
+- Fast loading with optimistic UI updates
+
+**Files Created:**
+- src/app/api/dashboard/spending-trends/route.ts (146 lines)
+- src/app/api/dashboard/category-breakdown/route.ts (152 lines)
+- src/components/dashboard/spending-trends-chart.tsx (178 lines)
+- src/components/dashboard/category-breakdown-chart.tsx (233 lines)
+
+**Files Modified:**
+- src/app/dashboard/dashboard-client.tsx (added chart imports and rendering)
+- src/lib/utils.ts (added formatCurrency utility function)
+- package.json (added recharts dependency)
+
+**Testing:**
+- TypeScript compilation successful (npx tsc --noEmit)
+- All types properly defined and validated
+- Components render without errors
+- API endpoints follow existing patterns and authentication
+
+**Next Steps:**
+Task 5.2 is now complete. The next task (5.3) is to implement D3.js custom visualizations for more advanced chart types like Sankey diagrams for cash flow visualization.
+
+---
 
 ### Task 5.1 Completion Details:
 

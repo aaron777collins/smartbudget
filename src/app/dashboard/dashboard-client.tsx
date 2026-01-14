@@ -5,6 +5,8 @@ import { NetWorthCard } from '@/components/dashboard/net-worth-card';
 import { MonthlySpendingCard } from '@/components/dashboard/monthly-spending-card';
 import { MonthlyIncomeCard } from '@/components/dashboard/monthly-income-card';
 import { CashFlowCard } from '@/components/dashboard/cash-flow-card';
+import { SpendingTrendsChart } from '@/components/dashboard/spending-trends-chart';
+import { CategoryBreakdownChart } from '@/components/dashboard/category-breakdown-chart';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface DashboardData {
@@ -135,11 +137,16 @@ export function DashboardClient() {
         />
       </div>
 
-      {/* Future sections will go here:
-          - Spending Trends Chart
-          - Category Breakdown
+      {/* Visualizations Section */}
+      <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
+        <SpendingTrendsChart />
+        <CategoryBreakdownChart />
+      </div>
+
+      {/* Future sections:
           - Recent Transactions
-          - etc.
+          - Upcoming Recurring Expenses
+          - Financial Goals Progress
       */}
     </div>
   );
