@@ -95,18 +95,53 @@ export default function ImportPage() {
             );
           }
         } else if (fileExtension === 'ofx' || fileExtension === 'qfx') {
-          // OFX/QFX parsing not yet implemented
-          setUploadedFiles((prev) =>
-            prev.map((f) =>
-              f.id === uploadedFile.id
-                ? {
-                    ...f,
-                    status: "error" as const,
-                    error: "OFX/QFX parsing coming soon (Task 2.3)",
-                  }
-                : f
-            )
-          );
+          // Handle OFX/QFX files
+          const formData = new FormData();
+          formData.append('file', file);
+
+          const response = await fetch('/api/import/parse-ofx', {
+            method: 'POST',
+            body: formData,
+          });
+
+          const result = await response.json();
+
+          if (response.ok && result.success) {
+            // Success - update file with parsed data
+            setUploadedFiles((prev) =>
+              prev.map((f) =>
+                f.id === uploadedFile.id
+                  ? {
+                      ...f,
+                      status: "success" as const,
+                      previewData: {
+                        transactionCount: result.validTransactions,
+                        format: 'OFX/QFX',
+                        transactions: result.transactions,
+                        validRows: result.validTransactions,
+                        totalRows: result.totalTransactions,
+                        accountInfo: result.accountInfo,
+                        balance: result.balance,
+                      },
+                    }
+                  : f
+              )
+            );
+          } else {
+            // Error - update file with error message
+            const errorMessage = result.errors?.join(', ') || result.error || 'Failed to parse OFX/QFX';
+            setUploadedFiles((prev) =>
+              prev.map((f) =>
+                f.id === uploadedFile.id
+                  ? {
+                      ...f,
+                      status: "error" as const,
+                      error: errorMessage,
+                    }
+                  : f
+              )
+            );
+          }
         } else {
           // Unsupported file type
           setUploadedFiles((prev) =>

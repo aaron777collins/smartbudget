@@ -17,7 +17,7 @@ IN_PROGRESS
 ### Phase 2: Transaction Import & Management
 - [x] 2.1: Build file upload system with multi-file drag-and-drop
 - [x] 2.2: Implement CSV parser for CIBC transaction formats
-- [ ] 2.3: Implement OFX/QFX parser for bank export formats
+- [x] 2.3: Implement OFX/QFX parser for bank export formats
 - [ ] 2.4: Create transaction management (CRUD, list, detail views)
 - [ ] 2.5: Build account management system
 
@@ -70,7 +70,7 @@ IN_PROGRESS
 
 ## Tasks Completed This Iteration
 
-- Task 2.2: Implement CSV parser for CIBC transaction formats
+- Task 2.3: Implement OFX/QFX parser for bank export formats
 
 ## Notes
 
@@ -352,4 +352,91 @@ IN_PROGRESS
 **Next Steps:**
 - Task 2.3: Implement OFX/QFX parser
 - Task 2.4: Transaction management with database import
+- Task 3.3: Advanced merchant normalization pipeline
+
+### Task 2.3 Completion Details:
+
+**OFX Parser Library:**
+- Installed node-ofx-parser (v2.3.0)
+- XML-based financial data format parser
+- Created TypeScript type definitions (src/types/node-ofx-parser.d.ts)
+
+**OFX/QFX Parser Implementation (src/lib/ofx-parser.ts):**
+- Comprehensive OFX/QFX parser supporting bank and credit card statements
+- Key features:
+  - XML structure parsing (OFX SGML format)
+  - Transaction record extraction (STMTTRN)
+  - FITID support for duplicate detection
+  - Account information extraction (BANKACCTFROM/CCACCTFROM)
+  - Balance parsing (LEDGERBAL)
+  - Merchant name normalization (NAME + MEMO concatenation)
+  - OFX date format parsing (YYYYMMDDHHMMSS with timezone)
+  - Transaction type determination (DEBIT/CREDIT/TRANSFER)
+  - Support for both DTPOSTED and DTUSER dates
+- Handles both bank statements (BANKMSGSRSV1) and credit card statements (CREDITCARDMSGSRSV1)
+- Comprehensive error handling with detailed error messages
+- Raw data preservation in JSON format
+
+**API Route Created:**
+- Created /api/import/parse-ofx POST endpoint
+- File upload handling via FormData
+- File type and size validation (max 10MB)
+- Returns parsed transactions with metadata (account info, balance, errors)
+- Proper error responses with status codes
+
+**Integration with File Upload:**
+- Updated src/app/import/page.tsx to call OFX parser API
+- Sequential file processing with individual status tracking
+- Success states show transaction count and account information
+- Error states display descriptive error messages
+- Supports both .ofx and .qfx file extensions
+
+**Test Files Created:**
+- test-ofx.ofx: Sample OFX file with 5 transactions
+  - Includes various transaction types (DEBIT, CREDIT)
+  - Account information (CIBC-style)
+  - Balance information
+  - Realistic merchant names and memos
+- test-ofx-parser.js: Basic Node.js test script
+
+**Features Implemented:**
+- OFX SGML format parsing
+- Multi-level XML structure navigation
+- FITID extraction for duplicate prevention
+- NAME + MEMO concatenation for full merchant names
+- Account type detection (CHECKING, SAVINGS, CREDIT_CARD)
+- Balance and date extraction
+- Transaction type classification
+- Error collection and reporting
+- File validation (type, size, empty check)
+
+**Type Safety:**
+- Created comprehensive TypeScript type definitions for node-ofx-parser
+- Defined interfaces for OfxAccount, OfxBalance, OfxTransaction, etc.
+- Full type safety throughout the parser implementation
+
+**Verification:**
+- TypeScript type check: ✓ Passes (npx tsc --noEmit)
+- Type definitions: ✓ Complete and accurate
+- API route structure: ✓ Verified
+- Integration with file upload: ✓ Complete
+- File validation: ✓ Working
+
+**Known Limitations:**
+- node-ofx-parser library uses callbacks (wrapped in Promise)
+- Some edge cases in OFX format variations may need additional handling
+- Advanced merchant normalization deferred to Task 3.3
+- Actual database import deferred to Task 2.4
+- Duplicate detection (via FITID) not yet implemented (will be in Task 2.4)
+
+**Technical Notes:**
+- OFX NAME field is limited to 32 characters by specification
+- MEMO field often contains the full merchant name
+- Parser intelligently combines NAME and MEMO for best results
+- Handles both bank statements (BANKMSGSRSV1) and credit card statements (CREDITCARDMSGSRSV1)
+- Supports OFX date format with timezone information
+
+**Next Steps:**
+- Task 2.4: Transaction management with database import (use FITID for duplicate detection)
+- Task 2.5: Account management system
 - Task 3.3: Advanced merchant normalization pipeline
