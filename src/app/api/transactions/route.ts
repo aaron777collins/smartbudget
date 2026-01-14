@@ -24,6 +24,11 @@ export async function GET(request: NextRequest) {
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
     const search = searchParams.get('search');
+    const minAmount = searchParams.get('minAmount');
+    const maxAmount = searchParams.get('maxAmount');
+    const type = searchParams.get('type');
+    const isReconciled = searchParams.get('isReconciled');
+    const isRecurring = searchParams.get('isRecurring');
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
     const sortBy = searchParams.get('sortBy') || 'date';
@@ -64,6 +69,32 @@ export async function GET(request: NextRequest) {
         { merchantName: { contains: search, mode: 'insensitive' } },
         { notes: { contains: search, mode: 'insensitive' } }
       ];
+    }
+
+    // Amount range filters
+    if (minAmount || maxAmount) {
+      where.amount = {};
+      if (minAmount) {
+        where.amount.gte = parseFloat(minAmount);
+      }
+      if (maxAmount) {
+        where.amount.lte = parseFloat(maxAmount);
+      }
+    }
+
+    // Transaction type filter
+    if (type) {
+      where.type = type as TransactionType;
+    }
+
+    // Reconciliation status filter
+    if (isReconciled !== null && isReconciled !== undefined && isReconciled !== '') {
+      where.isReconciled = isReconciled === 'true';
+    }
+
+    // Recurring status filter
+    if (isRecurring !== null && isRecurring !== undefined && isRecurring !== '') {
+      where.isRecurring = isRecurring === 'true';
     }
 
     // Fetch transactions

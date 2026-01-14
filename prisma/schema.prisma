@@ -23,6 +23,7 @@ model User {
   categories    Category[]
   tags          Tag[]
   settings      UserSettings?
+  filterPresets FilterPreset[]
   jobs          Job[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
@@ -227,6 +228,18 @@ model UserSettings {
   budgetAlertThreshold Int      @default(80) // percentage
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
+}
+
+model FilterPreset {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  filters   Json     // Stores filter configuration
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }
 
 enum AccountType {

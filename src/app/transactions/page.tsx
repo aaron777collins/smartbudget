@@ -22,7 +22,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { TransactionDetailDialog } from '@/components/transactions/transaction-detail-dialog';
-import { Search, Filter, Download, Plus, Pencil, Trash2, Repeat } from 'lucide-react';
+import { AdvancedFilters, TransactionFilters } from '@/components/transactions/advanced-filters';
+import { Search, Filter, Download, Plus, Pencil, Trash2, Repeat, X } from 'lucide-react';
+import { Badge as FilterBadge } from '@/components/ui/badge';
 
 interface Transaction {
   id: string;
@@ -80,6 +82,7 @@ export default function TransactionsPage() {
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [selectedTagId, setSelectedTagId] = useState<string>('');
   const [availableTags, setAvailableTags] = useState<Array<{ id: string; name: string; color: string }>>([]);
+  const [advancedFilters, setAdvancedFilters] = useState<TransactionFilters>({});
   const limit = 50;
 
   useEffect(() => {
@@ -92,7 +95,7 @@ export default function TransactionsPage() {
     if (session) {
       fetchTransactions();
     }
-  }, [session, search, sortBy, sortOrder, offset, selectedTagId]);
+  }, [session, search, sortBy, sortOrder, offset, selectedTagId, advancedFilters]);
 
   const fetchTags = async () => {
     try {
@@ -122,6 +125,38 @@ export default function TransactionsPage() {
 
       if (selectedTagId) {
         params.append('tagId', selectedTagId);
+      }
+
+      // Add advanced filters
+      if (advancedFilters.accountId) {
+        params.append('accountId', advancedFilters.accountId);
+      }
+      if (advancedFilters.categoryId) {
+        params.append('categoryId', advancedFilters.categoryId);
+      }
+      if (advancedFilters.tagId) {
+        params.append('tagId', advancedFilters.tagId);
+      }
+      if (advancedFilters.dateRange?.from) {
+        params.append('startDate', advancedFilters.dateRange.from.toISOString());
+      }
+      if (advancedFilters.dateRange?.to) {
+        params.append('endDate', advancedFilters.dateRange.to.toISOString());
+      }
+      if (advancedFilters.minAmount) {
+        params.append('minAmount', advancedFilters.minAmount);
+      }
+      if (advancedFilters.maxAmount) {
+        params.append('maxAmount', advancedFilters.maxAmount);
+      }
+      if (advancedFilters.type) {
+        params.append('type', advancedFilters.type);
+      }
+      if (advancedFilters.isReconciled) {
+        params.append('isReconciled', advancedFilters.isReconciled);
+      }
+      if (advancedFilters.isRecurring) {
+        params.append('isRecurring', advancedFilters.isRecurring);
       }
 
       const response = await fetch(`/api/transactions?${params}`);
@@ -190,6 +225,16 @@ export default function TransactionsPage() {
     fetchTransactions(); // Refresh the list
   };
 
+  const handleAdvancedFiltersChange = (filters: TransactionFilters) => {
+    setAdvancedFilters(filters);
+    setOffset(0); // Reset to first page
+  };
+
+  const handleClearAdvancedFilters = () => {
+    setAdvancedFilters({});
+    setOffset(0); // Reset to first page
+  };
+
   if (!session) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -216,59 +261,153 @@ export default function TransactionsPage() {
 
       {/* Filters and Search */}
       <Card className="p-4">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search transactions..."
-              value={search}
-              onChange={(e) => handleSearch(e.target.value)}
-              className="pl-10"
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search transactions..."
+                value={search}
+                onChange={(e) => handleSearch(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="date">Date</SelectItem>
+                <SelectItem value="amount">Amount</SelectItem>
+                <SelectItem value="merchantName">Merchant</SelectItem>
+                <SelectItem value="description">Description</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={sortOrder} onValueChange={(val) => setSortOrder(val as 'asc' | 'desc')}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Order" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="desc">Newest First</SelectItem>
+                <SelectItem value="asc">Oldest First</SelectItem>
+              </SelectContent>
+            </Select>
+            <AdvancedFilters
+              filters={advancedFilters}
+              onFiltersChange={handleAdvancedFiltersChange}
+              onClearFilters={handleClearAdvancedFilters}
             />
+            <Button variant="outline">
+              <Download className="mr-2 h-4 w-4" />
+              Export
+            </Button>
           </div>
-          <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="date">Date</SelectItem>
-              <SelectItem value="amount">Amount</SelectItem>
-              <SelectItem value="merchantName">Merchant</SelectItem>
-              <SelectItem value="description">Description</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={sortOrder} onValueChange={(val) => setSortOrder(val as 'asc' | 'desc')}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Order" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="desc">Newest First</SelectItem>
-              <SelectItem value="asc">Oldest First</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={selectedTagId} onValueChange={handleTagFilter}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filter by tag" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">All Tags</SelectItem>
-              {availableTags.map((tag) => (
-                <SelectItem key={tag.id} value={tag.id}>
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="h-2 w-2 rounded-full"
-                      style={{ backgroundColor: tag.color }}
-                    />
-                    {tag.name}
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button variant="outline">
-            <Download className="mr-2 h-4 w-4" />
-            Export
-          </Button>
+
+          {/* Active Filters Display */}
+          {(Object.keys(advancedFilters).length > 0 || selectedTagId) && (
+            <div className="flex flex-wrap gap-2 items-center">
+              <span className="text-sm text-muted-foreground">Active filters:</span>
+              {selectedTagId && (
+                <FilterBadge variant="secondary" className="gap-1">
+                  Tag: {availableTags.find(t => t.id === selectedTagId)?.name}
+                  <button
+                    onClick={() => handleTagFilter('')}
+                    className="ml-1 hover:bg-black/20 rounded-full p-0.5"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </FilterBadge>
+              )}
+              {advancedFilters.accountId && (
+                <FilterBadge variant="secondary" className="gap-1">
+                  Account
+                  <button
+                    onClick={() => handleAdvancedFiltersChange({ ...advancedFilters, accountId: undefined })}
+                    className="ml-1 hover:bg-black/20 rounded-full p-0.5"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </FilterBadge>
+              )}
+              {advancedFilters.categoryId && (
+                <FilterBadge variant="secondary" className="gap-1">
+                  Category
+                  <button
+                    onClick={() => handleAdvancedFiltersChange({ ...advancedFilters, categoryId: undefined })}
+                    className="ml-1 hover:bg-black/20 rounded-full p-0.5"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </FilterBadge>
+              )}
+              {advancedFilters.dateRange && (
+                <FilterBadge variant="secondary" className="gap-1">
+                  Date Range
+                  <button
+                    onClick={() => handleAdvancedFiltersChange({ ...advancedFilters, dateRange: undefined })}
+                    className="ml-1 hover:bg-black/20 rounded-full p-0.5"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </FilterBadge>
+              )}
+              {(advancedFilters.minAmount || advancedFilters.maxAmount) && (
+                <FilterBadge variant="secondary" className="gap-1">
+                  Amount Range
+                  <button
+                    onClick={() => handleAdvancedFiltersChange({ ...advancedFilters, minAmount: undefined, maxAmount: undefined })}
+                    className="ml-1 hover:bg-black/20 rounded-full p-0.5"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </FilterBadge>
+              )}
+              {advancedFilters.type && (
+                <FilterBadge variant="secondary" className="gap-1">
+                  Type: {advancedFilters.type}
+                  <button
+                    onClick={() => handleAdvancedFiltersChange({ ...advancedFilters, type: undefined })}
+                    className="ml-1 hover:bg-black/20 rounded-full p-0.5"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </FilterBadge>
+              )}
+              {advancedFilters.isReconciled && (
+                <FilterBadge variant="secondary" className="gap-1">
+                  {advancedFilters.isReconciled === 'true' ? 'Reconciled' : 'Unreconciled'}
+                  <button
+                    onClick={() => handleAdvancedFiltersChange({ ...advancedFilters, isReconciled: undefined })}
+                    className="ml-1 hover:bg-black/20 rounded-full p-0.5"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </FilterBadge>
+              )}
+              {advancedFilters.isRecurring && (
+                <FilterBadge variant="secondary" className="gap-1">
+                  {advancedFilters.isRecurring === 'true' ? 'Recurring' : 'One-time'}
+                  <button
+                    onClick={() => handleAdvancedFiltersChange({ ...advancedFilters, isRecurring: undefined })}
+                    className="ml-1 hover:bg-black/20 rounded-full p-0.5"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </FilterBadge>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  handleClearAdvancedFilters();
+                  setSelectedTagId('');
+                }}
+                className="h-7"
+              >
+                Clear all
+              </Button>
+            </div>
+          )}
         </div>
       </Card>
 
