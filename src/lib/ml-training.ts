@@ -213,11 +213,11 @@ export async function getTrainingStats() {
   return {
     userCorrectionsCount,
     knowledgeBaseSize,
-    categoryDistribution: categoryDistribution.map(cd => ({
+    categoryDistribution: categoryDistribution.map((cd: { categoryId: string | null; _count: number }) => ({
       categoryId: cd.categoryId,
       count: cd._count
     })),
-    sourceDistribution: sourceDistribution.map(sd => ({
+    sourceDistribution: sourceDistribution.map((sd: { source: string; _count: number }) => ({
       source: sd.source,
       count: sd._count
     }))

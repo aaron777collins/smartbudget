@@ -122,11 +122,11 @@ async function loadTrainingData(): Promise<TrainingExample[]> {
     select: { id: true, slug: true }
   });
 
-  const categoryMap = new Map(categories.map(c => [c.id, c.slug]));
+  const categoryMap = new Map(categories.map((c: { id: string; slug: string }) => [c.id, c.slug]));
 
   trainingData = merchants
-    .filter(m => m.categoryId)
-    .map(m => ({
+    .filter((m: { categoryId: string | null }) => m.categoryId)
+    .map((m: { merchantName: string; normalizedName: string; categoryId: string | null }) => ({
       merchantName: m.merchantName,
       normalizedName: m.normalizedName,
       categoryId: m.categoryId!,
@@ -136,7 +136,7 @@ async function loadTrainingData(): Promise<TrainingExample[]> {
   trainingDataLastLoaded = now;
   console.log(`Loaded ${trainingData.length} training examples`);
 
-  return trainingData;
+  return trainingData || [];
 }
 
 /**
