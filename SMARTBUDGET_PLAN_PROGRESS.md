@@ -16,7 +16,7 @@ IN_PROGRESS
 
 ### Phase 2: Transaction Import & Management
 - [x] 2.1: Build file upload system with multi-file drag-and-drop
-- [ ] 2.2: Implement CSV parser for CIBC transaction formats
+- [x] 2.2: Implement CSV parser for CIBC transaction formats
 - [ ] 2.3: Implement OFX/QFX parser for bank export formats
 - [ ] 2.4: Create transaction management (CRUD, list, detail views)
 - [ ] 2.5: Build account management system
@@ -70,7 +70,7 @@ IN_PROGRESS
 
 ## Tasks Completed This Iteration
 
-- Task 2.1: Build file upload system with multi-file drag-and-drop
+- Task 2.2: Implement CSV parser for CIBC transaction formats
 
 ## Notes
 
@@ -280,7 +280,76 @@ IN_PROGRESS
 - Full Next.js build still affected by Prisma 7 compatibility issue (TypeScript passes)
 
 **Next Steps:**
-- Task 2.2: Implement CSV parser for CIBC transaction formats
 - Task 2.3: Implement OFX/QFX parser for bank export formats
-- Integrate parsers with FileUpload component
-- Add file preview functionality
+- Task 2.4: Create transaction management (CRUD, list, detail views)
+
+### Task 2.2 Completion Details:
+
+**CSV Parser Library:**
+- Installed papaparse (v5.4.1) and @types/papaparse
+- Industry-standard CSV parsing with robust error handling
+
+**CSV Parser Implementation (src/lib/csv-parser.ts):**
+- Comprehensive CSV parser supporting 4 CIBC transaction formats:
+  1. 3-column format: Date, Description, Amount
+  2. 4-column format: Date, Description, Credit, Debit
+  3. 5-column format: Account Number, Date, Description, Amount, Balance
+  4. CIBC detailed format: Transaction Date, Posted Date, Description, Amount
+- Automatic format detection based on header analysis
+- Multi-format date parsing (ISO, MM/DD/YYYY, DD/MM/YYYY, YYYY-MM-DD)
+- Amount parsing with currency symbols, commas, parentheses (accounting format)
+- Merchant name extraction from descriptions (removes transaction IDs, dates)
+- Transaction type determination (DEBIT/CREDIT/TRANSFER) based on amount sign
+- Confidence scoring and validation
+- Raw data preservation in JSON format for debugging
+- Comprehensive error handling with detailed error messages
+
+**API Route Created:**
+- Created /api/import/parse-csv POST endpoint
+- File upload handling via FormData
+- File type and size validation (max 10MB)
+- Returns parsed transactions with metadata (format, row counts, errors)
+- Proper error responses with status codes
+
+**Integration with File Upload:**
+- Updated src/app/import/page.tsx to call CSV parser API
+- Sequential file processing with individual status tracking
+- Success states show transaction count and format detected
+- Error states display descriptive error messages
+- OFX/QFX files show "coming soon" message (Task 2.3)
+
+**Test Files Created:**
+- test-3col.csv: 3-column format with 5 sample transactions
+- test-4col.csv: 4-column format with credit/debit columns
+- test-5col.csv: 5-column format with account numbers and balances
+- test-csv-parser.js: Basic Node.js test script for validation
+
+**Features Implemented:**
+- Format auto-detection (no manual format selection needed)
+- Multiple date format support
+- Currency formatting handling
+- Credit/debit column support
+- Account number and balance tracking
+- Posted date vs transaction date (CIBC-specific)
+- Merchant name normalization (basic)
+- Transaction type classification
+- Error collection and reporting
+- Transaction count validation
+
+**Verification:**
+- TypeScript type check: ✓ Passes (npx tsc --noEmit)
+- Test files created and validated
+- CSV parser logic tested with all 3 formats
+- API route structure verified
+- Integration with file upload component complete
+
+**Known Limitations:**
+- Full Next.js build still affected by Prisma 7 compatibility issue (not related to CSV parser)
+- Advanced merchant normalization (fuzzy matching, NER) deferred to Task 3.3
+- Actual database import deferred to Task 2.4
+- Duplicate detection not yet implemented (will be in Task 2.4)
+
+**Next Steps:**
+- Task 2.3: Implement OFX/QFX parser
+- Task 2.4: Transaction management with database import
+- Task 3.3: Advanced merchant normalization pipeline
