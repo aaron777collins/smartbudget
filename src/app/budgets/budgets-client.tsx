@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { PlusCircle, Calendar, DollarSign, Target, Trash2 } from 'lucide-react';
+import { PlusCircle, Calendar, DollarSign, Target, Trash2, BarChart3 } from 'lucide-react';
 import Link from 'next/link';
 
 interface BudgetCategory {
@@ -143,12 +143,20 @@ export default function BudgetsClient() {
             Create and manage your budgets to track spending
           </p>
         </div>
-        <Link href="/budgets/create">
-          <Button>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Create Budget
-          </Button>
-        </Link>
+        <div className="flex gap-2">
+          <Link href="/budgets/analytics">
+            <Button variant="outline">
+              <BarChart3 className="mr-2 h-4 w-4" />
+              Analytics
+            </Button>
+          </Link>
+          <Link href="/budgets/create">
+            <Button>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Create Budget
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {budgets.length === 0 ? (
