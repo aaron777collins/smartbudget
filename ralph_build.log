@@ -59,3 +59,27 @@ The next iteration should work on **Phase 2: Docker Infrastructure** starting wi
 
 [0;34m══════════════════ ITERATION 2 ══════════════════[0m
 
+Perfect! Task 2.1 has been successfully completed:
+
+## Summary
+
+**Task Completed**: Task 2.1 - Create Dockerfile (multi-stage build)
+
+**What was done**:
+- Created `/home/ubuntu/repos/smartbudget/Dockerfile` with a comprehensive multi-stage build configuration
+- Implemented 4 build stages: base (node:20-alpine), deps (dependencies), builder (Prisma + Next.js), runner (production)
+- Configured non-root user (nextjs:nodejs, uid 1001, gid 1001) for security
+- Set up proper file ownership and permissions
+- Created uploads directory structure in the container
+- Configured environment variables for production
+- Updated progress file to mark Task 2.1 as complete
+- Committed changes to git
+
+**Next Task**: Task 2.2 - Create .dockerignore file
+
+**Status**: IN_PROGRESS (still many tasks remaining in the deployment plan)
+
+[0;32mIteration 2 complete[0m
+
+[0;34m══════════════════ ITERATION 3 ══════════════════[0m
+

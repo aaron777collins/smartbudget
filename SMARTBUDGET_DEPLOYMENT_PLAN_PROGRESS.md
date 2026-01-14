@@ -174,13 +174,13 @@ The deployment plan requires:
   - ✅ Set ENV variables (NODE_ENV=production, PORT=3000, HOSTNAME=0.0.0.0)
   - ✅ CMD: ["node", "server.js"]
 
-- [ ] **Task 2.2**: Create .dockerignore file
-  - Exclude node_modules/, .next/, .git/
-  - Exclude uploads/, *.log, *.md (except README)
-  - Exclude .env files (all variants)
-  - Exclude test files and coverage reports
-  - Exclude .github/, .vscode/, .idea/
-  - Include only necessary files for build
+- [x] **Task 2.2**: Create .dockerignore file
+  - ✅ Exclude node_modules/, .next/, .git/
+  - ✅ Exclude uploads/, *.log, *.md (except README)
+  - ✅ Exclude .env files (all variants)
+  - ✅ Exclude test files and coverage reports
+  - ✅ Exclude .github/, .vscode/, .idea/
+  - ✅ Include only necessary files for build
 
 - [ ] **Task 2.3**: Create docker-compose.yml
   - Service: smartbudget-app
@@ -501,16 +501,19 @@ The deployment plan requires:
 
 ## Completed This Iteration
 
-**Task 2.1: Create Dockerfile (multi-stage build)**
-- Created multi-stage Dockerfile with 4 stages (base, deps, builder, runner)
-- Base stage: node:20-alpine for minimal image size
-- Deps stage: Install dependencies with npm ci
-- Builder stage: Generate Prisma client and build Next.js with standalone output
-- Runner stage: Copy standalone build, static files, and Prisma artifacts
-- Configured non-root user (nextjs:nodejs, uid 1001, gid 1001)
-- Created uploads directory with proper ownership
-- Set environment variables (NODE_ENV=production, PORT=3000, HOSTNAME=0.0.0.0)
-- Configured CMD to run standalone server.js
+**Task 2.2: Create .dockerignore file**
+- Created comprehensive .dockerignore file to optimize Docker build context
+- Excluded node_modules/, .next/, build outputs (will be rebuilt in container)
+- Excluded all .env variants (passed via docker-compose at runtime)
+- Excluded testing files (*.test.ts, *.spec.ts, e2e/, coverage/)
+- Excluded documentation files (*.md except README.md)
+- Excluded IDE files (.vscode/, .idea/, .DS_Store)
+- Excluded Git files (.git/, .github/, .gitignore)
+- Excluded uploads/ directory (will be mounted as volume)
+- Excluded logs (*.log, ralph_*.log)
+- Excluded Prisma migrations history (only schema needed)
+- Excluded Docker files themselves (Dockerfile, docker-compose.yml)
+- This reduces build context size and speeds up Docker builds significantly
 
 **Blockers/Manual Steps Required:**
 - Task 1.1: Supabase DATABASE_URL and DIRECT_URL need actual connection strings with password
