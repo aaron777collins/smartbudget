@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma';
 // GET /api/accounts/:id - Get account details
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -14,7 +14,7 @@ export async function GET(
     }
 
     const userId = session.user.id;
-    const accountId = params.id;
+    const { id: accountId } = await params;
 
     const account = await prisma.account.findFirst({
       where: { id: accountId, userId },
@@ -62,7 +62,7 @@ export async function GET(
 // PATCH /api/accounts/:id - Update account
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -71,7 +71,7 @@ export async function PATCH(
     }
 
     const userId = session.user.id;
-    const accountId = params.id;
+    const { id: accountId } = await params;
 
     // Verify account belongs to user
     const existingAccount = await prisma.account.findFirst({
@@ -139,7 +139,7 @@ export async function PATCH(
 // DELETE /api/accounts/:id - Delete account
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -148,7 +148,7 @@ export async function DELETE(
     }
 
     const userId = session.user.id;
-    const accountId = params.id;
+    const { id: accountId } = await params;
 
     // Verify account belongs to user
     const existingAccount = await prisma.account.findFirst({

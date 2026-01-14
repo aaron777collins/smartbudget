@@ -12,7 +12,7 @@ import { getJob, cancelJob } from '@/lib/job-queue';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -20,7 +20,8 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const job = await getJob(params.id, session.user.id);
+    const { id } = await params;
+    const job = await getJob(id, session.user.id);
 
     if (!job) {
       return NextResponse.json({ error: 'Job not found' }, { status: 404 });
@@ -45,7 +46,7 @@ export async function GET(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -53,7 +54,8 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const success = await cancelJob(params.id, session.user.id);
+    const { id } = await params;
+    const success = await cancelJob(id, session.user.id);
 
     if (!success) {
       return NextResponse.json(
