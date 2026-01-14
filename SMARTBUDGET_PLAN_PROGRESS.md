@@ -15,7 +15,7 @@ IN_PROGRESS
 - [x] 1.3: Implement NextAuth.js v5 authentication system
 
 ### Phase 2: Transaction Import & Management
-- [ ] 2.1: Build file upload system with multi-file drag-and-drop
+- [x] 2.1: Build file upload system with multi-file drag-and-drop
 - [ ] 2.2: Implement CSV parser for CIBC transaction formats
 - [ ] 2.3: Implement OFX/QFX parser for bank export formats
 - [ ] 2.4: Create transaction management (CRUD, list, detail views)
@@ -70,7 +70,7 @@ IN_PROGRESS
 
 ## Tasks Completed This Iteration
 
-- Task 1.3: Implement NextAuth.js v5 authentication system
+- Task 2.1: Build file upload system with multi-file drag-and-drop
 
 ## Notes
 
@@ -214,3 +214,73 @@ IN_PROGRESS
 - Task 2.1: Build file upload system with multi-file drag-and-drop
 - Create PostgreSQL database and run migrations
 - Test authentication flow with actual database
+
+### Task 2.1 Completion Details:
+
+**Dependencies Installed:**
+- react-dropzone (v14.3.5) - Industry-standard file upload library with drag-and-drop support
+
+**File Upload Component Created:**
+- Created src/components/file-upload.tsx (FileUpload component)
+  - Multi-file drag-and-drop functionality using react-dropzone
+  - File type validation (CSV, OFX, QFX)
+  - File size validation (configurable max size, default 10MB)
+  - Max files limit (configurable, default 10 files)
+  - File status tracking (pending, processing, success, error)
+  - File preview with transaction count
+  - Individual file removal
+  - File size formatting
+  - Status icons (CheckCircle, AlertCircle, spinner)
+  - Error message display
+  - Responsive design with hover states
+  - Dark mode support
+
+**Import Page Created:**
+- Created src/app/import/page.tsx (/import route)
+  - Full-featured import workflow UI
+  - Page header with description
+  - Info alert explaining supported formats
+  - 3-step process visualization (Upload → Validate → Import)
+  - File upload integration
+  - File processing simulation
+  - Action buttons (Clear All, Process Files, Import)
+  - Transaction count summary
+  - Success state with ready-to-import indicator
+  - Help section with CIBC export instructions
+  - Format documentation (CSV, OFX, QFX)
+  - Responsive card-based layout
+
+**shadcn/ui Components Added:**
+- Alert component installed for info messages
+
+**Features Implemented:**
+- Multi-file upload with drag-and-drop
+- File validation (type, size, count)
+- Visual feedback during drag events
+- File list display with status indicators
+- File removal capability
+- Processing state management
+- Success/error states with messages
+- File size formatting
+- Transaction count preview (ready for parser integration)
+- Comprehensive help documentation
+- Mobile-responsive design
+
+**Verification:**
+- TypeScript type check: ✓ Passes (npx tsc --noEmit)
+- File structure: ✓ All files created successfully
+- Component integration: ✓ FileUpload component properly imported
+- Route access: ✓ /import route accessible from sidebar
+- UI components: ✓ Alert component installed
+
+**Known Limitations:**
+- File processing is currently simulated (returns mock transaction count)
+- Actual file parsing will be implemented in Task 2.2 (CSV) and 2.3 (OFX/QFX)
+- Import to database will be implemented in Task 2.4 (Transaction Management)
+- Full Next.js build still affected by Prisma 7 compatibility issue (TypeScript passes)
+
+**Next Steps:**
+- Task 2.2: Implement CSV parser for CIBC transaction formats
+- Task 2.3: Implement OFX/QFX parser for bank export formats
+- Integrate parsers with FileUpload component
+- Add file preview functionality
