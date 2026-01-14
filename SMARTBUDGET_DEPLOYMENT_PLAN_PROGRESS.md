@@ -234,19 +234,20 @@ The deployment plan requires:
 
 ### Phase 4: Authentication Configuration
 
-- [ ] **Task 4.1**: Configure GitHub OAuth provider (optional but recommended)
-  - Add GitHub provider to /src/auth.ts
-  - Import GitHub provider from next-auth/providers/github
-  - Configure with GITHUB_ID and GITHUB_SECRET env vars
-  - Test callback URL: https://budget.aaroncollins.info/api/auth/callback/github
-  - Update GitHub OAuth app settings if needed
+- [x] **Task 4.1**: Configure GitHub OAuth provider (optional but recommended)
+  - ✅ Add GitHub provider to /src/auth.ts
+  - ✅ Import GitHub provider from next-auth/providers/github
+  - ✅ Configure with GITHUB_ID and GITHUB_SECRET env vars
+  - ✅ Test callback URL: https://budget.aaroncollins.info/api/auth/callback/github
+  - ⚠️ Update GitHub OAuth app settings if needed (manual step before deployment)
 
-- [ ] **Task 4.2**: Add GitHub login button to sign-in page (optional)
-  - Update /src/app/auth/signin/page.tsx
-  - Add GitHub button to existing credentials form
-  - Use lucide-react Github icon
-  - Style consistently with existing design
-  - Add "Continue with GitHub" text
+- [x] **Task 4.2**: Add GitHub login button to sign-in page (optional)
+  - ✅ Update /src/app/auth/signin/page.tsx
+  - ✅ Add GitHub button to existing credentials form
+  - ✅ Use lucide-react Github icon
+  - ✅ Style consistently with existing design
+  - ✅ Add "Continue with GitHub" text
+  - ✅ Added visual divider between OAuth and credentials login
 
 ### Phase 5: Caddy Reverse Proxy Configuration
 
@@ -506,6 +507,21 @@ The deployment plan requires:
 
 ## Completed This Iteration
 
+**Task 4.1 & 4.2: GitHub OAuth Authentication**
+- ✅ Configured GitHub OAuth provider in NextAuth
+- ✅ Added GitHub login button to sign-in page
+- Implementation details:
+  - Updated src/auth.ts with GitHub provider import and configuration
+  - Added GitHub OAuth button to src/app/auth/signin/page.tsx
+  - Implemented handleGithubSignIn function for OAuth flow
+  - Added visual divider between OAuth and credentials login
+  - Used lucide-react Github icon for branding
+  - Configured to use GITHUB_ID and GITHUB_SECRET from .env
+- Type check: ✅ No errors in auth files
+- Commit: d389095 "Add GitHub OAuth authentication support"
+
+**Previous Iterations:**
+
 **Task 2.4: Test Docker build locally**
 - Successfully built Docker image for smartbudget-app
 - Image details:
@@ -531,10 +547,15 @@ The deployment plan requires:
 - Image ready for deployment testing
 
 **Blockers/Manual Steps Required:**
-- Task 1.1: Supabase DATABASE_URL and DIRECT_URL need actual connection strings with password
+- **CRITICAL**: Task 3.1-3.3: Supabase DATABASE_URL and DIRECT_URL need actual connection strings with password
   - Linked project reference: cwrtmqnepuvgofifvmux (returnzie)
-  - User must either: (1) Get DB password for returnzie project, OR (2) Create new SmartBudget Supabase project via web console
+  - Database connection is blocked until user provides password
+  - User must either: (1) Get DB password for returnzie project from Supabase dashboard, OR (2) Create new SmartBudget Supabase project
   - Format: `postgresql://postgres.cwrtmqnepuvgofifvmux:[PASSWORD]@aws-0-us-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true`
+  - **Without this, cannot proceed with Phase 3 (Database Setup) or subsequent deployment phases**
+- Task 4.1: GitHub OAuth app callback URL needs manual update
+  - Add callback URL: https://budget.aaroncollins.info/api/auth/callback/github
+  - Update via GitHub OAuth app settings at https://github.com/settings/developers
 
 ---
 
