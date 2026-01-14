@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, DollarSign, Store, FileText, Tag, Trash2 } from 'lucide-react';
+import { Calendar, DollarSign, Store, FileText, Tag, Trash2, Search, Loader2 } from 'lucide-react';
 import { CategorySelector } from './category-selector';
 
 interface Transaction {
@@ -74,6 +74,9 @@ export function TransactionDetailDialog({
   const [loading, setLoading] = useState(false);
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState<Partial<Transaction>>({});
+  const [researching, setResearching] = useState(false);
+  const [researchResult, setResearchResult] = useState<any>(null);
+  const [researchError, setResearchError] = useState<string | null>(null);
 
   useEffect(() => {
     if (transactionId && open) {
@@ -170,6 +173,84 @@ export function TransactionDetailDialog({
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleResearchMerchant = async () => {
+    if (!transaction) return;
+
+    try {
+      setResearching(true);
+      setResearchError(null);
+      setResearchResult(null);
+
+      const response = await fetch('/api/merchants/research', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          merchantName: transaction.merchantName,
+          amount: parseFloat(transaction.amount),
+          date: transaction.date,
+          saveToKnowledgeBase: true,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to research merchant');
+      }
+
+      const result = await response.json();
+      setResearchResult(result);
+
+      // If the research was successful and returned a category, offer to apply it
+      if (result.categorySlug) {
+        // Fetch the category to get its full details
+        const categoriesResponse = await fetch('/api/categories');
+        if (categoriesResponse.ok) {
+          const categories = await categoriesResponse.json();
+          const category = categories.find((c: any) => c.slug === result.categorySlug);
+
+          if (category) {
+            // Auto-populate the form with the suggested category
+            setFormData((prev) => ({
+              ...prev,
+              category: {
+                id: category.id,
+                name: category.name,
+                slug: category.slug,
+                icon: category.icon,
+                color: category.color,
+              },
+              subcategory: result.subcategorySlug ? {
+                id: '', // Will be filled when category selector loads subcategories
+                name: result.subcategoryName || '',
+                slug: result.subcategorySlug,
+              } : undefined,
+            }));
+
+            // Switch to editing mode so user can review and save
+            if (!editing) {
+              setEditing(true);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error researching merchant:', error);
+      setResearchError(error instanceof Error ? error.message : 'Failed to research merchant');
+    } finally {
+      setResearching(false);
+    }
+  };
+
+  const handleApplyResearchResult = () => {
+    if (!researchResult) return;
+
+    // The category has already been set in handleResearchMerchant
+    // Now just save the changes
+    handleSave();
   };
 
   const formatAmount = (amount: string, type: string) => {
@@ -271,10 +352,32 @@ export function TransactionDetailDialog({
             {/* Merchant and Description */}
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label className="flex items-center gap-2">
-                  <Store className="h-4 w-4" />
-                  Merchant Name
-                </Label>
+                <div className="flex items-center justify-between">
+                  <Label className="flex items-center gap-2">
+                    <Store className="h-4 w-4" />
+                    Merchant Name
+                  </Label>
+                  {!editing && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleResearchMerchant}
+                      disabled={researching}
+                    >
+                      {researching ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Researching...
+                        </>
+                      ) : (
+                        <>
+                          <Search className="mr-2 h-4 w-4" />
+                          Research Merchant
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </div>
                 {editing ? (
                   <Input
                     value={formData.merchantName}
@@ -288,6 +391,118 @@ export function TransactionDetailDialog({
                   </div>
                 )}
               </div>
+
+              {/* Research Results */}
+              {researchResult && (
+                <div className="p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg space-y-3">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1">
+                      <h4 className="font-semibold text-blue-900 dark:text-blue-100">
+                        Research Results
+                      </h4>
+                      <p className="text-sm text-blue-700 dark:text-blue-300">
+                        Claude AI found information about this merchant
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 text-sm">
+                    {researchResult.businessName && (
+                      <div>
+                        <strong className="text-blue-900 dark:text-blue-100">Business Name:</strong>{' '}
+                        <span className="text-blue-700 dark:text-blue-300">{researchResult.businessName}</span>
+                      </div>
+                    )}
+                    {researchResult.businessType && (
+                      <div>
+                        <strong className="text-blue-900 dark:text-blue-100">Business Type:</strong>{' '}
+                        <span className="text-blue-700 dark:text-blue-300">{researchResult.businessType}</span>
+                      </div>
+                    )}
+                    {researchResult.categoryName && (
+                      <div>
+                        <strong className="text-blue-900 dark:text-blue-100">Suggested Category:</strong>{' '}
+                        <Badge
+                          variant="secondary"
+                          className="ml-1"
+                        >
+                          {researchResult.categoryName}
+                          {researchResult.subcategoryName && ` → ${researchResult.subcategoryName}`}
+                        </Badge>
+                      </div>
+                    )}
+                    {researchResult.confidence !== undefined && (
+                      <div>
+                        <strong className="text-blue-900 dark:text-blue-100">Confidence:</strong>{' '}
+                        <span className="text-blue-700 dark:text-blue-300">
+                          {Math.round(researchResult.confidence * 100)}%
+                        </span>
+                      </div>
+                    )}
+                    {researchResult.reasoning && (
+                      <div>
+                        <strong className="text-blue-900 dark:text-blue-100">Reasoning:</strong>{' '}
+                        <span className="text-blue-700 dark:text-blue-300">{researchResult.reasoning}</span>
+                      </div>
+                    )}
+                    {researchResult.website && (
+                      <div>
+                        <strong className="text-blue-900 dark:text-blue-100">Website:</strong>{' '}
+                        <a
+                          href={researchResult.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 dark:text-blue-400 hover:underline"
+                        >
+                          {researchResult.website}
+                        </a>
+                      </div>
+                    )}
+                    {researchResult.location && (
+                      <div>
+                        <strong className="text-blue-900 dark:text-blue-100">Location:</strong>{' '}
+                        <span className="text-blue-700 dark:text-blue-300">{researchResult.location}</span>
+                      </div>
+                    )}
+                    {researchResult.sources && researchResult.sources.length > 0 && (
+                      <div>
+                        <strong className="text-blue-900 dark:text-blue-100">Sources:</strong>
+                        <ul className="mt-1 space-y-1">
+                          {researchResult.sources.map((source: string, idx: number) => (
+                            <li key={idx}>
+                              <a
+                                href={source}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                              >
+                                {source}
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+
+                  {editing && researchResult.categorySlug && (
+                    <div className="pt-2 border-t border-blue-200 dark:border-blue-800">
+                      <p className="text-xs text-blue-700 dark:text-blue-300">
+                        The suggested category has been applied. Review and save when ready.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Research Error */}
+              {researchError && (
+                <div className="p-4 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg">
+                  <p className="text-sm text-red-700 dark:text-red-300">
+                    <strong>Research failed:</strong> {researchError}
+                  </p>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label className="flex items-center gap-2">
