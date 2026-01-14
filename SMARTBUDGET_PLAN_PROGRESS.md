@@ -40,7 +40,7 @@ IN_PROGRESS
 - [x] 5.4: Create timeframe selector with multi-period views
 
 ### Phase 6: Budget Management
-- [ ] 6.1: Create budget data models and API
+- [x] 6.1: Create budget data models and API
 - [ ] 6.2: Build budget creation wizard
 - [ ] 6.3: Implement budget tracking with progress indicators
 - [ ] 6.4: Create budget analytics and forecasting
@@ -70,7 +70,7 @@ IN_PROGRESS
 
 ## Tasks Completed This Iteration
 
-- Task 5.4: Create timeframe selector with multi-period views
+- Task 6.1: Create budget data models and API
 
 ## Notes
 
@@ -2623,3 +2623,169 @@ Rules implemented for:
 - Test with real CIBC transaction data
 - Measure categorization accuracy
 - Tune rules based on real data
+
+### Task 6.1 Completion Details:
+
+**Budget Data Models and API Implementation:**
+
+**Summary:**
+Successfully implemented comprehensive budget management API with full CRUD operations, progress tracking, forecasting, and template generation. The database models were already in place from the Prisma schema, so this task focused on creating the RESTful API endpoints to manage budgets.
+
+**What Was Implemented:**
+
+1. **Core Budget API Routes** (src/app/api/budgets/route.ts)
+   - GET /api/budgets - List all user budgets with filtering
+     - Query parameters: active, type, period, sortBy, sortOrder
+     - Returns budgets with categories and counts
+     - Supports filtering by budget type and period
+   - POST /api/budgets - Create new budget
+     - Validates required fields (name, type, period, startDate, totalAmount, categories)
+     - Validates budget type (ENVELOPE, PERCENTAGE, FIXED_AMOUNT, GOAL_BASED)
+     - Validates budget period (WEEKLY, BI_WEEKLY, MONTHLY, QUARTERLY, YEARLY)
+     - Verifies all category IDs exist
+     - Auto-deactivates other budgets if new budget is set as active
+     - Creates budget with category allocations in single transaction
+     - Returns created budget with full category details
+
+2. **Individual Budget Operations** (src/app/api/budgets/[id]/route.ts)
+   - GET /api/budgets/:id - Get budget details
+     - Returns budget with all categories and metadata
+     - Includes category information (name, slug, color, icon, description)
+     - Ordered by amount descending
+   - PATCH /api/budgets/:id - Update budget
+     - Supports partial updates (only provided fields are updated)
+     - Validates budget type and period if changed
+     - Handles category updates (delete old, create new)
+     - Auto-deactivates other budgets if isActive is set to true
+     - Returns updated budget with full details
+   - DELETE /api/budgets/:id - Delete budget
+     - Verifies budget ownership
+     - Cascade deletes all budget categories (via Prisma schema)
+     - Returns success confirmation
+
+3. **Budget Progress Tracking** (src/app/api/budgets/[id]/progress/route.ts)
+   - GET /api/budgets/:id/progress - Real-time spending progress
+   - Calculates current budget period based on period type:
+     - WEEKLY: Current week (startOfWeek to endOfWeek)
+     - BI_WEEKLY: 2-week periods calculated from budget start date
+     - MONTHLY: Current month
+     - QUARTERLY: Current quarter
+     - YEARLY: Current year
+   - Fetches actual spending from transactions (DEBIT type only)
+   - Calculates per-category progress:
+     - Budgeted amount
+     - Amount spent
+     - Amount remaining
+     - Percent used
+     - Status: good (<80%), caution (80-90%), warning (90-100%), over (>100%)
+   - Calculates overall budget progress
+   - Returns comprehensive progress data for UI visualization
+
+4. **Budget Forecasting** (src/app/api/budgets/[id]/forecast/route.ts)
+   - GET /api/budgets/:id/forecast - Predictive spending analysis
+   - Calculates time metrics:
+     - Total days in period
+     - Days elapsed
+     - Days remaining
+     - Percent time elapsed
+   - Analyzes spending patterns:
+     - Daily spending rate (spent / days elapsed)
+     - Projected end-of-period spending
+     - Projected over/under budget amount
+     - Suggested daily rate to stay on budget
+   - Per-category forecasts with status:
+     - on_track: Projected to stay under budget
+     - at_risk: Projected to reach 95-100% of budget
+     - will_exceed: Projected to exceed budget
+   - Generates actionable recommendations:
+     - Overall budget status alerts
+     - Top overspending categories with suggested daily rates
+     - Well-managed categories (positive reinforcement)
+     - Encouragement messages when on track
+   - Returns comprehensive forecast data for planning
+
+5. **Budget Templates** (src/app/api/budgets/templates/route.ts)
+   - GET /api/budgets/templates - Smart template generation
+   - Template Types:
+     
+     a. **50/30/20 Rule Template** (type=50-30-20)
+        - 50% Needs (rent, utilities, food, transportation, medical)
+        - 30% Wants (entertainment, shopping, personal care)
+        - 20% Savings (transfers, loan payments)
+        - Returns percentage-based allocations
+     
+     b. **Previous Budget Template** (type=previous)
+        - Copies user's most recent budget
+        - Preserves type, period, amounts
+        - Names it "Copy of [original name]"
+        - Returns 404 if no previous budget exists
+     
+     c. **Suggested Template** (type=suggested, default)
+        - Analyzes last 3 months of transaction history
+        - Calculates average monthly spending per category
+        - Adds 10% buffer for safety
+        - Returns top 10 spending categories
+        - Includes analysis metadata (periods analyzed, transaction count)
+        - Falls back to "Beginner Budget" if no transaction history
+
+**Technical Highlights:**
+- RESTful API design following Next.js App Router patterns
+- NextAuth.js authentication on all endpoints (401 Unauthorized)
+- User-scoped queries (all operations check userId)
+- Prisma ORM for type-safe database operations
+- Comprehensive validation with clear error messages
+- HTTP status codes: 200 (OK), 201 (Created), 400 (Bad Request), 401 (Unauthorized), 404 (Not Found), 409 (Conflict), 500 (Internal Server Error)
+- Includes related data (categories, counts) via Prisma relations
+- Date calculations using date-fns library
+- Smart period calculations (bi-weekly from start date)
+- Optimistic forecasting with actionable insights
+- Template generation using real spending data
+
+**Database Models Used:**
+- Budget model (id, userId, name, type, period, startDate, endDate, totalAmount, isActive, rollover)
+- BudgetCategory model (id, budgetId, categoryId, amount, spent)
+- Category model (for category details)
+- Transaction model (for spending calculations)
+- Enums: BudgetType, BudgetPeriod
+
+**API Endpoints Created:**
+```
+GET    /api/budgets                    - List budgets
+POST   /api/budgets                    - Create budget
+GET    /api/budgets/:id                - Get budget details
+PATCH  /api/budgets/:id                - Update budget
+DELETE /api/budgets/:id                - Delete budget
+GET    /api/budgets/:id/progress       - Get budget progress
+GET    /api/budgets/:id/forecast       - Get spending forecast
+GET    /api/budgets/templates          - Get budget templates
+```
+
+**Use Cases Supported:**
+1. Creating budgets with multiple category allocations
+2. Listing all budgets with filtering and sorting
+3. Viewing detailed budget information
+4. Updating budget parameters and category allocations
+5. Deleting budgets (cascade deletes categories)
+6. Real-time progress tracking against budget
+7. Predictive forecasting for end-of-period spending
+8. Smart budget template generation from spending history
+9. 50/30/20 rule template for beginners
+10. Copying previous budgets
+
+**Files Created:**
+- src/app/api/budgets/route.ts (198 lines) - List and create budgets
+- src/app/api/budgets/[id]/route.ts (206 lines) - Get, update, delete budget
+- src/app/api/budgets/[id]/progress/route.ts (156 lines) - Progress tracking
+- src/app/api/budgets/[id]/forecast/route.ts (216 lines) - Spending forecasting
+- src/app/api/budgets/templates/route.ts (173 lines) - Template generation
+
+**Total Lines of Code:** ~949 lines
+
+**Next Steps:**
+- Task 6.2: Build budget creation wizard (UI component)
+- Task 6.3: Implement budget tracking with progress indicators (UI components)
+- Task 6.4: Create budget analytics and forecasting (UI components)
+- Create /budgets page to replace orphaned navigation links
+- Build budget visualization components
+- Test APIs with real data
+- Add budget notification system (alerts when approaching limits)
