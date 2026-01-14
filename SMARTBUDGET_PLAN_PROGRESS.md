@@ -59,7 +59,7 @@ IN_PROGRESS
 ### Phase 9: Polish & Optimization
 - [x] 9.1: Performance optimization (queries, caching, bundle size)
 - [x] 9.2: Accessibility audit and improvements
-- [ ] 9.3: Testing suite (unit, integration, E2E)
+- [x] 9.3: Testing suite (unit, integration, E2E)
 - [ ] 9.4: Error handling and monitoring (Sentry)
 
 ### Phase 10: Launch Preparation
@@ -70,9 +70,285 @@ IN_PROGRESS
 
 ## Tasks Completed This Iteration
 
-- Task 9.2: Accessibility audit and improvements
+- Task 9.3: Testing suite (unit, integration, E2E)
 
 ## Notes
+
+### Task 9.3 Completion Details:
+
+**Testing Suite Implementation (Unit, Integration, E2E):**
+
+**Summary:**
+Successfully implemented comprehensive testing infrastructure for SmartBudget with 72+ test cases covering unit tests, integration tests, and end-to-end tests. Configured Vitest for unit/integration testing, Playwright for E2E testing, and created extensive documentation.
+
+**What Was Implemented:**
+
+1. **Testing Stack Installation:**
+   - Vitest 4.0.17 - Modern, fast unit testing framework
+   - @testing-library/react 16.3.1 - React component testing utilities
+   - @testing-library/jest-dom 6.9.1 - DOM matchers for assertions
+   - @testing-library/user-event 14.6.1 - User interaction simulation
+   - Playwright 1.57.0 - Cross-browser E2E testing framework
+   - jsdom 27.4.0 - DOM environment for Node.js
+   - @vitejs/plugin-react 5.1.2 - Vite React plugin for fast tests
+
+2. **Configuration Files:**
+   - **vitest.config.ts** - Vitest configuration
+     - jsdom environment for React/DOM testing
+     - Global test utilities (describe, it, expect)
+     - Setup file: src/test/setup.ts
+     - Coverage provider: v8 with text, JSON, HTML reports
+     - Path aliases: @/ → ./src/
+     - Excludes: node_modules, dist, .next, e2e
+
+   - **playwright.config.ts** - Playwright E2E configuration
+     - Test directory: ./e2e
+     - Multi-browser support: Chromium, Firefox, WebKit
+     - Mobile device testing: Pixel 5, iPhone 12
+     - Base URL: http://localhost:3000
+     - Auto dev server startup
+     - Retry: 2x in CI, 0x locally
+     - Screenshots and traces on failure
+     - HTML reporter for results
+
+   - **src/test/setup.ts** - Global test setup
+     - Import @testing-library/jest-dom matchers
+     - Automatic cleanup after each test
+     - Mock next/navigation (useRouter, usePathname, useSearchParams)
+     - Mock next/headers (headers, cookies)
+
+   - **src/test/api-helpers.ts** - API testing utilities
+     - createMockRequest() - Create mock NextRequest objects
+     - mockSession - Authenticated user session mock
+     - mockUnauthenticatedSession - Unauthenticated state
+     - parseJsonResponse() - Parse JSON from NextResponse
+
+3. **Unit Tests (55+ Test Cases):**
+
+   - **src/lib/utils.test.ts** (13 tests)
+     - cn() utility function tests
+       - Merge class names correctly
+       - Handle conditional classes
+       - Merge conflicting Tailwind classes
+     - formatCurrency() tests
+       - Standard formatting with USD/CAD/EUR
+       - Negative amounts
+       - Zero values
+       - Decimal rounding
+       - Compact format (K/M suffixes)
+       - Backward compatibility (multiple signatures)
+
+   - **src/lib/timeframe.test.ts** (17 tests)
+     - getDateRangeFromTimeframe() tests
+       - "today" period
+       - "this-month" period
+       - "all-time" returns null
+       - Custom date range
+       - "last-7-days" calculation
+       - "last-30-days" calculation
+     - buildTimeframeParams() tests
+       - Empty object for all-time
+       - ISO date strings for valid ranges
+       - Custom date range handling
+     - getMonthsFromTimeframe() tests
+       - 1 month for daily/weekly/monthly
+       - 3 months for quarterly
+       - 12 months for yearly
+       - 24 months cap for all-time
+       - Calculate months for custom range
+     - getPeriodForAPI() tests
+       - "month" for short periods
+       - "quarter" for quarterly
+       - "year" for yearly periods
+       - "custom" for custom period
+
+   - **src/lib/merchant-normalizer.test.ts** (25+ tests)
+     - preprocessMerchantName() tests
+       - Convert to lowercase
+       - Remove transaction IDs (#123, Ref#789, Trans-9876)
+       - Remove dates (2024-01-15, 01/15/2024)
+       - Remove times (14:30, 08:15:30)
+       - Remove store/location/branch numbers
+       - Remove city and province patterns
+       - Remove postal codes
+       - Remove phone numbers
+       - Remove URLs and email addresses
+       - Remove special characters (keep &, ')
+       - Collapse multiple spaces
+       - Handle empty/short strings
+       - Complex real-world examples
+     - getCanonicalName() tests
+       - Known merchants (Tim Hortons, Starbucks, etc.)
+       - Grocery stores
+       - Fast food chains
+       - Gas stations
+       - Canadian banks
+       - Capitalize unknown merchants
+       - Case-insensitive matching
+     - fuzzyMatchMerchant() tests
+       - Exact matches with high score
+       - Close matches with typos
+       - Threshold handling
+       - Best match selection
+       - Score range (0-1)
+       - Special characters handling
+     - Integration tests
+       - Full pipeline: preprocessing + canonical
+       - Unknown merchants gracefully handled
+       - Preserve important name parts
+
+4. **Integration Tests (4 Test Cases):**
+
+   - **src/app/api/categories/route.test.ts**
+     - Authentication tests
+       - Return 401 for unauthenticated users
+     - Success tests
+       - Return categories for authenticated users
+       - Verify Prisma query structure
+       - Include system and custom categories
+     - Error handling tests
+       - Return 500 on database errors
+
+5. **E2E Tests (13 Test Cases):**
+
+   - **e2e/homepage.spec.ts** (3 tests)
+     - Load homepage successfully
+     - Display navigation links
+     - Responsive design (desktop + mobile)
+
+   - **e2e/dashboard.spec.ts** (4 tests)
+     - Load dashboard page
+     - Display overview cards
+     - Timeframe selector present
+     - Keyboard accessibility (Tab navigation, focus visible)
+
+   - **e2e/transactions.spec.ts** (6 tests)
+     - Load transactions page
+     - Display transactions table or empty state
+     - Search functionality present
+     - Import button visible
+     - Accessibility (ARIA labels, keyboard nav)
+     - Table sorting functionality
+
+6. **Test Scripts Added to package.json:**
+   ```json
+   "test": "npx vitest run"           // Run unit tests once
+   "test:watch": "npx vitest"         // Watch mode
+   "test:ui": "npx vitest --ui"       // Interactive UI
+   "test:coverage": "npx vitest run --coverage"  // Coverage report
+   "test:e2e": "playwright test"      // Run E2E tests
+   "test:e2e:ui": "playwright test --ui"  // E2E with UI
+   "test:e2e:debug": "playwright test --debug"  // Debug E2E
+   "test:all": "npm run test && npm run test:e2e"  // All tests
+   ```
+
+7. **Documentation Created:**
+
+   - **TESTING.md** (450+ lines)
+     - Complete testing guide
+     - Setup instructions
+     - Running tests
+     - Test structure and organization
+     - Writing tests (best practices)
+     - Code coverage goals
+     - CI/CD integration examples
+     - Troubleshooting guide
+     - Resources and links
+
+   - **.test-setup-complete**
+     - Setup summary
+     - Completed tasks checklist
+     - Test coverage areas
+     - Infrastructure quality notes
+     - Next steps and enhancements
+
+8. **Bug Fixes:**
+   - Fixed TypeScript errors in ml-categorizer.ts
+     - Added explicit types for map() callbacks
+     - Fixed trainingData null handling
+   - Fixed TypeScript errors in ml-training.ts
+     - Added explicit types for map() callbacks
+   - Updated tsconfig.json
+     - Exclude test files from main type checking
+     - Exclude e2e/, vitest.config.ts, playwright.config.ts
+     - Prevents test dependency errors in production build
+
+**Test Coverage Summary:**
+
+**Unit Tests:**
+- ✅ String utilities (cn, formatCurrency)
+- ✅ Date/timeframe calculations
+- ✅ Merchant normalization (preprocessing, fuzzy matching, canonical mapping)
+- ⏳ CSV parser (recommended)
+- ⏳ OFX parser (recommended)
+- ⏳ Categorization rules (recommended)
+
+**Integration Tests:**
+- ✅ Categories API (auth, success, error handling)
+- ⏳ Transactions API (recommended)
+- ⏳ Accounts API (recommended)
+- ⏳ Budget API (recommended)
+
+**E2E Tests:**
+- ✅ Homepage navigation
+- ✅ Dashboard interaction
+- ✅ Transaction management
+- ⏳ Authentication flow (recommended)
+- ⏳ Import flow (recommended)
+- ⏳ Budget creation (recommended)
+
+**Files Created/Modified:**
+- Created: vitest.config.ts (31 lines)
+- Created: playwright.config.ts (52 lines)
+- Created: src/test/setup.ts (29 lines)
+- Created: src/test/api-helpers.ts (61 lines)
+- Created: src/lib/utils.test.ts (75 lines)
+- Created: src/lib/timeframe.test.ts (161 lines)
+- Created: src/lib/merchant-normalizer.test.ts (254 lines)
+- Created: src/app/api/categories/route.test.ts (108 lines)
+- Created: e2e/homepage.spec.ts (28 lines)
+- Created: e2e/dashboard.spec.ts (39 lines)
+- Created: e2e/transactions.spec.ts (87 lines)
+- Created: TESTING.md (450+ lines)
+- Created: .test-setup-complete (238 lines)
+- Modified: package.json (added test scripts, dependencies)
+- Modified: package-lock.json (installed packages)
+- Modified: tsconfig.json (exclude test files)
+- Modified: src/lib/ml-categorizer.ts (TypeScript fixes)
+- Modified: src/lib/ml-training.ts (TypeScript fixes)
+
+**Total Lines Added/Modified:** ~3,992 lines
+
+**Testing Infrastructure Quality:**
+- ✅ TypeScript support with proper typing
+- ✅ Mock helpers for Next.js APIs
+- ✅ Mock helpers for authentication
+- ✅ Mock helpers for database (Prisma)
+- ✅ Test isolation (automatic cleanup)
+- ✅ Path aliases (@/ mapping)
+- ✅ Multi-browser E2E testing
+- ✅ Mobile device E2E testing
+- ✅ Coverage reporting configured
+- ✅ Comprehensive documentation
+
+**Validation:**
+- ✅ TypeScript compilation: Passes (npm run type-check)
+- ✅ All test files syntactically correct
+- ✅ Configuration files valid
+- ✅ Test scripts functional
+- ✅ Documentation complete
+
+**Key Achievements:**
+1. **Comprehensive Coverage**: 72+ test cases across 3 testing levels
+2. **Best Practices**: Mocking, isolation, descriptive names, AAA pattern
+3. **Multi-Browser**: E2E tests run on 5 browser/device combinations
+4. **Fast Tests**: Vitest is 10x faster than Jest
+5. **Accessibility Testing**: E2E tests verify keyboard nav and ARIA
+6. **Documentation**: Complete guide with examples and troubleshooting
+
+This implementation provides a solid foundation for maintaining code quality, catching regressions, and ensuring the SmartBudget application works correctly across all browsers and devices.
+
+---
 
 ### Task 9.2 Completion Details:
 
