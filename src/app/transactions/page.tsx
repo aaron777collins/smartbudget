@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { TransactionDetailDialog } from '@/components/transactions/transaction-detail-dialog';
-import { Search, Filter, Download, Plus, Pencil, Trash2 } from 'lucide-react';
+import { Search, Filter, Download, Plus, Pencil, Trash2, Repeat } from 'lucide-react';
 
 interface Transaction {
   id: string;
@@ -56,6 +56,7 @@ interface Transaction {
     color: string;
   }>;
   isReconciled: boolean;
+  isRecurring: boolean;
 }
 
 interface TransactionResponse {
@@ -264,7 +265,14 @@ export default function TransactionsPage() {
                     </TableCell>
                     <TableCell>
                       <div>
-                        <div className="font-medium">{transaction.merchantName}</div>
+                        <div className="font-medium flex items-center gap-2">
+                          {transaction.merchantName}
+                          {transaction.isRecurring && (
+                            <span title="Recurring transaction">
+                              <Repeat className="h-3.5 w-3.5 text-purple-600" />
+                            </span>
+                          )}
+                        </div>
                         <div className="text-sm text-muted-foreground">
                           {transaction.description}
                         </div>

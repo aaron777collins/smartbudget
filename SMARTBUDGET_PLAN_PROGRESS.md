@@ -46,7 +46,7 @@ IN_PROGRESS
 - [x] 6.4: Create budget analytics and forecasting
 
 ### Phase 7: Advanced Features
-- [ ] 7.1: Implement recurring transaction detection
+- [x] 7.1: Implement recurring transaction detection
 - [ ] 7.2: Build split transaction functionality
 - [ ] 7.3: Create tags and labels system
 - [ ] 7.4: Implement search and filtering
@@ -70,7 +70,7 @@ IN_PROGRESS
 
 ## Tasks Completed This Iteration
 
-- Task 6.4: Create budget analytics and forecasting
+- Task 7.1: Implement recurring transaction detection
 
 ## Notes
 
@@ -390,6 +390,244 @@ Successfully implemented a comprehensive budget analytics dashboard with histori
 
 **Next Steps:**
 Task 6.4 is now complete. Phase 6 (Budget Management) is fully finished. The next phase is Phase 7 (Advanced Features), starting with Task 7.1: Implement recurring transaction detection.
+
+---
+
+### Task 7.1 Completion Details:
+
+**Recurring Transaction Detection Implementation:**
+
+**Summary:**
+Successfully implemented a comprehensive recurring transaction detection system that automatically identifies patterns in transaction history, creates recurring rules, tracks upcoming expenses, and displays recurring indicators throughout the application. The system uses sophisticated pattern detection algorithms with confidence scoring.
+
+**What Was Implemented:**
+
+1. **Recurring Transaction Detection API** (`/api/recurring-rules/detect`)
+   - GET endpoint with configurable parameters (minOccurrences, lookbackMonths)
+   - Analyzes transaction history to identify recurring patterns
+   - **Pattern Detection Algorithm:**
+     - Normalizes merchant names for comparison (lowercase, remove special chars)
+     - Groups transactions by normalized merchant name
+     - Groups by similar amounts (within 10% variance)
+     - Calculates frequency between transaction dates (weekly, bi-weekly, monthly, quarterly, yearly)
+     - Validates consistency with standard deviation checks (20% variance threshold)
+     - Identifies most common category for each pattern
+     - Calculates next due date based on average interval
+   - **Confidence Scoring:**
+     - Based on transaction count, amount variance, and frequency consistency
+     - Weights: 50% transaction count, 30% amount consistency, 20% frequency consistency
+     - Only returns patterns with confidence >= 0.6
+   - Returns detected patterns sorted by confidence with summary statistics
+
+2. **Recurring Rules Management API** (`/api/recurring-rules`)
+   - **GET /api/recurring-rules** - List all recurring rules with transaction counts
+   - **POST /api/recurring-rules** - Create new recurring rule
+     - Accepts: merchantName, frequency, amount, categoryId, nextDueDate, transactionIds
+     - Links provided transactions to the new rule
+     - Sets isRecurring flag on linked transactions
+   - **GET /api/recurring-rules/[id]** - Fetch specific rule with all transactions
+   - **PATCH /api/recurring-rules/[id]** - Update existing rule
+   - **DELETE /api/recurring-rules/[id]** - Delete rule and unlink transactions
+   - All endpoints include authentication checks and user ownership validation
+
+3. **Upcoming Expenses API** (`/api/recurring-rules/upcoming`)
+   - GET endpoint with configurable days ahead (default: 30)
+   - Fetches recurring rules with nextDueDate within specified range
+   - Calculates days until due for each expense
+   - **Status Classification:**
+     - Overdue: daysUntil < 0
+     - Due Today: daysUntil = 0
+     - Due Soon: 0 < daysUntil <= 7
+     - Future: daysUntil > 7
+   - Returns summary statistics (total, totalAmount, overdue count, due today, due soon)
+
+4. **Recurring Detection Dialog Component**
+   - Modal dialog for pattern detection workflow
+   - **Step 1: Analysis Info**
+     - Explains detection process
+     - "Start Detection" button to trigger analysis
+   - **Step 2: Pattern Selection**
+     - Displays all detected patterns with details
+     - Auto-selects high confidence patterns (>= 0.8)
+     - Pattern cards show:
+       - Merchant name with confidence badge (High/Medium/Low)
+       - Frequency (weekly, bi-weekly, monthly, etc.)
+       - Average amount
+       - Next due date
+       - Number of occurrences detected
+     - Checkboxes for manual selection
+     - "Select All" / "Clear" buttons
+   - **Step 3: Create Rules**
+     - "Create X Rules" button
+     - Creates recurring rules for all selected patterns
+     - Links transactions to rules automatically
+     - Shows success/error toasts
+   - Summary stats displayed (transactions analyzed, patterns found)
+
+5. **Recurring Transactions Page** (`/recurring`)
+   - Main management interface for recurring rules
+   - **Header Section:**
+     - Page title with Repeat icon
+     - "Detect Patterns" button to open detection dialog
+   - **Summary Statistics Cards:**
+     - Total Rules count
+     - Monthly Estimated total (converts all frequencies to monthly equivalent)
+     - Due Soon count (next 7 days)
+   - **Rules Grid:**
+     - Card-based layout (responsive: 1/2/3 columns)
+     - Each card displays:
+       - Merchant name
+       - Due status badge (Overdue/Due Today/Due Soon/X days)
+       - Amount and frequency
+       - Next due date
+       - Linked transaction count
+       - Delete button
+   - **Empty State:**
+     - Helpful message when no rules exist
+     - "Detect Recurring Patterns" call-to-action button
+   - **Delete Confirmation:**
+     - Alert dialog for rule deletion
+     - Explains consequences (unlinks transactions)
+     - Cannot be undone warning
+
+6. **Upcoming Expenses Dashboard Widget**
+   - Integrated into main dashboard at `/dashboard`
+   - **Summary Bar:**
+     - Total expenses count
+     - Total amount
+     - Due soon count (yellow highlight)
+     - Overdue count (red highlight)
+   - **Expense List:**
+     - Shows up to 5 upcoming expenses
+     - Each item displays:
+       - Merchant name with status badge
+       - Next due date and frequency
+       - Amount
+     - Color-coded status badges
+   - **Empty State:**
+     - Alert message when no upcoming expenses
+     - Link to recurring management page
+   - **Navigation:**
+     - "View All" button to go to /recurring page
+     - "View All X Expenses" button if more than 5
+
+7. **Transaction List Recurring Indicators**
+   - Updated transactions page (`/transactions`)
+   - Recurring icon (Repeat) displayed next to merchant name
+   - Purple color (text-purple-600) for visual consistency
+   - Tooltip on hover: "Recurring transaction"
+   - Only shows for transactions with isRecurring = true
+
+8. **Navigation Integration**
+   - Added "Recurring" menu item to sidebar
+   - Icon: Repeat (from lucide-react)
+   - Color: text-purple-600
+   - Positioned between "Budgets" and "Goals"
+   - Active state highlighting
+
+**Technical Implementation:**
+
+1. **New Files Created:**
+   - `/src/app/api/recurring-rules/detect/route.ts` - Pattern detection API
+   - `/src/app/api/recurring-rules/route.ts` - CRUD operations for rules
+   - `/src/app/api/recurring-rules/[id]/route.ts` - Individual rule operations
+   - `/src/app/api/recurring-rules/upcoming/route.ts` - Upcoming expenses API
+   - `/src/app/recurring/page.tsx` - Recurring page wrapper
+   - `/src/app/recurring/recurring-client.tsx` - Main recurring UI
+   - `/src/components/recurring/recurring-detection-dialog.tsx` - Detection modal
+   - `/src/components/dashboard/upcoming-expenses.tsx` - Dashboard widget
+
+2. **Files Modified:**
+   - `/src/app/dashboard/dashboard-client.tsx` - Added UpcomingExpenses widget
+   - `/src/app/transactions/page.tsx` - Added recurring indicator icon
+   - `/src/components/sidebar.tsx` - Added Recurring navigation item
+
+3. **Dependencies Added:**
+   - `@radix-ui/react-alert-dialog` (via shadcn/ui alert-dialog component)
+
+4. **Database Schema Used:**
+   - RecurringRule model (already defined in Prisma schema)
+   - Transaction.isRecurring field
+   - Transaction.recurringRuleId foreign key
+   - Frequency enum (WEEKLY, BI_WEEKLY, MONTHLY, QUARTERLY, YEARLY)
+
+5. **Pattern Detection Algorithm Details:**
+   - **Merchant Normalization:** Removes special characters, lowercase, trim
+   - **Grouping Logic:** Maps transactions to normalized merchant names
+   - **Amount Tolerance:** 10% variance allowed for amount matching
+   - **Frequency Calculation:**
+     - Calculates intervals between consecutive transaction dates
+     - Averages intervals and checks standard deviation
+     - 20% variance threshold for consistency
+     - Maps to enum: 6-8 days = WEEKLY, 13-15 = BI_WEEKLY, 28-32 = MONTHLY, etc.
+   - **Confidence Formula:**
+     - Transaction count factor (max 0.5): min(count/12, 0.5)
+     - Amount consistency (max 0.3): (1 - amountVariance) * 0.3
+     - Frequency consistency (max 0.2): (1 - frequencyVariance) * 0.2
+   - **Minimum Threshold:** Only returns patterns with confidence >= 0.6
+
+**Features:**
+
+1. **Automatic Pattern Detection:**
+   - Analyzes last 6 months of transactions by default
+   - Requires minimum 3 occurrences
+   - Detects 5 frequency types (weekly to yearly)
+   - Handles amount variance intelligently
+   - Categories based on historical data
+
+2. **Smart Rule Management:**
+   - Create rules from detected patterns
+   - Bulk creation with multi-select
+   - Auto-link transactions to rules
+   - Delete with transaction unlinking
+   - Track transaction counts per rule
+
+3. **Proactive Expense Tracking:**
+   - Dashboard widget shows upcoming bills
+   - Color-coded urgency (overdue, due today, due soon)
+   - Next due date predictions
+   - Monthly equivalent calculations
+   - Total amount summaries
+
+4. **Visual Indicators:**
+   - Purple recurring icon throughout app
+   - Status badges with semantic colors
+   - Confidence scoring in detection
+   - Transaction counts per rule
+
+**User Experience Benefits:**
+
+1. **Bill Tracking Automation:**
+   - Never miss a recurring payment
+   - Automatic detection from history
+   - Visual reminders on dashboard
+
+2. **Budget Planning:**
+   - Know upcoming expenses in advance
+   - Monthly equivalent calculations
+   - Better cash flow management
+
+3. **Pattern Recognition:**
+   - Identifies subscriptions automatically
+   - Finds recurring bills you might forget
+   - Calculates payment frequencies
+
+4. **Easy Management:**
+   - One-click pattern detection
+   - Bulk rule creation
+   - Simple deletion when needed
+   - Clear visual indicators
+
+**Testing:**
+- TypeScript compilation: ✓ Passed (npx tsc --noEmit - zero errors)
+- All API endpoints properly authenticated
+- Pattern detection algorithm tested with various scenarios
+- UI components properly typed
+- Responsive design verified
+- Navigation integration working
+
+**Next Steps:**
+Task 7.1 is now complete. The next task is Task 7.2: Build split transaction functionality, which will allow users to split a single transaction across multiple categories.
 
 ---
 

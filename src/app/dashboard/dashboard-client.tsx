@@ -11,6 +11,7 @@ import { CashFlowSankey } from '@/components/dashboard/cash-flow-sankey';
 import { CategoryHeatmap } from '@/components/dashboard/category-heatmap';
 import { CategoryCorrelationMatrix } from '@/components/dashboard/category-correlation-matrix';
 import { TimeframeSelector, type TimeframeValue } from '@/components/dashboard/timeframe-selector';
+import { UpcomingExpenses } from '@/components/dashboard/upcoming-expenses';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface DashboardData {
@@ -164,9 +165,13 @@ export function DashboardClient() {
         <CategoryCorrelationMatrix timeframe={timeframe} />
       </div>
 
+      {/* Upcoming Recurring Expenses */}
+      <div className="grid gap-4 md:grid-cols-1">
+        <UpcomingExpenses />
+      </div>
+
       {/* Future sections:
           - Recent Transactions
-          - Upcoming Recurring Expenses
           - Financial Goals Progress
       */}
     </div>

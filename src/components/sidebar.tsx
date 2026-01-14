@@ -13,6 +13,7 @@ import {
   Upload,
   TrendingUp,
   ListTodo,
+  Repeat,
 } from "lucide-react"
 
 const routes = [
@@ -39,6 +40,12 @@ const routes = [
     icon: PieChart,
     href: "/budgets",
     color: "text-orange-700",
+  },
+  {
+    label: "Recurring",
+    icon: Repeat,
+    href: "/recurring",
+    color: "text-purple-600",
   },
   {
     label: "Goals",
