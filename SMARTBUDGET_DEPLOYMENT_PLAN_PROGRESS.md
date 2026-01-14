@@ -182,18 +182,18 @@ The deployment plan requires:
   - ✅ Exclude .github/, .vscode/, .idea/
   - ✅ Include only necessary files for build
 
-- [ ] **Task 2.3**: Create docker-compose.yml
-  - Service: smartbudget-app
-  - Container name: smartbudget-app
-  - Build context: . (current directory)
-  - Dockerfile: Dockerfile
-  - Ports: "3002:3000" (host:container)
-  - Env file: .env
-  - Additional env: NODE_ENV=production, PORT=3000
-  - Volumes: ./uploads:/app/uploads
-  - Networks: internal (external: true)
-  - Restart policy: unless-stopped
-  - Health check: curl http://localhost:3000/api/health
+- [x] **Task 2.3**: Create docker-compose.yml
+  - ✅ Service: smartbudget-app
+  - ✅ Container name: smartbudget-app
+  - ✅ Build context: . (current directory)
+  - ✅ Dockerfile: Dockerfile
+  - ✅ Ports: "3002:3000" (host:container)
+  - ✅ Env file: .env
+  - ✅ Additional env: NODE_ENV=production, PORT=3000
+  - ✅ Volumes: ./uploads:/app/uploads
+  - ✅ Networks: internal (external: true)
+  - ✅ Restart policy: unless-stopped
+  - ✅ Health check: wget http://localhost:3000/api/health (using wget for Alpine compatibility)
 
 - [ ] **Task 2.4**: Test Docker build locally
   - Run: docker-compose build
@@ -501,19 +501,20 @@ The deployment plan requires:
 
 ## Completed This Iteration
 
-**Task 2.2: Create .dockerignore file**
-- Created comprehensive .dockerignore file to optimize Docker build context
-- Excluded node_modules/, .next/, build outputs (will be rebuilt in container)
-- Excluded all .env variants (passed via docker-compose at runtime)
-- Excluded testing files (*.test.ts, *.spec.ts, e2e/, coverage/)
-- Excluded documentation files (*.md except README.md)
-- Excluded IDE files (.vscode/, .idea/, .DS_Store)
-- Excluded Git files (.git/, .github/, .gitignore)
-- Excluded uploads/ directory (will be mounted as volume)
-- Excluded logs (*.log, ralph_*.log)
-- Excluded Prisma migrations history (only schema needed)
-- Excluded Docker files themselves (Dockerfile, docker-compose.yml)
-- This reduces build context size and speeds up Docker builds significantly
+**Task 2.3: Create docker-compose.yml**
+- Created production-ready docker-compose.yml with version 3.8
+- Configured smartbudget-app service with:
+  - Build context pointing to current directory
+  - Container name: smartbudget-app
+  - Port mapping: 3002:3000 (host:container)
+  - Environment variables from .env file
+  - Additional environment: NODE_ENV=production, PORT=3000
+  - Volume mount for uploads: ./uploads:/app/uploads
+  - Network: internal (external: true) to connect with Caddy
+  - Restart policy: unless-stopped for automatic recovery
+  - Health check using wget to /api/health endpoint (runs every 30s with 40s start period)
+- Used wget instead of curl for health check (Alpine Linux compatibility)
+- Ready for deployment with existing Caddy reverse proxy infrastructure
 
 **Blockers/Manual Steps Required:**
 - Task 1.1: Supabase DATABASE_URL and DIRECT_URL need actual connection strings with password
