@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/select';
 import { TransactionDetailDialog } from '@/components/transactions/transaction-detail-dialog';
 import { AdvancedFilters, TransactionFilters } from '@/components/transactions/advanced-filters';
+import { ExportDialog } from '@/components/transactions/export-dialog';
 import { Search, Filter, Download, Plus, Pencil, Trash2, Repeat, X } from 'lucide-react';
 import { Badge as FilterBadge } from '@/components/ui/badge';
 
@@ -83,6 +84,7 @@ export default function TransactionsPage() {
   const [selectedTagId, setSelectedTagId] = useState<string>('');
   const [availableTags, setAvailableTags] = useState<Array<{ id: string; name: string; color: string }>>([]);
   const [advancedFilters, setAdvancedFilters] = useState<TransactionFilters>({});
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const limit = 50;
 
   useEffect(() => {
@@ -297,7 +299,7 @@ export default function TransactionsPage() {
               onFiltersChange={handleAdvancedFiltersChange}
               onClearFilters={handleClearAdvancedFilters}
             />
-            <Button variant="outline">
+            <Button variant="outline" onClick={() => setExportDialogOpen(true)}>
               <Download className="mr-2 h-4 w-4" />
               Export
             </Button>
@@ -547,6 +549,25 @@ export default function TransactionsPage() {
         onOpenChange={setDetailDialogOpen}
         onUpdate={handleTransactionUpdated}
         onDelete={handleTransactionDeleted}
+      />
+
+      {/* Export Dialog */}
+      <ExportDialog
+        open={exportDialogOpen}
+        onOpenChange={setExportDialogOpen}
+        filters={{
+          search: search || undefined,
+          accountId: advancedFilters.accountId,
+          categoryId: advancedFilters.categoryId,
+          tagId: advancedFilters.tagId || selectedTagId || undefined,
+          startDate: advancedFilters.dateRange?.from?.toISOString(),
+          endDate: advancedFilters.dateRange?.to?.toISOString(),
+          minAmount: advancedFilters.minAmount,
+          maxAmount: advancedFilters.maxAmount,
+          type: advancedFilters.type,
+          isReconciled: advancedFilters.isReconciled,
+          isRecurring: advancedFilters.isRecurring,
+        }}
       />
     </div>
   );
