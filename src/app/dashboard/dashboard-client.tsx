@@ -7,6 +7,9 @@ import { MonthlyIncomeCard } from '@/components/dashboard/monthly-income-card';
 import { CashFlowCard } from '@/components/dashboard/cash-flow-card';
 import { SpendingTrendsChart } from '@/components/dashboard/spending-trends-chart';
 import { CategoryBreakdownChart } from '@/components/dashboard/category-breakdown-chart';
+import { CashFlowSankey } from '@/components/dashboard/cash-flow-sankey';
+import { CategoryHeatmap } from '@/components/dashboard/category-heatmap';
+import { CategoryCorrelationMatrix } from '@/components/dashboard/category-correlation-matrix';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface DashboardData {
@@ -137,10 +140,23 @@ export function DashboardClient() {
         />
       </div>
 
-      {/* Visualizations Section */}
+      {/* Recharts Visualizations Section */}
       <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
         <SpendingTrendsChart />
         <CategoryBreakdownChart />
+      </div>
+
+      {/* D3.js Custom Visualizations Section */}
+      <div className="grid gap-4 md:grid-cols-1">
+        <CashFlowSankey />
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-1">
+        <CategoryHeatmap />
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-1">
+        <CategoryCorrelationMatrix />
       </div>
 
       {/* Future sections:
