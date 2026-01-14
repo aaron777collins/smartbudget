@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import type { AccountType, TransactionType } from '@prisma/client';
-import { categorizeTransaction, getCategoryAndSubcategoryIds } from '@/lib/rule-based-categorizer';
+import { categorizeTransactionHybrid } from '@/lib/hybrid-categorizer';
 import { normalizeMerchantName, addToKnowledgeBase } from '@/lib/merchant-normalizer';
 
 interface ParsedTransaction {
@@ -170,8 +170,8 @@ export async function POST(request: NextRequest) {
         const normalizationResult = await normalizeMerchantName(t.merchantName, true);
         const normalizedMerchant = normalizationResult.normalized;
 
-        // Step 2: Categorize transaction using rule-based engine
-        const categorizationResult = categorizeTransaction({
+        // Step 2: Categorize transaction using HYBRID engine (rule-based + ML fallback)
+        const categorizationResult = await categorizeTransactionHybrid({
           description: t.description,
           merchantName: normalizedMerchant, // Use normalized merchant name for better categorization
           amount: t.amount,
@@ -179,39 +179,29 @@ export async function POST(request: NextRequest) {
         });
 
         // Get category and subcategory IDs if categorized
-        let categoryId = null;
-        let subcategoryId = null;
-        let confidenceScore = null;
+        const categoryId = categorizationResult.categoryId;
+        const subcategoryId = categorizationResult.subcategoryId;
+        const confidenceScore = categorizationResult.confidenceScore;
 
-        if (categorizationResult.categorySlug && categorizationResult.subcategorySlug) {
-          const ids = await getCategoryAndSubcategoryIds(
-            categorizationResult.categorySlug,
-            categorizationResult.subcategorySlug,
-            prisma
-          );
-          categoryId = ids.categoryId;
-          subcategoryId = ids.subcategoryId;
-          confidenceScore = categorizationResult.confidence;
-
-          // Step 3: Add normalized merchant to knowledge base if categorized
-          // This builds the knowledge base over time for better fuzzy matching
-          if (categoryId && normalizedMerchant !== 'Unknown Merchant') {
-            try {
-              await addToKnowledgeBase(
-                normalizedMerchant.toLowerCase(),
-                normalizedMerchant,
-                categoryId,
-                'auto_categorization',
-                {
-                  normalizationSource: normalizationResult.source,
-                  normalizationConfidence: normalizationResult.confidence,
-                  categorizationConfidence: categorizationResult.confidence,
-                }
-              );
-            } catch (error) {
-              // Non-critical error, continue with import
-              console.warn('Failed to add merchant to knowledge base:', error);
-            }
+        // Step 3: Add normalized merchant to knowledge base if categorized
+        // This builds the knowledge base over time for better fuzzy matching and ML training
+        if (categoryId && normalizedMerchant !== 'Unknown Merchant') {
+          try {
+            await addToKnowledgeBase(
+              normalizedMerchant.toLowerCase(),
+              normalizedMerchant,
+              categoryId,
+              'auto_categorization',
+              {
+                normalizationSource: normalizationResult.source,
+                normalizationConfidence: normalizationResult.confidence,
+                categorizationConfidence: confidenceScore,
+                categorizationMethod: categorizationResult.method
+              }
+            );
+          } catch (error) {
+            // Non-critical error, continue with import
+            console.warn('Failed to add merchant to knowledge base:', error);
           }
         }
 
