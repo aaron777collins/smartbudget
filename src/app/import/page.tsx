@@ -175,6 +175,52 @@ export default function ImportPage() {
     setIsProcessing(false);
   };
 
+  const handleImportTransactions = async () => {
+    if (!allProcessed) return;
+
+    try {
+      setIsProcessing(true);
+
+      // Import each file's transactions
+      for (const uploadedFile of uploadedFiles.filter(f => f.status === "success")) {
+        if (!uploadedFile.previewData?.transactions) continue;
+
+        const response = await fetch('/api/transactions/import', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            transactions: uploadedFile.previewData.transactions,
+            accountInfo: uploadedFile.previewData.accountInfo ? {
+              name: uploadedFile.previewData.accountInfo.accountName || 'Imported Account',
+              institution: uploadedFile.previewData.accountInfo.bankName || 'CIBC',
+              accountType: uploadedFile.previewData.accountInfo.accountType || 'CHECKING',
+              accountNumber: uploadedFile.previewData.accountInfo.accountNumber || 'Unknown',
+              currency: uploadedFile.previewData.accountInfo.currency || 'CAD',
+            } : undefined,
+          }),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error || 'Failed to import transactions');
+        }
+      }
+
+      // Success! Show message and redirect
+      alert(`Successfully imported ${totalTransactions} transactions!`);
+      // Redirect to transactions page
+      window.location.href = '/transactions';
+    } catch (error) {
+      console.error('Import error:', error);
+      alert(error instanceof Error ? error.message : 'Failed to import transactions');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const totalTransactions = uploadedFiles.reduce(
     (acc, file) => acc + (file.previewData?.transactionCount || 0),
     0
@@ -305,8 +351,8 @@ export default function ImportPage() {
                     Process Files
                   </Button>
                 ) : (
-                  <Button onClick={() => alert("Import functionality coming soon!")}>
-                    Import Transactions
+                  <Button onClick={handleImportTransactions} disabled={isProcessing}>
+                    {isProcessing ? 'Importing...' : 'Import Transactions'}
                   </Button>
                 )}
               </div>
