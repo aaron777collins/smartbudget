@@ -14,6 +14,8 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatCurrency } from '@/lib/utils';
+import type { TimeframeValue } from './timeframe-selector';
+import { getMonthsFromTimeframe, buildTimeframeParams } from '@/lib/timeframe';
 
 interface CategoryMetadata {
   id: string;
@@ -71,7 +73,11 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   return null;
 };
 
-export function SpendingTrendsChart() {
+interface SpendingTrendsChartProps {
+  timeframe: TimeframeValue;
+}
+
+export function SpendingTrendsChart({ timeframe }: SpendingTrendsChartProps) {
   const [data, setData] = useState<SpendingTrendsData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -80,7 +86,9 @@ export function SpendingTrendsChart() {
     async function fetchData() {
       try {
         setIsLoading(true);
-        const response = await fetch('/api/dashboard/spending-trends?months=12');
+        const months = getMonthsFromTimeframe(timeframe);
+        const params = new URLSearchParams({ months: months.toString() });
+        const response = await fetch(`/api/dashboard/spending-trends?${params}`);
 
         if (!response.ok) {
           throw new Error('Failed to fetch spending trends');
@@ -98,7 +106,7 @@ export function SpendingTrendsChart() {
     }
 
     fetchData();
-  }, []);
+  }, [timeframe]);
 
   if (isLoading) {
     return (

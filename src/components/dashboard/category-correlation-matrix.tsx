@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import type { TimeframeValue } from './timeframe-selector';
+import { getMonthsFromTimeframe } from '@/lib/timeframe';
 
 interface CorrelationData {
   categories: Array<{
@@ -27,7 +29,11 @@ interface CorrelationData {
   };
 }
 
-export function CategoryCorrelationMatrix() {
+interface CategoryCorrelationMatrixProps {
+  timeframe: TimeframeValue;
+}
+
+export function CategoryCorrelationMatrix({ timeframe }: CategoryCorrelationMatrixProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [data, setData] = useState<CorrelationData | null>(null);
@@ -38,7 +44,9 @@ export function CategoryCorrelationMatrix() {
     async function fetchData() {
       try {
         setLoading(true);
-        const response = await fetch('/api/dashboard/category-correlation?months=6');
+        const months = Math.min(getMonthsFromTimeframe(timeframe), 6); // Cap at 6 months for correlation
+        const params = new URLSearchParams({ months: months.toString() });
+        const response = await fetch(`/api/dashboard/category-correlation?${params}`);
 
         if (!response.ok) {
           throw new Error('Failed to fetch correlation data');
@@ -54,7 +62,7 @@ export function CategoryCorrelationMatrix() {
     }
 
     fetchData();
-  }, []);
+  }, [timeframe]);
 
   useEffect(() => {
     if (!data || !svgRef.current || !containerRef.current || data.categories.length === 0) return;

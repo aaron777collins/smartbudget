@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrency } from '@/lib/utils';
+import type { TimeframeValue } from './timeframe-selector';
+import { getMonthsFromTimeframe } from '@/lib/timeframe';
 
 interface HeatmapData {
   data: Array<{
@@ -25,7 +27,11 @@ interface HeatmapData {
   };
 }
 
-export function CategoryHeatmap() {
+interface CategoryHeatmapProps {
+  timeframe: TimeframeValue;
+}
+
+export function CategoryHeatmap({ timeframe }: CategoryHeatmapProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [data, setData] = useState<HeatmapData | null>(null);
@@ -36,7 +42,9 @@ export function CategoryHeatmap() {
     async function fetchData() {
       try {
         setLoading(true);
-        const response = await fetch('/api/dashboard/category-heatmap?months=12');
+        const months = getMonthsFromTimeframe(timeframe);
+        const params = new URLSearchParams({ months: months.toString() });
+        const response = await fetch(`/api/dashboard/category-heatmap?${params}`);
 
         if (!response.ok) {
           throw new Error('Failed to fetch heatmap data');
@@ -52,7 +60,7 @@ export function CategoryHeatmap() {
     }
 
     fetchData();
-  }, []);
+  }, [timeframe]);
 
   useEffect(() => {
     if (!data || !svgRef.current || !containerRef.current || data.data.length === 0) return;

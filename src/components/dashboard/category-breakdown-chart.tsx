@@ -12,6 +12,8 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatCurrency } from '@/lib/utils';
+import type { TimeframeValue } from './timeframe-selector';
+import { getPeriodForAPI, buildTimeframeParams } from '@/lib/timeframe';
 
 interface CategoryData {
   id: string;
@@ -90,7 +92,11 @@ const CustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: an
   );
 };
 
-export function CategoryBreakdownChart() {
+interface CategoryBreakdownChartProps {
+  timeframe: TimeframeValue;
+}
+
+export function CategoryBreakdownChart({ timeframe }: CategoryBreakdownChartProps) {
   const [data, setData] = useState<CategoryBreakdownData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -99,7 +105,13 @@ export function CategoryBreakdownChart() {
     async function fetchData() {
       try {
         setIsLoading(true);
-        const response = await fetch('/api/dashboard/category-breakdown?period=month');
+        const period = getPeriodForAPI(timeframe);
+        const timeframeParams = buildTimeframeParams(timeframe);
+        const params = new URLSearchParams({
+          period,
+          ...timeframeParams
+        });
+        const response = await fetch(`/api/dashboard/category-breakdown?${params}`);
 
         if (!response.ok) {
           throw new Error('Failed to fetch category breakdown');
@@ -117,7 +129,7 @@ export function CategoryBreakdownChart() {
     }
 
     fetchData();
-  }, []);
+  }, [timeframe]);
 
   if (isLoading) {
     return (

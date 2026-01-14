@@ -37,7 +37,7 @@ IN_PROGRESS
 - [x] 5.1: Build dashboard layout with overview cards
 - [x] 5.2: Integrate Recharts for spending trends and category breakdown
 - [x] 5.3: Implement D3.js custom visualizations
-- [ ] 5.4: Create timeframe selector with multi-period views
+- [x] 5.4: Create timeframe selector with multi-period views
 
 ### Phase 6: Budget Management
 - [ ] 6.1: Create budget data models and API
@@ -70,9 +70,148 @@ IN_PROGRESS
 
 ## Tasks Completed This Iteration
 
-- Task 5.3: Implement D3.js custom visualizations
+- Task 5.4: Create timeframe selector with multi-period views
 
 ## Notes
+
+### Task 5.4 Completion Details:
+
+**Timeframe Selector with Multi-Period Views Implementation:**
+
+**Summary:**
+Successfully implemented a comprehensive timeframe selector component that allows users to filter all dashboard data by different time periods. The selector includes preset options (Today, This Week, This Month, etc.) and a custom date range picker, with all dashboard visualizations dynamically updating when the timeframe changes.
+
+**What Was Implemented:**
+
+1. **TimeframeSelector Component** (src/components/dashboard/timeframe-selector.tsx)
+   - Complete timeframe selection UI with dropdown and date picker
+   - Preset period options:
+     - Today
+     - This Week
+     - Last 7 Days
+     - This Month
+     - Last 30 Days
+     - This Quarter
+     - This Year
+     - Last 12 Months
+     - All Time
+     - Custom Range
+   - Custom date range picker with dual calendar view
+   - TypeScript types: TimeframePeriod enum and TimeframeValue interface
+   - Integrated shadcn/ui components: Select, Popover, Calendar, Button
+   - Smart display label showing selected period or custom date range
+   - State management for custom date ranges
+
+2. **Timeframe Utilities Library** (src/lib/timeframe.ts)
+   - getDateRangeFromTimeframe(): Converts timeframe selection to actual date range
+   - buildTimeframeParams(): Builds query parameters for API calls
+   - getMonthsFromTimeframe(): Calculates number of months for APIs expecting "months" param
+   - getPeriodForAPI(): Returns appropriate period value for category breakdown API
+   - Date calculations using date-fns (startOfDay, endOfDay, startOfWeek, etc.)
+   - Support for all timeframe periods with proper boundary handling
+   - Smart defaults (e.g., custom without dates defaults to this month)
+   - Performance cap (all-time limited to 24 months max)
+
+3. **Dashboard Integration** (src/app/dashboard/dashboard-client.tsx)
+   - Added timeframe state management: useState<TimeframeValue>
+   - Default timeframe: "this-month"
+   - TimeframeSelector placed in dashboard header (top-right)
+   - All visualizations receive timeframe prop:
+     - SpendingTrendsChart
+     - CategoryBreakdownChart
+     - CashFlowSankey
+     - CategoryHeatmap
+     - CategoryCorrelationMatrix
+
+4. **Updated All Dashboard Components to Support Timeframe:**
+
+   a. **SpendingTrendsChart** (src/components/dashboard/spending-trends-chart.tsx)
+      - Added timeframe prop
+      - useEffect dependency on timeframe for auto-refresh
+      - Calls getMonthsFromTimeframe() to determine data range
+      - Fetches data with months parameter
+
+   b. **CategoryBreakdownChart** (src/components/dashboard/category-breakdown-chart.tsx)
+      - Added timeframe prop
+      - useEffect dependency on timeframe
+      - Calls getPeriodForAPI() and buildTimeframeParams()
+      - Passes period, startDate, endDate to API
+
+   c. **CashFlowSankey** (src/components/dashboard/cash-flow-sankey.tsx)
+      - Added timeframe prop
+      - useEffect dependency on timeframe
+      - Calls getMonthsFromTimeframe() for data aggregation period
+
+   d. **CategoryHeatmap** (src/components/dashboard/category-heatmap.tsx)
+      - Added timeframe prop
+      - useEffect dependency on timeframe
+      - Calls getMonthsFromTimeframe() for heatmap dimensions
+
+   e. **CategoryCorrelationMatrix** (src/components/dashboard/category-correlation-matrix.tsx)
+      - Added timeframe prop
+      - useEffect dependency on timeframe
+      - Calls getMonthsFromTimeframe() with cap at 6 months (for correlation accuracy)
+
+5. **shadcn/ui Components Added:**
+   - Installed calendar component (react-day-picker based)
+   - Installed popover component (Radix UI based)
+   - Both components properly styled and themed
+
+**Technical Highlights:**
+- Type-safe implementation with TypeScript interfaces
+- React hooks pattern with proper dependency arrays
+- Automatic data refetching when timeframe changes
+- Smart API parameter building based on selected period
+- Date calculations using date-fns for accuracy
+- Responsive UI with proper mobile support
+- Component composition following React best practices
+- No prop drilling - direct prop passing from parent
+- Clean separation of concerns (UI, utilities, state)
+
+**User Experience Benefits:**
+- Single control for all dashboard visualizations
+- Instant visual feedback when changing timeframes
+- Preset options for common use cases (quick selection)
+- Custom date range for specific analysis periods
+- Clear display of selected timeframe
+- All charts update automatically and consistently
+- No page reload required (client-side state)
+- Intuitive dual-calendar picker for custom ranges
+
+**API Compatibility:**
+- Works with existing API endpoints (no backend changes required)
+- Spending trends: uses "months" query parameter
+- Category breakdown: uses "period", "startDate", "endDate" parameters
+- Heatmap: uses "months" query parameter
+- Correlation: uses "months" query parameter
+- Sankey: uses "months" query parameter
+
+**Files Created:**
+- src/components/dashboard/timeframe-selector.tsx (173 lines)
+- src/lib/timeframe.ts (157 lines)
+- src/components/ui/calendar.tsx (shadcn component)
+- src/components/ui/popover.tsx (shadcn component)
+
+**Files Modified:**
+- src/app/dashboard/dashboard-client.tsx (added timeframe state and selector)
+- src/components/dashboard/spending-trends-chart.tsx (added timeframe prop support)
+- src/components/dashboard/category-breakdown-chart.tsx (added timeframe prop support)
+- src/components/dashboard/cash-flow-sankey.tsx (added timeframe prop support)
+- src/components/dashboard/category-heatmap.tsx (added timeframe prop support)
+- src/components/dashboard/category-correlation-matrix.tsx (added timeframe prop support)
+- package.json (added react-day-picker dependency via shadcn)
+
+**Testing:**
+- TypeScript compilation: ✓ Passed (npx tsc --noEmit - zero errors)
+- All component props properly typed
+- Date range calculations verified for all periods
+- API parameter building tested
+- Component interfaces aligned
+
+**Next Steps:**
+Task 5.4 is now complete. All Phase 5 (Dashboard & Visualizations) tasks are now finished. The next phase (Phase 6) focuses on Budget Management, starting with creating budget data models and API (Task 6.1).
+
+---
 
 ### Task 5.3 Completion Details:
 

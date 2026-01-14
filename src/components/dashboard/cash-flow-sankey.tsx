@@ -5,6 +5,8 @@ import * as d3 from 'd3';
 import { sankey, sankeyLinkHorizontal, SankeyNode, SankeyLink } from 'd3-sankey';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrency } from '@/lib/utils';
+import type { TimeframeValue } from './timeframe-selector';
+import { getMonthsFromTimeframe } from '@/lib/timeframe';
 
 interface SankeyData {
   nodes: Array<{ id: string; name: string; color?: string }>;
@@ -31,7 +33,11 @@ interface ExtendedSankeyLink extends SankeyLink<ExtendedSankeyNode, {}> {
   value: number;
 }
 
-export function CashFlowSankey() {
+interface CashFlowSankeyProps {
+  timeframe: TimeframeValue;
+}
+
+export function CashFlowSankey({ timeframe }: CashFlowSankeyProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [data, setData] = useState<SankeyData | null>(null);
@@ -42,7 +48,9 @@ export function CashFlowSankey() {
     async function fetchData() {
       try {
         setLoading(true);
-        const response = await fetch('/api/dashboard/cash-flow-sankey?months=1');
+        const months = getMonthsFromTimeframe(timeframe);
+        const params = new URLSearchParams({ months: months.toString() });
+        const response = await fetch(`/api/dashboard/cash-flow-sankey?${params}`);
 
         if (!response.ok) {
           throw new Error('Failed to fetch cash flow data');
@@ -58,7 +66,7 @@ export function CashFlowSankey() {
     }
 
     fetchData();
-  }, []);
+  }, [timeframe]);
 
   useEffect(() => {
     if (!data || !svgRef.current || !containerRef.current) return;

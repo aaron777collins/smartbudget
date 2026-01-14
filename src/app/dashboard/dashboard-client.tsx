@@ -10,6 +10,7 @@ import { CategoryBreakdownChart } from '@/components/dashboard/category-breakdow
 import { CashFlowSankey } from '@/components/dashboard/cash-flow-sankey';
 import { CategoryHeatmap } from '@/components/dashboard/category-heatmap';
 import { CategoryCorrelationMatrix } from '@/components/dashboard/category-correlation-matrix';
+import { TimeframeSelector, type TimeframeValue } from '@/components/dashboard/timeframe-selector';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface DashboardData {
@@ -47,6 +48,9 @@ export function DashboardClient() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [timeframe, setTimeframe] = useState<TimeframeValue>({
+    period: 'this-month'
+  });
 
   useEffect(() => {
     async function fetchDashboardData() {
@@ -109,8 +113,9 @@ export function DashboardClient() {
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-      <div className="flex items-center justify-between space-y-2">
+      <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+        <TimeframeSelector value={timeframe} onChange={setTimeframe} />
       </div>
 
       {/* Overview Cards */}
@@ -142,21 +147,21 @@ export function DashboardClient() {
 
       {/* Recharts Visualizations Section */}
       <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
-        <SpendingTrendsChart />
-        <CategoryBreakdownChart />
+        <SpendingTrendsChart timeframe={timeframe} />
+        <CategoryBreakdownChart timeframe={timeframe} />
       </div>
 
       {/* D3.js Custom Visualizations Section */}
       <div className="grid gap-4 md:grid-cols-1">
-        <CashFlowSankey />
+        <CashFlowSankey timeframe={timeframe} />
       </div>
 
       <div className="grid gap-4 md:grid-cols-1">
-        <CategoryHeatmap />
+        <CategoryHeatmap timeframe={timeframe} />
       </div>
 
       <div className="grid gap-4 md:grid-cols-1">
-        <CategoryCorrelationMatrix />
+        <CategoryCorrelationMatrix timeframe={timeframe} />
       </div>
 
       {/* Future sections:
