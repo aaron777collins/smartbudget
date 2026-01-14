@@ -47,7 +47,7 @@ IN_PROGRESS
 
 ### Phase 7: Advanced Features
 - [x] 7.1: Implement recurring transaction detection
-- [ ] 7.2: Build split transaction functionality
+- [x] 7.2: Build split transaction functionality
 - [ ] 7.3: Create tags and labels system
 - [ ] 7.4: Implement search and filtering
 - [ ] 7.5: Build export and reporting features
@@ -70,9 +70,127 @@ IN_PROGRESS
 
 ## Tasks Completed This Iteration
 
-- Task 7.1: Implement recurring transaction detection
+- Task 7.2: Build split transaction functionality
 
 ## Notes
+
+### Task 7.2 Completion Details:
+
+**Split Transaction Functionality Implementation:**
+
+**Summary:**
+Successfully implemented comprehensive split transaction functionality allowing users to divide a single transaction across multiple categories. This is useful for transactions like grocery shopping (food + household items) or multi-category business expenses.
+
+**What Was Implemented:**
+
+1. **API Route for Split Management**
+   - Created `/api/transactions/[id]/split` endpoint
+   - **POST**: Create or update splits for a transaction
+     - Validates split amounts equal transaction total (±0.01 for floating point)
+     - Validates all category IDs exist
+     - Uses Prisma transaction to atomically delete old splits and create new ones
+     - Returns updated transaction with splits
+   - **DELETE**: Remove all splits from a transaction
+   - Full authorization checks (user must own transaction)
+   - Comprehensive error handling and validation
+
+2. **Split Transaction Editor Component**
+   - New file: `/src/components/transactions/split-transaction-editor.tsx`
+   - **Features:**
+     - Add/remove splits dynamically
+     - Category selector for each split
+     - Amount and percentage input (auto-calculates between them)
+     - Optional notes per split
+     - "Distribute Evenly" button for quick splitting
+     - Real-time validation and visual feedback
+     - Summary panel showing total allocated and remaining
+     - Visual indicators (green checkmark when valid, red when invalid)
+   - **Validation:**
+     - All splits must have categories
+     - All split amounts must be > 0
+     - Total split amounts must equal transaction amount (±0.01)
+     - Clear error messages for validation failures
+
+3. **Transaction Detail Dialog Integration**
+   - Updated `/src/components/transactions/transaction-detail-dialog.tsx`
+   - Added Split icon import from lucide-react
+   - Added splits to Transaction interface
+   - Added showSplitEditor state
+   - **UI Components:**
+     - "Split Transaction" button next to category (when not split)
+     - Split status display panel (when splits exist)
+       - Shows all splits with amounts and percentages
+       - "Edit Splits" button to modify existing splits
+     - Integrated SplitTransactionEditor component
+     - Conditional rendering: shows splits OR category (not both)
+   - **User Flow:**
+     - View transaction → Click "Split Transaction" → Configure splits → Save
+     - Or: View split transaction → Click "Edit Splits" → Modify → Save
+     - Automatically refreshes transaction data after save
+
+4. **Bug Fix: Recurring Rules Route**
+   - Fixed `/api/recurring-rules/[id]/route.ts` for Next.js 16 compatibility
+   - Updated params type to `Promise<{ id: string }>` for all routes
+   - Added `await params` before accessing id
+   - Fixed GET, PATCH, and DELETE functions
+
+**Technical Implementation:**
+
+1. **Files Created:**
+   - `/src/app/api/transactions/[id]/split/route.ts` (198 lines)
+   - `/src/components/transactions/split-transaction-editor.tsx` (386 lines)
+
+2. **Files Modified:**
+   - `/src/components/transactions/transaction-detail-dialog.tsx`
+   - `/src/app/api/recurring-rules/[id]/route.ts` (Next.js 16 compatibility fix)
+
+3. **Database Schema:**
+   - Uses existing TransactionSplit model from Prisma schema
+   - Fields: id, transactionId, categoryId, amount, percentage, notes
+   - Cascade delete when transaction deleted
+
+4. **Validation Logic:**
+   - Frontend validation in component (real-time)
+   - Backend validation in API route (security)
+   - Floating point handling (allows ±0.01 difference)
+   - Category existence validation
+
+5. **State Management:**
+   - Local state for splits array
+   - Loading/error/success states
+   - Dynamic split updates with percentage calculations
+   - Optimistic UI updates
+
+**User Experience Benefits:**
+
+1. **Flexibility:**
+   - Split any transaction into multiple categories
+   - Adjust amounts or percentages easily
+   - Add/remove splits as needed
+   - Distribute evenly with one click
+
+2. **Visual Feedback:**
+   - Real-time validation messages
+   - Color-coded summary (green/red)
+   - Progress indicator during save
+   - Success confirmation
+
+3. **Data Accuracy:**
+   - Prevents splits that don't match transaction total
+   - Ensures all splits have valid categories
+   - Maintains data integrity with database transactions
+
+4. **Integration:**
+   - Seamlessly integrated into existing transaction detail dialog
+   - Works with all transaction types
+   - Preserves existing transaction data
+   - Compatible with other features (categorization, notes, etc.)
+
+**Testing:**
+- TypeScript compilation: ✓ Passed (npx tsc --noEmit)
+- All components properly typed with interfaces
+- API validation tested with multiple scenarios
+- UI components render correctly
 
 ### Task 6.3 Completion Details:
 

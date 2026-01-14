@@ -6,7 +6,7 @@ import { Frequency } from '@prisma/client';
 // GET - Fetch a specific recurring rule
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -14,8 +14,10 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
+
     const recurringRule = await prisma.recurringRule.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         transactions: {
           orderBy: { date: 'desc' },
@@ -43,7 +45,7 @@ export async function GET(
 // PATCH - Update a recurring rule
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -51,6 +53,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
     const body = await request.json();
     const { merchantName, frequency, amount, categoryId, nextDueDate } = body;
 
@@ -64,7 +67,7 @@ export async function PATCH(
 
     // Update recurring rule
     const recurringRule = await prisma.recurringRule.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...(merchantName && { merchantName }),
         ...(frequency && { frequency }),
@@ -93,7 +96,7 @@ export async function PATCH(
 // DELETE - Delete a recurring rule
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -101,9 +104,11 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
+
     // First, unlink all transactions from this rule
     await prisma.transaction.updateMany({
-      where: { recurringRuleId: params.id },
+      where: { recurringRuleId: id },
       data: {
         isRecurring: false,
         recurringRuleId: null,
@@ -112,7 +117,7 @@ export async function DELETE(
 
     // Then delete the rule
     await prisma.recurringRule.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ message: 'Recurring rule deleted successfully' });
