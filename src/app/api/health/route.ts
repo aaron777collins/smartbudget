@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
+// Force Node.js runtime for process APIs
+export const runtime = 'nodejs'
+
 /**
  * Health Check Endpoint
  *
