@@ -1,18 +1,20 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import { NetWorthCard } from '@/components/dashboard/net-worth-card';
 import { MonthlySpendingCard } from '@/components/dashboard/monthly-spending-card';
 import { MonthlyIncomeCard } from '@/components/dashboard/monthly-income-card';
 import { CashFlowCard } from '@/components/dashboard/cash-flow-card';
 import { SpendingTrendsChart } from '@/components/dashboard/spending-trends-chart';
 import { CategoryBreakdownChart } from '@/components/dashboard/category-breakdown-chart';
-import { CashFlowSankey } from '@/components/dashboard/cash-flow-sankey';
-import { CategoryHeatmap } from '@/components/dashboard/category-heatmap';
-import { CategoryCorrelationMatrix } from '@/components/dashboard/category-correlation-matrix';
 import { TimeframeSelector, type TimeframeValue } from '@/components/dashboard/timeframe-selector';
 import { UpcomingExpenses } from '@/components/dashboard/upcoming-expenses';
 import { Skeleton } from '@/components/ui/skeleton';
+
+// Lazy load D3-based visualization components for bundle optimization
+const CashFlowSankey = lazy(() => import('@/components/dashboard/cash-flow-sankey').then(m => ({ default: m.CashFlowSankey })));
+const CategoryHeatmap = lazy(() => import('@/components/dashboard/category-heatmap').then(m => ({ default: m.CategoryHeatmap })));
+const CategoryCorrelationMatrix = lazy(() => import('@/components/dashboard/category-correlation-matrix').then(m => ({ default: m.CategoryCorrelationMatrix })));
 
 interface DashboardData {
   netWorth: {
@@ -152,17 +154,23 @@ export function DashboardClient() {
         <CategoryBreakdownChart timeframe={timeframe} />
       </div>
 
-      {/* D3.js Custom Visualizations Section */}
+      {/* D3.js Custom Visualizations Section - Lazy loaded for performance */}
       <div className="grid gap-4 md:grid-cols-1">
-        <CashFlowSankey timeframe={timeframe} />
+        <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
+          <CashFlowSankey timeframe={timeframe} />
+        </Suspense>
       </div>
 
       <div className="grid gap-4 md:grid-cols-1">
-        <CategoryHeatmap timeframe={timeframe} />
+        <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
+          <CategoryHeatmap timeframe={timeframe} />
+        </Suspense>
       </div>
 
       <div className="grid gap-4 md:grid-cols-1">
-        <CategoryCorrelationMatrix timeframe={timeframe} />
+        <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
+          <CategoryCorrelationMatrix timeframe={timeframe} />
+        </Suspense>
       </div>
 
       {/* Upcoming Recurring Expenses */}

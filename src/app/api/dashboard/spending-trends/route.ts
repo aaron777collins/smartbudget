@@ -19,34 +19,46 @@ export async function GET(request: NextRequest) {
     const months = parseInt(searchParams.get('months') || '12', 10);
 
     // Get spending data for the last N months, grouped by category
+    // OPTIMIZED: Single query instead of N queries
+    const startDate = startOfMonth(subMonths(now, months - 1));
+    const endDate = endOfMonth(now);
+
+    // Fetch all transactions for the entire period in one query
+    const allTransactions = await prisma.transaction.findMany({
+      where: {
+        userId,
+        date: {
+          gte: startDate,
+          lte: endDate,
+        },
+        type: 'DEBIT',
+      },
+      select: {
+        amount: true,
+        date: true,
+        categoryId: true,
+        category: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            color: true,
+          },
+        },
+      },
+    });
+
+    // Group transactions by month in application code
     const monthlyData = [];
 
     for (let i = months - 1; i >= 0; i--) {
       const monthStart = startOfMonth(subMonths(now, i));
       const monthEnd = endOfMonth(subMonths(now, i));
 
-      // Get all transactions for this month
-      const monthTransactions = await prisma.transaction.findMany({
-        where: {
-          userId,
-          date: {
-            gte: monthStart,
-            lte: monthEnd,
-          },
-          type: 'DEBIT',
-        },
-        select: {
-          amount: true,
-          categoryId: true,
-          category: {
-            select: {
-              id: true,
-              name: true,
-              slug: true,
-              color: true,
-            },
-          },
-        },
+      // Filter transactions for this month
+      const monthTransactions = allTransactions.filter(txn => {
+        const txnDate = new Date(txn.date);
+        return txnDate >= monthStart && txnDate <= monthEnd;
       });
 
       // Group spending by category

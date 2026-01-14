@@ -39,6 +39,34 @@ export async function GET(request: NextRequest) {
     });
 
     // Build heat map data: categories x months
+    // OPTIMIZED: Single query instead of (categories × months) queries
+    const startDate = startOfMonth(subMonths(now, months - 1));
+    const endDate = endOfMonth(now);
+
+    // Get category IDs excluding transfers
+    const categoryIds = categories
+      .filter(cat => cat.slug !== 'transfer-in' && cat.slug !== 'transfer-out')
+      .map(cat => cat.id);
+
+    // Fetch all transactions for all categories in one query
+    const allTransactions = await prisma.transaction.findMany({
+      where: {
+        userId,
+        categoryId: { in: categoryIds },
+        date: {
+          gte: startDate,
+          lte: endDate,
+        },
+        type: 'DEBIT',
+      },
+      select: {
+        amount: true,
+        date: true,
+        categoryId: true,
+      },
+    });
+
+    // Build heat map data by grouping in application code
     const heatmapData: Array<{
       category: string;
       categoryId: string;
@@ -66,23 +94,15 @@ export async function GET(request: NextRequest) {
         const monthStart = startOfMonth(subMonths(now, i));
         const monthEnd = endOfMonth(subMonths(now, i));
 
-        // Get spending for this category in this month
-        const transactions = await prisma.transaction.findMany({
-          where: {
-            userId,
-            categoryId: category.id,
-            date: {
-              gte: monthStart,
-              lte: monthEnd,
-            },
-            type: 'DEBIT',
-          },
-          select: {
-            amount: true,
-          },
+        // Filter transactions for this category and month
+        const categoryTransactions = allTransactions.filter(txn => {
+          const txnDate = new Date(txn.date);
+          return txn.categoryId === category.id &&
+                 txnDate >= monthStart &&
+                 txnDate <= monthEnd;
         });
 
-        const totalAmount = transactions.reduce(
+        const totalAmount = categoryTransactions.reduce(
           (sum, txn) => sum + Number(txn.amount),
           0
         );

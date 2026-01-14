@@ -126,31 +126,40 @@ export async function GET(request: NextRequest) {
     // Calculate cash flow
     const cashFlow = monthlyIncome - monthlySpending;
 
-    // Get last 12 months data for sparkline
+    // Get last 12 months data for sparkline - OPTIMIZED: Single query instead of 12
     const last12MonthsStart = startOfMonth(subMonths(now, 11));
-    const monthlyData = [];
 
+    // Fetch all transactions for 12 months in one query
+    const allMonthTransactions = await prisma.transaction.findMany({
+      where: {
+        userId,
+        date: {
+          gte: last12MonthsStart,
+          lte: currentMonthEnd,
+        },
+      },
+      select: {
+        amount: true,
+        type: true,
+        date: true,
+        category: {
+          select: {
+            slug: true,
+          },
+        },
+      },
+    });
+
+    // Group transactions by month in application code
+    const monthlyData = [];
     for (let i = 11; i >= 0; i--) {
       const monthStart = startOfMonth(subMonths(now, i));
       const monthEnd = endOfMonth(subMonths(now, i));
 
-      const monthTransactions = await prisma.transaction.findMany({
-        where: {
-          userId,
-          date: {
-            gte: monthStart,
-            lte: monthEnd,
-          },
-        },
-        select: {
-          amount: true,
-          type: true,
-          category: {
-            select: {
-              slug: true,
-            },
-          },
-        },
+      // Filter transactions for this month
+      const monthTransactions = allMonthTransactions.filter(txn => {
+        const txnDate = new Date(txn.date);
+        return txnDate >= monthStart && txnDate <= monthEnd;
       });
 
       const income = monthTransactions.reduce((sum, txn) => {

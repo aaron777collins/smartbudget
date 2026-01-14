@@ -84,6 +84,9 @@ model Transaction {
   @@index([accountId, date])
   @@index([merchantName])
   @@index([categoryId])
+  @@index([userId, categoryId, date])
+  @@index([userId, type, date])
+  @@index([userId, type, categoryId, date])
 }
 
 model Category {
@@ -103,6 +106,8 @@ model Category {
   user             User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
+
+  @@index([parentId])
 }
 
 model Subcategory {
@@ -207,7 +212,7 @@ model MerchantKnowledge {
   categoryId      String
   confidenceScore Float
   source          String // "rule", "ml", "claude_ai", "user"
-  metadata        Json?    // Store additional info from Claude AI research
+  metadata        Json? // Store additional info from Claude AI research
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -235,7 +240,7 @@ model FilterPreset {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   name      String
-  filters   Json     // Stores filter configuration
+  filters   Json // Stores filter configuration
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -294,11 +299,11 @@ model Job {
   type        JobType
   status      JobStatus @default(PENDING)
   progress    Int       @default(0) // Percentage 0-100
-  total       Int?      // Total items to process
+  total       Int? // Total items to process
   processed   Int       @default(0) // Items processed so far
-  payload     Json      // Job-specific data (merchants, parameters, etc.)
-  result      Json?     // Job result data
-  error       String?   // Error message if failed
+  payload     Json // Job-specific data (merchants, parameters, etc.)
+  result      Json? // Job result data
+  error       String? // Error message if failed
   startedAt   DateTime?
   completedAt DateTime?
   createdAt   DateTime  @default(now())
