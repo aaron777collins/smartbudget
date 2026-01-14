@@ -1,6 +1,10 @@
 import { auth } from "@/auth"
 import { NextResponse } from "next/server"
 
+// Force Node.js runtime instead of edge runtime
+// Required for bcryptjs and Prisma which don't work in edge runtime
+export const runtime = 'nodejs'
+
 export default auth((req) => {
   const { pathname } = req.nextUrl
   const isAuthenticated = !!req.auth
