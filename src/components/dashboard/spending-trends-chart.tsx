@@ -161,11 +161,12 @@ export function SpendingTrendsChart({ timeframe }: SpendingTrendsChartProps) {
         </div>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={400}>
-          <AreaChart
-            data={data.chartData}
-            margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-          >
+        <div role="img" aria-label={`Spending trends chart showing monthly spending by category. Average monthly spending is ${formatCurrency(data.summary.averageMonthlySpending)}. Highest spending month was ${data.summary.highestMonth.month} with ${formatCurrency(data.summary.highestMonth.total)}.`}>
+          <ResponsiveContainer width="100%" height={400}>
+            <AreaChart
+              data={data.chartData}
+              margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+            >
             <defs>
               {data.categories.map((category) => (
                 <linearGradient
@@ -210,6 +211,7 @@ export function SpendingTrendsChart({ timeframe }: SpendingTrendsChartProps) {
             ))}
           </AreaChart>
         </ResponsiveContainer>
+        </div>
       </CardContent>
     </Card>
   );

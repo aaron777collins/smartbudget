@@ -12,10 +12,10 @@ export function AppLayout({ children }: AppLayoutProps) {
     <div className="min-h-screen">
       <Header />
       <div className="flex h-[calc(100vh-4rem)]">
-        <aside className="hidden md:flex w-64 border-r">
+        <aside className="hidden md:flex w-64 border-r" aria-label="Main navigation">
           <Sidebar />
         </aside>
-        <main className="flex-1 overflow-y-auto p-8">
+        <main id="main-content" className="flex-1 overflow-y-auto p-8" tabIndex={-1}>
           {children}
         </main>
       </div>

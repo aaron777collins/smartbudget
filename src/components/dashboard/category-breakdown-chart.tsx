@@ -198,7 +198,7 @@ export function CategoryBreakdownChart({ timeframe }: CategoryBreakdownChartProp
       <CardContent>
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Pie Chart */}
-          <div className="flex-1">
+          <div className="flex-1" role="img" aria-label={`Category breakdown pie chart showing spending across ${data.summary.categoryCount} categories. Total spending: ${formatCurrency(data.totalSpending)}.${data.topCategories.length > 0 ? ` Top category: ${data.topCategories[0].name} with ${formatCurrency(data.topCategories[0].amount)}.` : ''}`}>
             <ResponsiveContainer width="100%" height={400}>
               <PieChart>
                 <Pie

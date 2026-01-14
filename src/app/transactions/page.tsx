@@ -256,7 +256,7 @@ export default function TransactionsPage() {
           </p>
         </div>
         <Button>
-          <Plus className="mr-2 h-4 w-4" />
+          <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
           Add Transaction
         </Button>
       </div>
@@ -266,12 +266,13 @@ export default function TransactionsPage() {
         <div className="flex flex-col gap-4">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
               <Input
                 placeholder="Search transactions..."
                 value={search}
                 onChange={(e) => handleSearch(e.target.value)}
                 className="pl-10"
+                aria-label="Search transactions"
               />
             </div>
             <Select value={sortBy} onValueChange={setSortBy}>
@@ -300,7 +301,7 @@ export default function TransactionsPage() {
               onClearFilters={handleClearAdvancedFilters}
             />
             <Button variant="outline" onClick={() => setExportDialogOpen(true)}>
-              <Download className="mr-2 h-4 w-4" />
+              <Download className="mr-2 h-4 w-4" aria-hidden="true" />
               Export
             </Button>
           </div>
@@ -416,15 +417,15 @@ export default function TransactionsPage() {
       {/* Transactions Table */}
       <Card>
         <div className="overflow-x-auto">
-          <Table>
+          <Table aria-label="Transactions table">
             <TableHeader>
               <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Merchant</TableHead>
-                <TableHead>Account</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead scope="col">Date</TableHead>
+                <TableHead scope="col">Merchant</TableHead>
+                <TableHead scope="col">Account</TableHead>
+                <TableHead scope="col">Category</TableHead>
+                <TableHead scope="col" className="text-right">Amount</TableHead>
+                <TableHead scope="col" className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -503,8 +504,9 @@ export default function TransactionsPage() {
                           variant="ghost"
                           size="icon"
                           onClick={() => handleViewTransaction(transaction.id)}
+                          aria-label={`View transaction for ${transaction.merchantName}`}
                         >
-                          <Pencil className="h-4 w-4" />
+                          <Pencil className="h-4 w-4" aria-hidden="true" />
                         </Button>
                       </div>
                     </TableCell>

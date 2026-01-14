@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { useSession, signOut } from "next-auth/react"
+import { usePathname } from "next/navigation"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -17,38 +18,43 @@ import { Wallet, LogOut, Settings, User } from "lucide-react"
 
 export function Header() {
   const { data: session, status } = useSession()
+  const pathname = usePathname()
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
         <div className="mr-4 flex">
-          <Link href="/" className="mr-6 flex items-center space-x-2">
-            <Wallet className="h-6 w-6 text-primary" />
+          <Link href="/" className="mr-6 flex items-center space-x-2" aria-label="SmartBudget home">
+            <Wallet className="h-6 w-6 text-primary" aria-hidden="true" />
             <span className="font-bold text-xl">SmartBudget</span>
           </Link>
           {status === "authenticated" && (
-            <nav className="flex items-center space-x-6 text-sm font-medium">
+            <nav className="flex items-center space-x-6 text-sm font-medium" aria-label="Primary navigation">
               <Link
                 href="/dashboard"
                 className="transition-colors hover:text-foreground/80 text-foreground/60"
+                aria-current={pathname === "/dashboard" ? "page" : undefined}
               >
                 Dashboard
               </Link>
               <Link
                 href="/transactions"
                 className="transition-colors hover:text-foreground/80 text-foreground/60"
+                aria-current={pathname === "/transactions" ? "page" : undefined}
               >
                 Transactions
               </Link>
               <Link
                 href="/budgets"
                 className="transition-colors hover:text-foreground/80 text-foreground/60"
+                aria-current={pathname === "/budgets" ? "page" : undefined}
               >
                 Budgets
               </Link>
               <Link
                 href="/accounts"
                 className="transition-colors hover:text-foreground/80 text-foreground/60"
+                aria-current={pathname === "/accounts" ? "page" : undefined}
               >
                 Accounts
               </Link>
@@ -60,7 +66,7 @@ export function Header() {
           {status === "authenticated" ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" aria-label="User menu">
                   <Avatar>
                     <AvatarFallback>
                       {session?.user?.name?.charAt(0).toUpperCase() ||
