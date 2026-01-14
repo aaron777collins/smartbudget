@@ -1,12 +1,66 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import { AppLayout } from "@/components/app-layout"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Wallet, TrendingUp, PieChart, Target } from "lucide-react"
 import Link from "next/link"
+import OnboardingFlow from "@/components/onboarding/onboarding-flow"
 
 export default function Home() {
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [onboardingStep, setOnboardingStep] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Check if user has completed onboarding
+    async function checkOnboardingStatus() {
+      try {
+        const response = await fetch('/api/user/settings');
+        if (response.ok) {
+          const settings = await response.json();
+          if (!settings.hasCompletedOnboarding) {
+            setOnboardingStep(settings.onboardingStep || 0);
+            setShowOnboarding(true);
+          }
+        }
+      } catch (error) {
+        console.error('Error checking onboarding status:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    checkOnboardingStatus();
+  }, []);
+
+  const handleOnboardingComplete = () => {
+    setShowOnboarding(false);
+  };
+
+  if (loading) {
+    return (
+      <AppLayout>
+        <div className="space-y-8">
+          <div className="text-center space-y-4">
+            <h1 className="text-4xl font-bold tracking-tight">
+              Loading...
+            </h1>
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
+
   return (
     <AppLayout>
+      <OnboardingFlow
+        open={showOnboarding}
+        onComplete={handleOnboardingComplete}
+        currentStep={onboardingStep}
+      />
+
       <div className="space-y-8">
         <div className="text-center space-y-4">
           <h1 className="text-4xl font-bold tracking-tight">

@@ -220,19 +220,21 @@ model MerchantKnowledge {
 }
 
 model UserSettings {
-  id                   String   @id @default(uuid())
-  userId               String   @unique
-  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  currency             String   @default("CAD")
-  dateFormat           String   @default("MM/DD/YYYY")
-  firstDayOfWeek       Int      @default(0) // 0 = Sunday
-  theme                String   @default("system")
-  notificationsEnabled Boolean  @default(true)
-  emailDigest          Boolean  @default(true)
-  digestFrequency      String   @default("weekly")
-  budgetAlertThreshold Int      @default(80) // percentage
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  id                     String   @id @default(uuid())
+  userId                 String   @unique
+  user                   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  currency               String   @default("CAD")
+  dateFormat             String   @default("MM/DD/YYYY")
+  firstDayOfWeek         Int      @default(0) // 0 = Sunday
+  theme                  String   @default("system")
+  notificationsEnabled   Boolean  @default(true)
+  emailDigest            Boolean  @default(true)
+  digestFrequency        String   @default("weekly")
+  budgetAlertThreshold   Int      @default(80) // percentage
+  hasCompletedOnboarding Boolean  @default(false)
+  onboardingStep         Int      @default(0) // Current step in onboarding (0-4)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
 }
 
 model FilterPreset {
