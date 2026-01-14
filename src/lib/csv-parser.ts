@@ -1,4 +1,5 @@
 import Papa from 'papaparse';
+import { preprocessMerchantName } from './merchant-normalizer';
 
 export interface ParsedTransaction {
   date: Date;
@@ -150,26 +151,11 @@ function parseAmount(amountStr: string): number | null {
 
 /**
  * Extracts merchant name from description
- * Removes transaction IDs, reference numbers, etc.
+ * Uses merchant normalization pipeline for consistent names
  */
 function extractMerchantName(description: string): string {
-  if (!description) return 'Unknown Merchant';
-
-  let cleaned = description.trim();
-
-  // Remove common patterns:
-  // - Transaction IDs (e.g., "TXN12345", "REF:12345")
-  // - Date patterns at the end
-  // - Location patterns (e.g., "CITY ST")
-  cleaned = cleaned
-    .replace(/\s+(TXN|REF|TRANS|ID|#)[\w-]+/gi, '')
-    .replace(/\s+\d{2}\/\d{2}\/\d{4}$/, '')
-    .replace(/\s+\d{4}-\d{2}-\d{2}$/, '');
-
-  // Trim extra whitespace
-  cleaned = cleaned.replace(/\s+/g, ' ').trim();
-
-  return cleaned || 'Unknown Merchant';
+  // Use the merchant normalization pipeline for consistent preprocessing
+  return preprocessMerchantName(description);
 }
 
 /**

@@ -3,6 +3,7 @@ import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import type { AccountType, TransactionType } from '@prisma/client';
 import { categorizeTransaction, getCategoryAndSubcategoryIds } from '@/lib/rule-based-categorizer';
+import { normalizeMerchantName, addToKnowledgeBase } from '@/lib/merchant-normalizer';
 
 interface ParsedTransaction {
   date: Date;
@@ -162,13 +163,17 @@ export async function POST(request: NextRequest) {
       return true;
     });
 
-    // Categorize transactions before import
+    // Normalize merchants and categorize transactions before import
     const categorizedData = await Promise.all(
       newTransactions.map(async (t) => {
-        // Categorize transaction using rule-based engine
+        // Step 1: Normalize merchant name using full pipeline (preprocessing + fuzzy matching + canonical mapping)
+        const normalizationResult = await normalizeMerchantName(t.merchantName, true);
+        const normalizedMerchant = normalizationResult.normalized;
+
+        // Step 2: Categorize transaction using rule-based engine
         const categorizationResult = categorizeTransaction({
           description: t.description,
-          merchantName: t.merchantName,
+          merchantName: normalizedMerchant, // Use normalized merchant name for better categorization
           amount: t.amount,
           date: t.date
         });
@@ -187,6 +192,27 @@ export async function POST(request: NextRequest) {
           categoryId = ids.categoryId;
           subcategoryId = ids.subcategoryId;
           confidenceScore = categorizationResult.confidence;
+
+          // Step 3: Add normalized merchant to knowledge base if categorized
+          // This builds the knowledge base over time for better fuzzy matching
+          if (categoryId && normalizedMerchant !== 'Unknown Merchant') {
+            try {
+              await addToKnowledgeBase(
+                normalizedMerchant.toLowerCase(),
+                normalizedMerchant,
+                categoryId,
+                'auto_categorization',
+                {
+                  normalizationSource: normalizationResult.source,
+                  normalizationConfidence: normalizationResult.confidence,
+                  categorizationConfidence: categorizationResult.confidence,
+                }
+              );
+            } catch (error) {
+              // Non-critical error, continue with import
+              console.warn('Failed to add merchant to knowledge base:', error);
+            }
+          }
         }
 
         return {
@@ -195,7 +221,7 @@ export async function POST(request: NextRequest) {
           date: t.date,
           postedDate: t.postedDate,
           description: t.description,
-          merchantName: t.merchantName,
+          merchantName: normalizedMerchant, // Use normalized merchant name in database
           amount: t.amount,
           type: t.type,
           fitid: t.fitid,

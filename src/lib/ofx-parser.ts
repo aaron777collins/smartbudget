@@ -1,4 +1,5 @@
 import Ofx from 'node-ofx-parser';
+import { preprocessMerchantName } from './merchant-normalizer';
 
 export interface ParsedTransaction {
   date: Date;
@@ -33,6 +34,7 @@ export interface OFXParseResult {
 /**
  * Extracts merchant name from OFX NAME and MEMO fields
  * OFX NAME is limited to 32 chars, so MEMO often contains the full name
+ * Uses merchant normalization pipeline for consistent names
  */
 function extractMerchantName(name?: string, memo?: string): string {
   // Combine NAME and MEMO, preferring MEMO if it's longer/more detailed
@@ -57,12 +59,8 @@ function extractMerchantName(name?: string, memo?: string): string {
     }
   }
 
-  // Clean up common patterns
-  merchantName = merchantName
-    .replace(/\s+/g, ' ')
-    .trim();
-
-  return merchantName || 'Unknown Merchant';
+  // Use merchant normalization pipeline for consistent preprocessing
+  return preprocessMerchantName(merchantName || 'Unknown Merchant');
 }
 
 /**
