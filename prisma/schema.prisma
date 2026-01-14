@@ -24,6 +24,7 @@ model User {
   categories    Category[]
   tags          Tag[]
   settings      UserSettings?
+  jobs          Job[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 }
@@ -272,4 +273,39 @@ enum Frequency {
   MONTHLY
   QUARTERLY
   YEARLY
+}
+
+model Job {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type        JobType
+  status      JobStatus @default(PENDING)
+  progress    Int       @default(0) // Percentage 0-100
+  total       Int?      // Total items to process
+  processed   Int       @default(0) // Items processed so far
+  payload     Json      // Job-specific data (merchants, parameters, etc.)
+  result      Json?     // Job result data
+  error       String?   // Error message if failed
+  startedAt   DateTime?
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([userId, status])
+  @@index([status, createdAt])
+}
+
+enum JobType {
+  MERCHANT_RESEARCH_BATCH
+  TRANSACTION_CATEGORIZE_BATCH
+  IMPORT_TRANSACTIONS
+}
+
+enum JobStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
 }

@@ -12,6 +12,7 @@ import {
   Settings,
   Upload,
   TrendingUp,
+  ListTodo,
 } from "lucide-react"
 
 const routes = [
@@ -56,6 +57,12 @@ const routes = [
     icon: Upload,
     href: "/import",
     color: "text-blue-500",
+  },
+  {
+    label: "Jobs",
+    icon: ListTodo,
+    href: "/jobs",
+    color: "text-indigo-500",
   },
   {
     label: "Settings",

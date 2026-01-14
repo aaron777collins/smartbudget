@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { researchMerchant, researchMerchantsBatch } from '@/lib/merchant-researcher';
 import { prisma } from '@/lib/prisma';
+import { createJob, JobType } from '@/lib/job-queue';
 
 /**
  * POST /api/merchants/research
@@ -49,10 +50,46 @@ export async function POST(request: NextRequest) {
       const merchants = body.merchants.map((m: any) => ({
         merchantName: m.merchantName,
         amount: m.amount,
-        date: m.date ? new Date(m.date) : undefined,
+        date: m.date,
       }));
 
-      const results = await researchMerchantsBatch(merchants);
+      // For large batches (>10 merchants), use background job queue
+      const useBackgroundJob = body.background === true || merchants.length > 10;
+
+      if (useBackgroundJob) {
+        // Create background job
+        const job = await createJob({
+          userId: session.user.id,
+          type: JobType.MERCHANT_RESEARCH_BATCH,
+          payload: {
+            merchants: merchants,
+            saveToKnowledgeBase: body.saveToKnowledgeBase !== false,
+          },
+          total: merchants.length,
+        });
+
+        // Trigger processing asynchronously (don't wait)
+        fetch(`${request.nextUrl.origin}/api/jobs/process`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        }).catch((err) => console.error('Failed to trigger job processing:', err));
+
+        return NextResponse.json({
+          success: true,
+          background: true,
+          jobId: job.id,
+          message: `Background job created for ${merchants.length} merchants`,
+        });
+      }
+
+      // For small batches, process immediately
+      const results = await researchMerchantsBatch(
+        merchants.map((m: any) => ({
+          merchantName: m.merchantName,
+          amount: m.amount,
+          date: m.date ? new Date(m.date) : undefined,
+        }))
+      );
 
       // Save successful results to knowledge base if requested
       if (body.saveToKnowledgeBase !== false) {
