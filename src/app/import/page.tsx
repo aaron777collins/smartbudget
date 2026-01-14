@@ -30,25 +30,112 @@ export default function ImportPage() {
 
     setIsProcessing(true);
 
-    // Update all files to processing status
-    setUploadedFiles((prev) =>
-      prev.map((f) => ({ ...f, status: "processing" as const }))
-    );
+    // Process each file
+    for (let i = 0; i < uploadedFiles.length; i++) {
+      const uploadedFile = uploadedFiles[i];
 
-    // Simulate processing (in real implementation, this would call API endpoints)
-    // For now, we'll just simulate success after a delay
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Skip already processed files
+      if (uploadedFile.status === "success") continue;
 
-    // Update files to success status with mock data
-    setUploadedFiles((prev) =>
-      prev.map((f) => ({
-        ...f,
-        status: "success" as const,
-        previewData: {
-          transactionCount: Math.floor(Math.random() * 100) + 1,
-        },
-      }))
-    );
+      // Update this specific file to processing
+      setUploadedFiles((prev) =>
+        prev.map((f) =>
+          f.id === uploadedFile.id ? { ...f, status: "processing" as const } : f
+        )
+      );
+
+      try {
+        const file = uploadedFile.file;
+        const fileExtension = file.name.toLowerCase().split('.').pop();
+
+        // Handle CSV files
+        if (fileExtension === 'csv') {
+          const formData = new FormData();
+          formData.append('file', file);
+
+          const response = await fetch('/api/import/parse-csv', {
+            method: 'POST',
+            body: formData,
+          });
+
+          const result = await response.json();
+
+          if (response.ok && result.success) {
+            // Success - update file with parsed data
+            setUploadedFiles((prev) =>
+              prev.map((f) =>
+                f.id === uploadedFile.id
+                  ? {
+                      ...f,
+                      status: "success" as const,
+                      previewData: {
+                        transactionCount: result.transactionCount,
+                        format: result.format,
+                        transactions: result.transactions,
+                        validRows: result.validRows,
+                        totalRows: result.totalRows,
+                      },
+                    }
+                  : f
+              )
+            );
+          } else {
+            // Error - update file with error message
+            const errorMessage = result.errors?.join(', ') || result.error || 'Failed to parse CSV';
+            setUploadedFiles((prev) =>
+              prev.map((f) =>
+                f.id === uploadedFile.id
+                  ? {
+                      ...f,
+                      status: "error" as const,
+                      error: errorMessage,
+                    }
+                  : f
+              )
+            );
+          }
+        } else if (fileExtension === 'ofx' || fileExtension === 'qfx') {
+          // OFX/QFX parsing not yet implemented
+          setUploadedFiles((prev) =>
+            prev.map((f) =>
+              f.id === uploadedFile.id
+                ? {
+                    ...f,
+                    status: "error" as const,
+                    error: "OFX/QFX parsing coming soon (Task 2.3)",
+                  }
+                : f
+            )
+          );
+        } else {
+          // Unsupported file type
+          setUploadedFiles((prev) =>
+            prev.map((f) =>
+              f.id === uploadedFile.id
+                ? {
+                    ...f,
+                    status: "error" as const,
+                    error: "Unsupported file type",
+                  }
+                : f
+            )
+          );
+        }
+      } catch (error) {
+        // Network or other error
+        setUploadedFiles((prev) =>
+          prev.map((f) =>
+            f.id === uploadedFile.id
+              ? {
+                  ...f,
+                  status: "error" as const,
+                  error: error instanceof Error ? error.message : 'Failed to process file',
+                }
+              : f
+          )
+        );
+      }
+    }
 
     setIsProcessing(false);
   };
