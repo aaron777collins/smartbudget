@@ -316,11 +316,12 @@ The deployment plan requires:
   - ⚠️ Fixed edge runtime issues in health endpoint and middleware
   - ⚠️ Database connection fails as expected (needs Supabase password)
 
-- [ ] **Task 7.2**: Reload Caddy with new configuration
-  - Run: docker exec caddy caddy reload --config /etc/caddy/Caddyfile
-  - Verify reload successful (exit code 0)
-  - Check Caddy logs: docker logs caddy
-  - Look for "reloaded successfully" message
+- [x] **Task 7.2**: Reload Caddy with new configuration
+  - ✅ Run: docker exec caddy caddy reload --config /etc/caddy/Caddyfile
+  - ✅ Verify reload successful (exit code 0)
+  - ✅ Check Caddy logs: docker logs caddy
+  - ✅ "load complete" message confirmed in logs
+  - ✅ Config unchanged (already added in Task 5.2)
 
 - [ ] **Task 7.3**: Verify HTTPS certificate acquisition
   - Wait 30-60 seconds for Let's Encrypt
@@ -529,6 +530,23 @@ The deployment plan requires:
 
 ## Completed This Iteration
 
+**Task 7.2: Reload Caddy with New Configuration**
+- ✅ Successfully reloaded Caddy with SmartBudget configuration
+- Reload details:
+  - Command: docker exec caddy caddy reload --config /etc/caddy/Caddyfile
+  - Exit code: 0 (success)
+  - Logs show: "load complete" message
+  - Config status: unchanged (SmartBudget config already present from Task 5.2)
+- ✅ Verified Caddy accepted the configuration:
+  - No syntax errors
+  - No conflicts with existing configurations
+  - "adapted config to JSON" successful
+  - Warning about header_up X-Forwarded-For (informational only, not an issue)
+- ✅ Caddy is now routing budget.aaroncollins.info → smartbudget-app:3000
+- Next: Task 7.3 (Verify HTTPS certificate acquisition)
+
+**Previous Iteration:**
+
 **Task 7.1: Build and Start SmartBudget Container**
 - ✅ Successfully built Docker image with no-cache flag
 - ✅ Started smartbudget-app container successfully
@@ -550,7 +568,6 @@ The deployment plan requires:
   - Prevents edge runtime incompatibility with Node.js process APIs
 - ✅ Container logs show no errors (only expected DB connection warning)
 - ✅ Container successfully joined internal network for Caddy communication
-- Next: Task 7.2 (Reload Caddy with new configuration)
 
 **Previous Iteration:**
 
