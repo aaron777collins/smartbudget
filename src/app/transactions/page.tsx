@@ -78,13 +78,33 @@ export default function TransactionsPage() {
   const [offset, setOffset] = useState(0);
   const [selectedTransactionId, setSelectedTransactionId] = useState<string | null>(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
+  const [selectedTagId, setSelectedTagId] = useState<string>('');
+  const [availableTags, setAvailableTags] = useState<Array<{ id: string; name: string; color: string }>>([]);
   const limit = 50;
+
+  useEffect(() => {
+    if (session) {
+      fetchTags();
+    }
+  }, [session]);
 
   useEffect(() => {
     if (session) {
       fetchTransactions();
     }
-  }, [session, search, sortBy, sortOrder, offset]);
+  }, [session, search, sortBy, sortOrder, offset, selectedTagId]);
+
+  const fetchTags = async () => {
+    try {
+      const response = await fetch('/api/tags');
+      if (!response.ok) throw new Error('Failed to fetch tags');
+
+      const data = await response.json();
+      setAvailableTags(data);
+    } catch (error) {
+      console.error('Error fetching tags:', error);
+    }
+  };
 
   const fetchTransactions = async () => {
     try {
@@ -98,6 +118,10 @@ export default function TransactionsPage() {
 
       if (search) {
         params.append('search', search);
+      }
+
+      if (selectedTagId) {
+        params.append('tagId', selectedTagId);
       }
 
       const response = await fetch(`/api/transactions?${params}`);
@@ -133,6 +157,11 @@ export default function TransactionsPage() {
 
   const handleSearch = (value: string) => {
     setSearch(value);
+    setOffset(0); // Reset to first page
+  };
+
+  const handleTagFilter = (value: string) => {
+    setSelectedTagId(value);
     setOffset(0); // Reset to first page
   };
 
@@ -217,10 +246,25 @@ export default function TransactionsPage() {
               <SelectItem value="asc">Oldest First</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline">
-            <Filter className="mr-2 h-4 w-4" />
-            Filters
-          </Button>
+          <Select value={selectedTagId} onValueChange={handleTagFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filter by tag" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">All Tags</SelectItem>
+              {availableTags.map((tag) => (
+                <SelectItem key={tag.id} value={tag.id}>
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="h-2 w-2 rounded-full"
+                      style={{ backgroundColor: tag.color }}
+                    />
+                    {tag.name}
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <Button variant="outline">
             <Download className="mr-2 h-4 w-4" />
             Export

@@ -14,6 +14,7 @@ import {
   TrendingUp,
   ListTodo,
   Repeat,
+  Hash,
 } from "lucide-react"
 
 const routes = [
@@ -46,6 +47,12 @@ const routes = [
     icon: Repeat,
     href: "/recurring",
     color: "text-purple-600",
+  },
+  {
+    label: "Tags",
+    icon: Hash,
+    href: "/tags",
+    color: "text-cyan-600",
   },
   {
     label: "Goals",

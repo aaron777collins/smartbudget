@@ -20,6 +20,7 @@ export async function GET(request: NextRequest) {
     // Parse query parameters
     const accountId = searchParams.get('accountId');
     const categoryId = searchParams.get('categoryId');
+    const tagId = searchParams.get('tagId');
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
     const search = searchParams.get('search');
@@ -37,6 +38,14 @@ export async function GET(request: NextRequest) {
 
     if (categoryId) {
       where.categoryId = categoryId;
+    }
+
+    if (tagId) {
+      where.tags = {
+        some: {
+          id: tagId,
+        },
+      };
     }
 
     if (startDate || endDate) {

@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar, DollarSign, Store, FileText, Tag, Trash2, Search, Loader2, Split } from 'lucide-react';
 import { CategorySelector } from './category-selector';
 import { SplitTransactionEditor } from './split-transaction-editor';
+import { TagSelector } from './tag-selector';
 
 interface Transaction {
   id: string;
@@ -86,6 +87,7 @@ export function TransactionDetailDialog({
   const [researchResult, setResearchResult] = useState<any>(null);
   const [researchError, setResearchError] = useState<string | null>(null);
   const [showSplitEditor, setShowSplitEditor] = useState(false);
+  const [updatingTags, setUpdatingTags] = useState(false);
 
   useEffect(() => {
     if (transactionId && open) {
@@ -161,6 +163,38 @@ export function TransactionDetailDialog({
         slug: prev.subcategory?.slug || '',
       } as any : undefined,
     }));
+  };
+
+  const handleTagsChange = async (newTags: Array<{ id: string; name: string; color: string }>) => {
+    if (!transactionId) return;
+
+    setUpdatingTags(true);
+    try {
+      const response = await fetch(`/api/transactions/${transactionId}/tags`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          tagIds: newTags.map(t => t.id),
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to update tags');
+
+      const updated = await response.json();
+      setTransaction(updated);
+      setFormData(updated);
+      onUpdate?.();
+    } catch (error) {
+      console.error('Error updating tags:', error);
+      // Revert to previous state on error
+      if (transaction) {
+        setFormData(transaction);
+      }
+    } finally {
+      setUpdatingTags(false);
+    }
   };
 
   const handleDelete = async () => {
@@ -682,22 +716,16 @@ export function TransactionDetailDialog({
             </div>
 
             {/* Tags */}
-            {transaction.tags.length > 0 && (
-              <div className="space-y-2">
-                <Label>Tags</Label>
-                <div className="flex flex-wrap gap-2">
-                  {transaction.tags.map((tag) => (
-                    <Badge
-                      key={tag.id}
-                      variant="outline"
-                      style={{ borderColor: tag.color }}
-                    >
-                      {tag.name}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
+            <div className="space-y-2">
+              <Label>Tags</Label>
+              <TagSelector
+                selectedTags={formData.tags || []}
+                onChange={handleTagsChange}
+              />
+              {updatingTags && (
+                <p className="text-xs text-muted-foreground">Updating tags...</p>
+              )}
+            </div>
 
             {/* Metadata */}
             <div className="grid grid-cols-2 gap-4 pt-4 border-t text-sm text-muted-foreground">
