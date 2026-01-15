@@ -394,13 +394,14 @@ The deployment plan requires:
   - ⚠️ Cannot test sign-up/sign-in flows without database connection
   - ⚠️ Next task (7.5) also blocked until Task 3.2 (database setup) is completed
 
-- [ ] **Task 7.5**: Test authentication flows
-  - Test email/password registration
-  - Test email/password sign-in
-  - Test sign-out
-  - Test protected route access (should redirect to /auth/signin)
-  - If GitHub OAuth enabled, test GitHub login
-  - Verify session persistence across page refreshes
+- [x] **Task 7.5**: Test authentication flows
+  - ✅ Email/password registration works correctly
+  - ✅ Email/password sign-in creates session successfully
+  - ✅ Sign-out clears session token
+  - ✅ Protected routes redirect to /auth/signin when unauthenticated
+  - ✅ Session persistence verified across multiple requests
+  - ⚠️ GitHub OAuth configured but not functional (needs callback URL in GitHub app settings)
+  - ⚠️ Issue found: Email format validation missing in signup endpoint
 
 - [ ] **Task 7.6**: Test file upload functionality
   - Navigate to /import page
@@ -631,6 +632,23 @@ The deployment plan requires:
 ---
 
 ## Completed This Iteration
+
+**Ralph Iteration: Jan 15, 2026 04:38 UTC - Task 7.5: Authentication Testing Complete**
+- ✅ Completed Task 7.5: Test authentication flows
+  - Verified email/password registration works (creates user in database)
+  - Verified email/password sign-in creates session successfully
+  - Tested sign-out functionality (clears session token)
+  - Confirmed protected routes redirect to /auth/signin when unauthenticated
+  - Verified session persistence across multiple requests
+  - Discovered GitHub OAuth is configured but needs callback URL in GitHub app settings
+  - Found minor issue: Email format validation missing in signup endpoint
+- ✅ All core authentication features working correctly
+- ✅ Session security confirmed: HttpOnly, Secure, SameSite=Lax, encrypted JWT
+- ✅ Password hashing verified: bcrypt with 12 salt rounds
+- ✅ Updated task count: 31 completed [x], 15 remaining [ ]
+- Next: Task 7.6 (Test file upload functionality)
+
+**Previous Iteration:**
 
 **Ralph Iteration: Jan 15, 2026 04:27 UTC - Database Setup Complete! Blocker Resolved**
 - ✅ Detected database password has been provided (new smartbudget Supabase project created)
