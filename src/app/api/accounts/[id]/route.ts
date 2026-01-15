@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { updateAccountSchema } from '@/lib/validations';
+import { z } from 'zod';
 
 // GET /api/accounts/:id - Get account details
 export async function GET(
@@ -84,24 +86,13 @@ export async function PATCH(
 
     const body = await request.json();
 
-    // Build update data (only allow updating certain fields)
-    const updateData: any = {};
-
-    if (body.name !== undefined) updateData.name = body.name;
-    if (body.institution !== undefined) updateData.institution = body.institution;
-    if (body.accountType !== undefined) updateData.accountType = body.accountType;
-    if (body.accountNumber !== undefined) updateData.accountNumber = body.accountNumber;
-    if (body.currency !== undefined) updateData.currency = body.currency;
-    if (body.currentBalance !== undefined) updateData.currentBalance = body.currentBalance;
-    if (body.availableBalance !== undefined) updateData.availableBalance = body.availableBalance;
-    if (body.color !== undefined) updateData.color = body.color;
-    if (body.icon !== undefined) updateData.icon = body.icon;
-    if (body.isActive !== undefined) updateData.isActive = body.isActive;
+    // Validate request body
+    const validatedData = updateAccountSchema.parse(body);
 
     // Check for duplicate if institution or accountNumber is being changed
-    if ((body.institution || body.accountNumber) && body.accountNumber) {
-      const institution = body.institution || existingAccount.institution;
-      const accountNumber = body.accountNumber;
+    if ((validatedData.institution || validatedData.accountNumber) && validatedData.accountNumber) {
+      const institution = validatedData.institution || existingAccount.institution;
+      const accountNumber = validatedData.accountNumber;
 
       const duplicate = await prisma.account.findFirst({
         where: {
@@ -123,12 +114,20 @@ export async function PATCH(
     // Update account
     const account = await prisma.account.update({
       where: { id: accountId },
-      data: updateData,
+      data: validatedData,
     });
 
     return NextResponse.json(account);
   } catch (error) {
     console.error('Error updating account:', error);
+
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Invalid account data', issues: error.issues },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
       { error: 'Failed to update account' },
       { status: 500 }

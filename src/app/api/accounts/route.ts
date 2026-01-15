@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { createAccountSchema, accountQuerySchema } from '@/lib/validations';
+import { z } from 'zod';
 
 // GET /api/accounts - List user's accounts
 export async function GET(request: NextRequest) {
@@ -13,11 +15,22 @@ export async function GET(request: NextRequest) {
     const userId = session.user.id;
     const { searchParams } = new URL(request.url);
 
-    // Query parameters
-    const active = searchParams.get('active');
-    const search = searchParams.get('search');
-    const sortBy = searchParams.get('sortBy') || 'name';
-    const sortOrder = searchParams.get('sortOrder') || 'asc';
+    // Validate query parameters
+    const queryValidation = accountQuerySchema.safeParse({
+      active: searchParams.get('active'),
+      search: searchParams.get('search'),
+      sortBy: searchParams.get('sortBy'),
+      sortOrder: searchParams.get('sortOrder'),
+    });
+
+    if (!queryValidation.success) {
+      return NextResponse.json(
+        { error: 'Invalid query parameters', issues: queryValidation.error.issues },
+        { status: 400 }
+      );
+    }
+
+    const { active, search, sortBy, sortOrder } = queryValidation.data;
 
     // Build where clause
     const where: any = { userId };
@@ -73,27 +86,16 @@ export async function POST(request: NextRequest) {
     const userId = session.user.id;
     const body = await request.json();
 
-    // Validate required fields
-    if (!body.name) {
-      return NextResponse.json({ error: 'Account name is required' }, { status: 400 });
-    }
-    if (!body.institution) {
-      return NextResponse.json({ error: 'Institution is required' }, { status: 400 });
-    }
-    if (!body.accountType) {
-      return NextResponse.json({ error: 'Account type is required' }, { status: 400 });
-    }
-    if (body.currentBalance === undefined || body.currentBalance === null) {
-      return NextResponse.json({ error: 'Current balance is required' }, { status: 400 });
-    }
+    // Validate request body
+    const validatedData = createAccountSchema.parse(body);
 
     // Check for duplicate account
-    if (body.accountNumber) {
+    if (validatedData.accountNumber) {
       const existingAccount = await prisma.account.findFirst({
         where: {
           userId,
-          institution: body.institution,
-          accountNumber: body.accountNumber,
+          institution: validatedData.institution,
+          accountNumber: validatedData.accountNumber,
         },
       });
 
@@ -109,22 +111,21 @@ export async function POST(request: NextRequest) {
     const account = await prisma.account.create({
       data: {
         userId,
-        name: body.name,
-        institution: body.institution,
-        accountType: body.accountType,
-        accountNumber: body.accountNumber || null,
-        currency: body.currency || 'CAD',
-        currentBalance: body.currentBalance,
-        availableBalance: body.availableBalance || null,
-        color: body.color || '#2563EB',
-        icon: body.icon || 'wallet',
-        isActive: body.isActive !== undefined ? body.isActive : true,
+        ...validatedData,
       },
     });
 
     return NextResponse.json(account, { status: 201 });
   } catch (error) {
     console.error('Error creating account:', error);
+
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Invalid account data', issues: error.issues },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
       { error: 'Failed to create account' },
       { status: 500 }
