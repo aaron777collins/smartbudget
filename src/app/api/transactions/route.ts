@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import type { TransactionType } from '@prisma/client';
+import { createTransactionSchema, transactionQuerySchema } from '@/lib/validations';
+import { z } from 'zod';
 
 // GET /api/transactions - List transactions with filtering
 export async function GET(request: NextRequest) {
@@ -175,18 +177,13 @@ export async function POST(request: NextRequest) {
     const userId = session.user.id;
     const body = await request.json();
 
-    // Validate required fields
-    if (!body.accountId || !body.date || !body.description || body.amount === undefined) {
-      return NextResponse.json(
-        { error: 'Missing required fields: accountId, date, description, amount' },
-        { status: 400 }
-      );
-    }
+    // Validate request body
+    const validatedData = createTransactionSchema.parse(body);
 
     // Verify account belongs to user
     const account = await prisma.account.findFirst({
       where: {
-        id: body.accountId,
+        id: validatedData.accountId,
         userId
       }
     });
@@ -202,19 +199,21 @@ export async function POST(request: NextRequest) {
     const transaction = await prisma.transaction.create({
       data: {
         userId,
-        accountId: body.accountId,
-        date: new Date(body.date),
-        postedDate: body.postedDate ? new Date(body.postedDate) : undefined,
-        description: body.description,
-        merchantName: body.merchantName || body.description,
-        amount: body.amount,
-        type: body.type || (body.amount < 0 ? 'DEBIT' : 'CREDIT') as TransactionType,
-        categoryId: body.categoryId,
-        subcategoryId: body.subcategoryId,
-        notes: body.notes,
-        isReconciled: body.isReconciled || false,
-        isRecurring: body.isRecurring || false,
-        userCorrected: body.userCorrected || false
+        accountId: validatedData.accountId,
+        date: validatedData.date,
+        postedDate: validatedData.postedDate,
+        description: validatedData.description,
+        merchantName: validatedData.merchantName,
+        amount: validatedData.amount,
+        type: validatedData.type,
+        categoryId: validatedData.categoryId,
+        subcategoryId: validatedData.subcategoryId,
+        notes: validatedData.notes,
+        isReconciled: validatedData.isReconciled,
+        isRecurring: validatedData.isRecurring,
+        fitid: validatedData.fitid,
+        recurringRuleId: validatedData.recurringRuleId,
+        rawData: validatedData.rawData,
       },
       include: {
         account: {
