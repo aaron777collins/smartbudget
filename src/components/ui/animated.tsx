@@ -1,7 +1,7 @@
 "use client"
 
-import { motion, HTMLMotionProps, Variants } from "framer-motion"
-import { ReactNode } from "react"
+import { motion, HTMLMotionProps, Variants, useMotionValue, useTransform, animate as animateValue } from "framer-motion"
+import { ReactNode, useEffect } from "react"
 
 // Fade In Animation
 export interface FadeInProps extends Omit<HTMLMotionProps<"div">, "variants" | "initial" | "animate"> {
@@ -212,7 +212,7 @@ export function ScaleIn({
 }
 
 // Count Up Animation for Numbers
-export interface CountUpProps extends Omit<HTMLMotionProps<"span">, "animate"> {
+export interface CountUpProps {
   from?: number
   to: number
   duration?: number
@@ -220,6 +220,7 @@ export interface CountUpProps extends Omit<HTMLMotionProps<"span">, "animate"> {
   decimals?: number
   prefix?: string
   suffix?: string
+  className?: string
 }
 
 export function CountUp({
@@ -230,35 +231,26 @@ export function CountUp({
   decimals = 0,
   prefix = "",
   suffix = "",
-  ...props
+  className = "",
 }: CountUpProps) {
-  return (
-    <motion.span
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.2, delay }}
-      {...props}
-    >
-      <motion.span
-        initial={from}
-        animate={to}
-        transition={{
-          duration,
-          delay,
-          ease: [0.22, 1, 0.36, 1], // easeOutExpo
-        }}
-        onUpdate={(latest) => {
-          if (props.children && typeof props.children === "function") {
-            return
-          }
-        }}
-      >
-        {(value: number) =>
-          `${prefix}${value.toFixed(decimals)}${suffix}`
-        }
-      </motion.span>
-    </motion.span>
-  )
+  const count = useMotionValue(from)
+  const rounded = useTransform(count, (latest) => {
+    return `${prefix}${latest.toFixed(decimals)}${suffix}`
+  })
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      const controls = animateValue(count, to, {
+        duration,
+        ease: [0.22, 1, 0.36, 1], // easeOutExpo
+      })
+      return controls.stop
+    }, delay * 1000)
+
+    return () => clearTimeout(timeout)
+  }, [count, to, duration, delay])
+
+  return <motion.span className={className}>{rounded}</motion.span>
 }
 
 // Hover Scale Effect (for buttons, cards, etc.)
