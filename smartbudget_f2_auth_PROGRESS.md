@@ -24,12 +24,13 @@ IN_PROGRESS
 - [x] Task 2.6: Verify user can be queried by username in database
 
 ### Phase 3: NextAuth Configuration Updates
-- [ ] Task 3.1: Update credentials provider to use username field instead of email
-- [ ] Task 3.2: Update authorize function to query by username
-- [ ] Task 3.3: Update JWT callback to include username in token
-- [ ] Task 3.4: Update session callback to include username in session
-- [ ] Task 3.5: Update custom pages config (change signin to login if needed)
-- [ ] Task 3.6: Test NextAuth configuration in isolation
+- [x] Task 3.1: Update credentials provider to use username field instead of email
+- [x] Task 3.2: Update authorize function to query by username
+- [x] Task 3.3: Update JWT callback to include username in token
+- [x] Task 3.4: Update session callback to include username in session
+- [x] Task 3.5: Updated TypeScript type definitions to include username in Session, User, and JWT interfaces
+- [ ] Task 3.6: Update custom pages config (change signin to login if needed)
+- [ ] Task 3.7: Test NextAuth configuration in isolation
 
 ### Phase 4: Authentication Pages Refactoring
 - [ ] Task 4.1: Rename `/auth/signin` to `/auth/login` (or update existing)
@@ -96,7 +97,14 @@ IN_PROGRESS
 
 ## Completed This Iteration
 
-### Phase 2: Default User Seeding
+### Phase 3: NextAuth Configuration Updates
+- Task 3.1: Updated src/auth.ts credentials provider to use "username" field instead of "email"
+- Task 3.2: Updated authorize function to query user by username instead of email
+- Task 3.3: Updated JWT callback to include username in token
+- Task 3.4: Updated session callback to include username in session
+- Task 3.5: Updated src/types/next-auth.d.ts to add username field to Session, User, and JWT TypeScript interfaces
+
+### Phase 2: Default User Seeding (Previous Iteration)
 - Task 2.1: Created multiple seed script variants (seed-user.ts, seed-docker.sh, seed-simple.js)
 - Task 2.2: Implemented idempotent user creation for aaron7c
 - Task 2.3: Hashed password KingOfKings12345! with bcrypt cost 12
@@ -106,6 +114,14 @@ IN_PROGRESS
 
 ## Notes
 
+### Current Iteration
+- NextAuth configuration successfully updated to use username-based authentication
+- Discovered edge runtime issue: middleware.ts imports auth.ts which imports Prisma, causing edge runtime incompatibility
+- Dev server shows error: "Module not found: Can't resolve '.prisma/client/default'" when middleware runs in edge runtime
+- This is expected behavior - Prisma doesn't work in edge runtime
+- Next task should address this by ensuring middleware doesn't cause edge runtime issues
+
+### Previous Iteration
 - Fixed Prisma 7.x configuration issues by updating prisma.config.ts to use "library" engine instead of "binary"
 - Encountered issues with pg module not being installed despite being in package.json devDependencies
 - Created docker-based seed script (prisma/seed-docker.sh) that uses docker exec to connect directly to PostgreSQL

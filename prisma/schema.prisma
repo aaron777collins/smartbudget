@@ -358,6 +358,46 @@ model Feedback {
   @@index([type, priority])
 }
 
+model AuditLog {
+  id          String        @id @default(uuid())
+  userId      String?
+  action      AuditAction
+  entityType  String // "account", "transaction", "budget", etc.
+  entityId    String?
+  oldValues   Json? // Previous state of the entity
+  newValues   Json? // New state of the entity
+  ipAddress   String?
+  userAgent   String?
+  status      AuditStatus   @default(SUCCESS)
+  errorMessage String?      @db.Text
+  metadata    Json? // Additional context
+  createdAt   DateTime      @default(now())
+
+  @@index([userId, createdAt])
+  @@index([entityType, entityId])
+  @@index([action, createdAt])
+  @@index([status, createdAt])
+}
+
+model SecurityEvent {
+  id            String           @id @default(uuid())
+  userId        String?
+  eventType     SecurityEventType
+  severity      SecuritySeverity @default(INFO)
+  description   String           @db.Text
+  ipAddress     String?
+  userAgent     String?
+  success       Boolean          @default(true)
+  failureReason String?
+  metadata      Json? // Additional context
+  createdAt     DateTime         @default(now())
+
+  @@index([userId, createdAt])
+  @@index([eventType, createdAt])
+  @@index([severity, createdAt])
+  @@index([success, createdAt])
+}
+
 enum FeedbackType {
   BUG
   FEATURE
@@ -379,4 +419,55 @@ enum FeedbackStatus {
   RESOLVED
   CLOSED
   WONT_FIX
+}
+
+enum AuditAction {
+  CREATE
+  READ
+  UPDATE
+  DELETE
+  EXPORT
+  IMPORT
+  LOGIN
+  LOGOUT
+  PASSWORD_CHANGE
+  EMAIL_CHANGE
+  SETTINGS_UPDATE
+  PERMISSION_CHANGE
+}
+
+enum AuditStatus {
+  SUCCESS
+  FAILURE
+  PARTIAL
+}
+
+enum SecurityEventType {
+  LOGIN_SUCCESS
+  LOGIN_FAILURE
+  LOGOUT
+  PASSWORD_CHANGE
+  PASSWORD_RESET_REQUEST
+  PASSWORD_RESET_COMPLETE
+  EMAIL_CHANGE
+  ACCOUNT_LOCKED
+  ACCOUNT_UNLOCKED
+  SESSION_EXPIRED
+  UNAUTHORIZED_ACCESS_ATTEMPT
+  RATE_LIMIT_EXCEEDED
+  SUSPICIOUS_ACTIVITY
+  DATA_EXPORT
+  DATA_DELETION
+  PERMISSION_ELEVATION
+  MFA_ENABLED
+  MFA_DISABLED
+  MFA_BACKUP_CODES_GENERATED
+}
+
+enum SecuritySeverity {
+  LOW
+  INFO
+  MEDIUM
+  HIGH
+  CRITICAL
 }

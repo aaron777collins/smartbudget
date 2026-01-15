@@ -3,6 +3,11 @@ import { PrismaAdapter } from "@auth/prisma-adapter"
 import Credentials from "next-auth/providers/credentials"
 import { compare } from "bcryptjs"
 import { prisma } from "@/lib/prisma"
+import {
+  logLoginSuccess,
+  logLoginFailure,
+  logAccountLocked,
+} from "@/lib/audit-logger"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -32,6 +37,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         })
 
         if (!user || !user.password) {
+          // Log failed login attempt for non-existent user
+          await logLoginFailure(
+            credentials.username as string,
+            'User not found or invalid credentials',
+            { ipAddress: 'unknown', userAgent: 'unknown' }
+          )
           return null
         }
 
@@ -85,7 +96,19 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             data: updateData,
           })
 
+          // Log failed login attempt
+          await logLoginFailure(
+            credentials.username as string,
+            'Invalid password',
+            { ipAddress: 'unknown', userAgent: 'unknown' }
+          )
+
           if (newFailedAttempts >= maxAttempts) {
+            // Log account lockout
+            await logAccountLocked(
+              user.id,
+              { ipAddress: 'unknown', userAgent: 'unknown' }
+            )
             throw new Error(
               `Account locked due to too many failed login attempts. Please try again in ${lockDurationMinutes} minutes.`
             )
@@ -105,6 +128,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             },
           })
         }
+
+        // Log successful login
+        await logLoginSuccess(
+          user.id,
+          { ipAddress: 'unknown', userAgent: 'unknown' }
+        )
 
         return {
           id: user.id,

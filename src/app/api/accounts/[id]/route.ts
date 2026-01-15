@@ -3,6 +3,7 @@ import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { updateAccountSchema } from '@/lib/validations';
 import { z } from 'zod';
+import { logUpdate, logDelete, getAuditContext } from '@/lib/audit-logger';
 
 // GET /api/accounts/:id - Get account details
 export async function GET(
@@ -117,6 +118,22 @@ export async function PATCH(
       data: validatedData,
     });
 
+    // Log account update
+    const context = getAuditContext(request);
+    await logUpdate(
+      userId,
+      'account',
+      accountId,
+      {
+        name: existingAccount.name,
+        institution: existingAccount.institution,
+        accountType: existingAccount.accountType,
+        isActive: existingAccount.isActive,
+      },
+      validatedData,
+      context
+    );
+
     return NextResponse.json(account);
   } catch (error) {
     console.error('Error updating account:', error);
@@ -175,6 +192,20 @@ export async function DELETE(
     await prisma.account.delete({
       where: { id: accountId },
     });
+
+    // Log account deletion
+    const context = getAuditContext(request);
+    await logDelete(
+      userId,
+      'account',
+      accountId,
+      {
+        name: existingAccount.name,
+        institution: existingAccount.institution,
+        accountType: existingAccount.accountType,
+      },
+      context
+    );
 
     return NextResponse.json({ success: true });
   } catch (error) {

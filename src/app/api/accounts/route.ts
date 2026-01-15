@@ -3,6 +3,7 @@ import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { createAccountSchema, accountQuerySchema } from '@/lib/validations';
 import { z } from 'zod';
+import { logCreate, getAuditContext } from '@/lib/audit-logger';
 
 // GET /api/accounts - List user's accounts
 export async function GET(request: NextRequest) {
@@ -114,6 +115,20 @@ export async function POST(request: NextRequest) {
         ...validatedData,
       },
     });
+
+    // Log account creation
+    const context = getAuditContext(request);
+    await logCreate(
+      userId,
+      'account',
+      account.id,
+      {
+        name: account.name,
+        institution: account.institution,
+        accountType: account.accountType,
+      },
+      context
+    );
 
     return NextResponse.json(account, { status: 201 });
   } catch (error) {
