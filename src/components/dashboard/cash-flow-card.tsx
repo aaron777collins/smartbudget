@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowUpCircle, ArrowDownCircle, MinusCircle } from 'lucide-react';
+import { CountUp } from '@/components/ui/animated';
 
 interface CashFlowCardProps {
   current: number;
@@ -62,7 +63,13 @@ export function CashFlowCard({
       </CardHeader>
       <CardContent>
         <div className={`text-2xl font-bold font-mono ${getTrendColor()}`}>
-          {formatCurrency(current)}
+          <CountUp
+            to={Math.abs(current)}
+            duration={1.2}
+            decimals={2}
+            prefix={current >= 0 ? "CA$" : "-CA$"}
+            className="font-mono"
+          />
         </div>
 
         <div className="flex items-center text-xs text-muted-foreground mt-1">

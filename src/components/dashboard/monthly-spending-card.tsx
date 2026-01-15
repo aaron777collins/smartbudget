@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { CreditCard } from 'lucide-react';
+import { CountUp } from '@/components/ui/animated';
 
 interface MonthlySpendingCardProps {
   current: number;
@@ -45,7 +46,15 @@ export function MonthlySpendingCard({
         <CreditCard className="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold font-mono">{formatCurrency(current)}</div>
+        <div className="text-2xl font-bold font-mono">
+          <CountUp
+            to={current}
+            duration={1.2}
+            decimals={2}
+            prefix="CA$"
+            className="font-mono"
+          />
+        </div>
 
         {budget !== null && budgetUsedPercentage !== null ? (
           <>

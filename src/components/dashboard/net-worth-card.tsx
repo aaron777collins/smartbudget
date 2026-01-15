@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { CountUp } from '@/components/ui/animated';
 
 interface NetWorthCardProps {
   current: number;
@@ -53,7 +54,15 @@ export function NetWorthCard({
         </svg>
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold font-mono">{formatCurrency(current)}</div>
+        <div className="text-2xl font-bold font-mono">
+          <CountUp
+            to={current}
+            duration={1.2}
+            decimals={2}
+            prefix="CA$"
+            className="font-mono"
+          />
+        </div>
         <div className="flex items-center text-xs text-muted-foreground mt-1">
           {isPositive && (
             <>

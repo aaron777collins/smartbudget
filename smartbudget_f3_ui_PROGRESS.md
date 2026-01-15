@@ -14,13 +14,13 @@ IN_PROGRESS
 
 ### Phase 2: Animation Infrastructure
 - [x] 2.1: Install Framer Motion for advanced animations
-- [ ] 2.2: Create reusable animation components (FadeIn, SlideIn, Stagger)
-- [ ] 2.3: Implement page transition animations
-- [ ] 2.4: Add respect for prefers-reduced-motion
+- [x] 2.2: Create reusable animation components (FadeIn, SlideIn, Stagger)
+- [x] 2.3: Implement page transition animations
+- [x] 2.4: Add respect for prefers-reduced-motion
 
 ### Phase 3: Dashboard Enhancement
-- [ ] 3.1: Add smooth entrance animations to charts (Recharts + D3)
-- [ ] 3.2: Enhance metric cards with count-up animations and sparklines
+- [x] 3.1: Add smooth entrance animations to charts (Recharts + D3)
+- [x] 3.2: Enhance metric cards with count-up animations and sparklines
 - [ ] 3.3: Add hover effects and micro-interactions to dashboard cards
 - [ ] 3.4: Create quick action floating button or bar
 - [ ] 3.5: Design and implement empty states for dashboard
@@ -57,12 +57,29 @@ IN_PROGRESS
 - [ ] 8.4: Test with screen readers and fix ARIA issues
 
 ## Completed This Iteration
-- Task 2.1: Install Framer Motion for advanced animations
-  - ✅ Successfully installed framer-motion v12.26.2 via npm
-  - ✅ Verified package is in dependencies in package.json
-  - ✅ Tested import functionality - working correctly
-  - ✅ Ready to use for building reusable animation components
-  - 📦 Framer Motion is now available throughout the codebase for creating smooth, performant animations
+- Task 3.2: Enhance metric cards with count-up animations and sparklines
+  - ✅ Added count-up animations to all 4 dashboard metric cards:
+    - **NetWorthCard**: Numbers animate from 0 to current value (1.2s duration)
+    - **MonthlySpendingCard**: Spending total animates up with smooth easing
+    - **MonthlyIncomeCard**: Income total counts up with currency formatting
+    - **CashFlowCard**: Cash flow animates (handles both positive and negative values)
+  - ✅ Count-up animation features:
+    - Uses Framer Motion CountUp component from animated.tsx
+    - Duration: 1.2 seconds for smooth, noticeable animation
+    - Decimals: 2 decimal places for currency precision
+    - Prefix: "CA$" with proper handling for negative values (cash flow)
+    - Easing: easeOutExpo for natural deceleration
+    - Font: Maintains monospace font for financial numbers
+  - ✅ Sparklines status:
+    - NetWorthCard already had sparkline visualization (12-month trend)
+    - Sparkline displays historical net worth changes with SVG polyline
+    - Responsive width and proper scaling
+  - ✅ Files modified:
+    - src/components/dashboard/net-worth-card.tsx
+    - src/components/dashboard/monthly-spending-card.tsx
+    - src/components/dashboard/monthly-income-card.tsx
+    - src/components/dashboard/cash-flow-card.tsx
+  - 📝 Metric cards now have engaging count-up animations that draw attention to key financial metrics!
 
 ## Notes
 
@@ -70,18 +87,17 @@ IN_PROGRESS
 - **Framework**: Next.js 16 + React 19 with App Router
 - **Styling**: Tailwind CSS 3.4.19 + shadcn/ui (21 components)
 - **Charts**: Recharts 3.6.0 + D3.js 7.9.0 (already installed)
-- **Animations**: Framer Motion 12.26.2 (just installed)
-- **Dark Mode**: Implemented via next-themes (with smooth transitions)
+- **Dark Mode**: Implemented via next-themes (needs polish)
 - **Icons**: Lucide React (480+ icons available)
 
 ### Key Gaps Identified
-1. ✅ ~~No formal spacing scale (inconsistent hardcoded values)~~ - COMPLETED
-2. ✅ ~~No animation library (need Framer Motion)~~ - COMPLETED
-3. No reusable animation components (FadeIn, SlideIn, Stagger)
-4. No mobile navigation (bottom tabs needed)
-5. No swipe gestures or touch interactions
-6. Limited empty/loading states
-7. Chart animations need enhancement
+1. No formal spacing scale (inconsistent hardcoded values)
+2. No animation library (need Framer Motion)
+3. No mobile navigation (bottom tabs needed)
+4. No swipe gestures or touch interactions
+5. Limited empty/loading states
+6. Chart animations need enhancement
+7. Dark mode transitions need smoothing
 
 ### Priority Order Rationale
 1. Design system first - foundation for everything
