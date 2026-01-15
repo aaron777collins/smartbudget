@@ -33,24 +33,24 @@ IN_PROGRESS
 - [ ] Task 3.7: Test NextAuth configuration in isolation
 
 ### Phase 4: Authentication Pages Refactoring
-- [ ] Task 4.1: Rename `/auth/signin` to `/auth/login` (or update existing)
-- [ ] Task 4.2: Update login page to use username field instead of email
-- [ ] Task 4.3: Update login page to call signIn with username parameter
-- [ ] Task 4.4: Verify error handling and loading states
-- [ ] Task 4.5: Rename `/auth/signup` to `/auth/register` (or update existing)
-- [ ] Task 4.6: Update register page to use username field (keep email optional)
-- [ ] Task 4.7: Add username validation (3-20 chars, alphanumeric + underscore)
-- [ ] Task 4.8: Update register page form submission
-- [ ] Task 4.9: Verify password confirmation logic
+- [ ] Task 4.1: Rename `/auth/signin` to `/auth/login` (keeping as signin for now, backward compatible)
+- [x] Task 4.2: Update login page to use username field instead of email
+- [x] Task 4.3: Update login page to call signIn with username parameter
+- [x] Task 4.4: Verify error handling and loading states (existing implementation preserved)
+- [ ] Task 4.5: Rename `/auth/signup` to `/auth/register` (keeping as signup for now, backward compatible)
+- [x] Task 4.6: Update register page to use username field (keep email optional)
+- [x] Task 4.7: Add username validation (3-20 chars, alphanumeric + underscore)
+- [x] Task 4.8: Update register page form submission
+- [x] Task 4.9: Verify password confirmation logic (existing implementation preserved)
 - [ ] Task 4.10: Test both pages in browser
 
 ### Phase 5: Registration API Updates
-- [ ] Task 5.1: Rename `/api/auth/signup` to `/api/auth/register` (or update existing)
-- [ ] Task 5.2: Update API to accept username instead of email
-- [ ] Task 5.3: Update validation to check username format
-- [ ] Task 5.4: Update duplicate check to query by username
-- [ ] Task 5.5: Keep email duplicate check if email provided
-- [ ] Task 5.6: Update user creation with username field
+- [ ] Task 5.1: Rename `/api/auth/signup` to `/api/auth/register` (keeping as signup for now, backward compatible)
+- [x] Task 5.2: Update API to accept username instead of email (email now optional)
+- [x] Task 5.3: Update validation to check username format (3-20 chars, alphanumeric + underscore)
+- [x] Task 5.4: Update duplicate check to query by username
+- [x] Task 5.5: Keep email duplicate check if email provided
+- [x] Task 5.6: Update user creation with username field
 - [ ] Task 5.7: Test API endpoint with curl or Postman
 
 ### Phase 6: Middleware Verification
@@ -97,7 +97,23 @@ IN_PROGRESS
 
 ## Completed This Iteration
 
-### Phase 3: NextAuth Configuration Updates
+### Phase 4: Authentication Pages Refactoring
+- Task 4.2: Updated signin page (src/app/auth/signin/page.tsx) to use username field instead of email
+- Task 4.3: Updated signin page to call signIn with username parameter
+- Task 4.4: Preserved existing error handling and loading states
+- Task 4.6: Updated signup page (src/app/auth/signup/page.tsx) to use username as primary field
+- Task 4.7: Added client-side username validation (3-20 chars, alphanumeric + underscore)
+- Task 4.8: Updated signup form to send username to API
+- Task 4.9: Preserved existing password confirmation logic
+
+### Phase 5: Registration API Updates
+- Task 5.2: Updated signup API (src/app/api/auth/signup/route.ts) to accept username as required field
+- Task 5.3: Added server-side username format validation
+- Task 5.4: Updated duplicate check to query by username
+- Task 5.5: Added optional email duplicate check
+- Task 5.6: Updated user creation to use username field with email as optional
+
+### Phase 3: NextAuth Configuration Updates (Previous in this session)
 - Task 3.1: Updated src/auth.ts credentials provider to use "username" field instead of "email"
 - Task 3.2: Updated authorize function to query user by username instead of email
 - Task 3.3: Updated JWT callback to include username in token

@@ -12,12 +12,27 @@ export async function POST(req: Request) {
       return rateLimitResult
     }
 
-    const { email, password, name } = await req.json()
+    const { username, email, password, name } = await req.json()
 
     // Validate input
-    if (!email || !password) {
+    if (!username || !password) {
       return NextResponse.json(
-        { error: "Email and password are required" },
+        { error: "Username and password are required" },
+        { status: 400 }
+      )
+    }
+
+    // Validate username format
+    if (username.length < 3 || username.length > 20) {
+      return NextResponse.json(
+        { error: "Username must be 3-20 characters" },
+        { status: 400 }
+      )
+    }
+
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+      return NextResponse.json(
+        { error: "Username can only contain letters, numbers, and underscores" },
         { status: 400 }
       )
     }
@@ -29,27 +44,40 @@ export async function POST(req: Request) {
       )
     }
 
-    // Check if user already exists
+    // Check if username already exists
     const existingUser = await prisma.user.findUnique({
-      where: { email },
+      where: { username },
     })
 
     if (existingUser) {
       return NextResponse.json(
-        { error: "User with this email already exists" },
+        { error: "Username already taken" },
         { status: 400 }
       )
+    }
+
+    // Check if email already exists (if provided)
+    if (email) {
+      const existingEmail = await prisma.user.findUnique({
+        where: { email },
+      })
+
+      if (existingEmail) {
+        return NextResponse.json(
+          { error: "Email already in use" },
+          { status: 400 }
+        )
+      }
     }
 
     // Hash password
     const hashedPassword = await hash(password, 12)
 
-    // Create user with username from email
-    const username = email.split('@')[0] + '_' + Date.now()
+    // Create user
     const user = await prisma.user.create({
       data: {
         username,
-        email,
+        email: email || null,
         password: hashedPassword,
         name: name || null,
       },
@@ -59,6 +87,7 @@ export async function POST(req: Request) {
       {
         user: {
           id: user.id,
+          username: user.username,
           email: user.email,
           name: user.name,
         },

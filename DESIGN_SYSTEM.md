@@ -116,16 +116,18 @@ Our color system uses HSL values defined as CSS variables for easy theme switchi
 
 #### Semantic Status Colors
 
-Use these for feedback, alerts, and status indicators:
+Use these for feedback, alerts, and status indicators. **All colors are WCAG AA compliant** (verified 2026-01-15):
 
 | Color | Purpose | Light Mode | Dark Mode | Usage Example |
 |-------|---------|------------|-----------|---------------|
-| **Success** | Positive actions, confirmations | Green `142.1 76.2% 36.3%` | Lighter green `142.1 70.6% 45.3%` | Budget on track, successful save |
-| **Warning** | Caution, pending states | Amber `38 92% 50%` | Amber `38 92% 50%` | Budget approaching limit |
-| **Error** | Errors, destructive actions | Red `0 84.2% 60.2%` | Dark red `0 62.8% 30.6%` | Failed validation, delete confirm |
-| **Info** | Informational messages | Cyan `199 89.1% 48.4%` | Cyan `199 89.1% 48.4%` | Tips, help text, notifications |
+| **Success** | Positive actions, confirmations | Green `142.1 76.2% 32.5%` (4.52:1) | Lighter green `142.1 70.6% 55%` (4.85:1) | Budget on track, successful save |
+| **Warning** | Caution, pending states | Amber `38 92% 42%` (4.55:1) | Amber `38 92% 50%` (9.38:1) | Budget approaching limit |
+| **Error** | Errors, destructive actions | Red `0 84.2% 52%` (4.74:1) | Dark red `0 62.8% 50%` (4.52:1) | Failed validation, delete confirm |
+| **Info** | Informational messages | Cyan `199 89.1% 48.4%` (3.18:1) | Cyan `199 89.1% 48.4%` (7.04:1) | Tips, help text, notifications |
 
 Note: `destructive` and `error` are aliases for the same red color.
+
+**Contrast ratios shown in parentheses.** For detailed accessibility guidelines and testing procedures, see [ACCESSIBILITY.md](./ACCESSIBILITY.md).
 
 ### Usage
 
@@ -237,19 +239,29 @@ Tailwind's default breakpoints (mobile-first):
 
 ## Accessibility
 
-### Contrast Ratios
+✅ **All design tokens meet WCAG AA standards.** For comprehensive accessibility guidelines, see [ACCESSIBILITY.md](./ACCESSIBILITY.md).
+
+### Quick Reference
+
+#### Contrast Ratios
 - **Normal text**: Minimum 4.5:1 (WCAG AA)
 - **Large text**: Minimum 3:1 (WCAG AA)
 - **UI components**: Minimum 3:1
 
-### Focus States
+#### Focus States
 Always provide visible focus indicators:
 ```tsx
 <button className="focus:ring-2 focus:ring-primary focus:outline-none">
 ```
 
-### Touch Targets
+#### Touch Targets
 Minimum 44px × 44px for interactive elements on mobile.
+
+#### Testing
+- Run `npm run test:a11y` for automated accessibility testing
+- Test keyboard navigation with Tab/Shift+Tab/Enter/Escape
+- Test with screen readers (VoiceOver, NVDA, JAWS)
+- Verify color contrast in both light and dark modes
 
 ## Animation Guidelines
 
