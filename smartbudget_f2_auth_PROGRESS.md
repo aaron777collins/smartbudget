@@ -29,8 +29,8 @@ IN_PROGRESS
 - [x] Task 3.3: Update JWT callback to include username in token
 - [x] Task 3.4: Update session callback to include username in session
 - [x] Task 3.5: Updated TypeScript type definitions to include username in Session, User, and JWT interfaces
-- [ ] Task 3.6: Update custom pages config (change signin to login if needed)
-- [ ] Task 3.7: Test NextAuth configuration in isolation
+- [x] Task 3.6: Update custom pages config (verified - using /auth/signin consistently)
+- [x] Task 3.7: Test NextAuth configuration in isolation
 
 ### Phase 4: Authentication Pages Refactoring
 - [ ] Task 4.1: Rename `/auth/signin` to `/auth/login` (keeping as signin for now, backward compatible)
