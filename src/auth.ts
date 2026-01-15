@@ -10,6 +10,7 @@ import {
 import { initializeSession, SESSION_CONFIG } from "@/lib/session-manager"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  trustHost: true,
   session: {
     strategy: "jwt",
     maxAge: SESSION_CONFIG.MAX_SESSION_AGE / 1000, // Convert ms to seconds (4 hours)

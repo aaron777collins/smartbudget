@@ -19,22 +19,49 @@ export async function GET(request: NextRequest) {
     const userId = session.user.id;
     const { searchParams } = new URL(request.url);
 
-    // Parse query parameters
-    const accountId = searchParams.get('accountId');
-    const categoryId = searchParams.get('categoryId');
+    // Validate query parameters using Zod schema for security
+    const queryValidation = transactionQuerySchema.safeParse({
+      accountId: searchParams.get('accountId'),
+      categoryId: searchParams.get('categoryId'),
+      type: searchParams.get('type'),
+      startDate: searchParams.get('startDate'),
+      endDate: searchParams.get('endDate'),
+      search: searchParams.get('search'),
+      minAmount: searchParams.get('minAmount'),
+      maxAmount: searchParams.get('maxAmount'),
+      isReconciled: searchParams.get('isReconciled'),
+      sortBy: searchParams.get('sortBy'),
+      sortOrder: searchParams.get('sortOrder'),
+      page: searchParams.get('page'),
+      limit: searchParams.get('limit'),
+    });
+
+    if (!queryValidation.success) {
+      return NextResponse.json(
+        { error: 'Invalid query parameters', issues: queryValidation.error.issues },
+        { status: 400 }
+      );
+    }
+
+    const {
+      accountId,
+      categoryId,
+      type,
+      startDate,
+      endDate,
+      search,
+      minAmount,
+      maxAmount,
+      isReconciled,
+      sortBy,
+      sortOrder,
+      limit,
+    } = queryValidation.data;
+
+    // Additional parameters not in schema
     const tagId = searchParams.get('tagId');
-    const startDate = searchParams.get('startDate');
-    const endDate = searchParams.get('endDate');
-    const search = searchParams.get('search');
-    const minAmount = searchParams.get('minAmount');
-    const maxAmount = searchParams.get('maxAmount');
-    const type = searchParams.get('type');
-    const isReconciled = searchParams.get('isReconciled');
     const isRecurring = searchParams.get('isRecurring');
-    const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
-    const sortBy = searchParams.get('sortBy') || 'date';
-    const sortOrder = searchParams.get('sortOrder') || 'desc';
 
     // Build where clause
     const where: any = { userId };
@@ -77,21 +104,21 @@ export async function GET(request: NextRequest) {
     if (minAmount || maxAmount) {
       where.amount = {};
       if (minAmount) {
-        where.amount.gte = parseFloat(minAmount);
+        where.amount.gte = minAmount;
       }
       if (maxAmount) {
-        where.amount.lte = parseFloat(maxAmount);
+        where.amount.lte = maxAmount;
       }
     }
 
     // Transaction type filter
     if (type) {
-      where.type = type as TransactionType;
+      where.type = type;
     }
 
     // Reconciliation status filter
-    if (isReconciled !== null && isReconciled !== undefined && isReconciled !== '') {
-      where.isReconciled = isReconciled === 'true';
+    if (isReconciled !== null && isReconciled !== undefined) {
+      where.isReconciled = isReconciled;
     }
 
     // Recurring status filter

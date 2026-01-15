@@ -358,6 +358,19 @@ export const transactionQuerySchema = paginationSchema.extend({
   minAmount: decimalSchema.optional(),
   maxAmount: decimalSchema.optional(),
   isReconciled: z.coerce.boolean().optional(),
+  // Security: Explicitly validate sortBy to prevent potential injection or invalid field access
+  sortBy: z.enum([
+    "date",
+    "postedDate",
+    "amount",
+    "description",
+    "merchantName",
+    "type",
+    "isReconciled",
+    "isRecurring",
+    "createdAt",
+    "updatedAt"
+  ]).default("date"),
 });
 
 export const accountQuerySchema = z.object({
