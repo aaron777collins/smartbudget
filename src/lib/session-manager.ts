@@ -198,8 +198,10 @@ export async function validateSession(
         description: 'Session expired due to inactivity (30 minutes)',
         success: false,
         failureReason: 'Session inactive',
-        ipAddress: context?.ip,
-        userAgent: context?.userAgent,
+        context: {
+          ipAddress: context?.ip,
+          userAgent: context?.userAgent,
+        },
       })
 
       return { valid: false, reason: 'inactive' }
