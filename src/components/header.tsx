@@ -69,7 +69,8 @@ export function Header() {
                 <Button variant="ghost" size="icon" aria-label="User menu">
                   <Avatar>
                     <AvatarFallback>
-                      {session?.user?.name?.charAt(0).toUpperCase() ||
+                      {session?.user?.username?.charAt(0).toUpperCase() ||
+                       session?.user?.name?.charAt(0).toUpperCase() ||
                        session?.user?.email?.charAt(0).toUpperCase() ||
                        "U"}
                     </AvatarFallback>
@@ -80,7 +81,7 @@ export function Header() {
                 <DropdownMenuLabel>
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">
-                      {session?.user?.name || "User"}
+                      {session?.user?.username || session?.user?.name || "User"}
                     </p>
                     <p className="text-xs leading-none text-muted-foreground">
                       {session?.user?.email}

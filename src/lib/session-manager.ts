@@ -180,8 +180,10 @@ export async function validateSession(
         description: 'Session expired due to maximum age exceeded (4 hours)',
         success: false,
         failureReason: 'Session too old',
-        ipAddress: context?.ip,
-        userAgent: context?.userAgent,
+        context: {
+          ipAddress: context?.ip,
+          userAgent: context?.userAgent,
+        },
       })
 
       return { valid: false, reason: 'too_old' }
