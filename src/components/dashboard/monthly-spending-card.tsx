@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { CreditCard } from 'lucide-react';
-import { CountUp } from '@/components/ui/animated';
+import { CountUp, HoverScale } from '@/components/ui/animated';
 
 interface MonthlySpendingCardProps {
   current: number;
@@ -40,49 +40,51 @@ export function MonthlySpendingCard({
   };
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">Monthly Spending</CardTitle>
-        <CreditCard className="h-4 w-4 text-muted-foreground" />
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold font-mono">
-          <CountUp
-            to={current}
-            duration={1.2}
-            decimals={2}
-            prefix="CA$"
-            className="font-mono"
-          />
-        </div>
+    <HoverScale scale={1.02} className="cursor-pointer">
+      <Card className="transition-shadow duration-300 hover:shadow-lg">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Monthly Spending</CardTitle>
+          <CreditCard className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold font-mono">
+            <CountUp
+              to={current}
+              duration={1.2}
+              decimals={2}
+              prefix="CA$"
+              className="font-mono"
+            />
+          </div>
 
-        {budget !== null && budgetUsedPercentage !== null ? (
-          <>
-            <div className="mt-3">
-              <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-                <span>Budget Progress</span>
-                <span className={`${getStatusColor()} font-mono`}>
-                  {budgetUsedPercentage.toFixed(0)}%
-                </span>
+          {budget !== null && budgetUsedPercentage !== null ? (
+            <>
+              <div className="mt-3">
+                <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
+                  <span>Budget Progress</span>
+                  <span className={`${getStatusColor()} font-mono`}>
+                    {budgetUsedPercentage.toFixed(0)}%
+                  </span>
+                </div>
+                <Progress
+                  value={Math.min(budgetUsedPercentage, 100)}
+                  className={`h-2 ${getProgressBarColor()}`}
+                />
+                <div className="flex items-center justify-between text-xs text-muted-foreground mt-1">
+                  <span className="font-mono">{formatCurrency(current)} of {formatCurrency(budget)}</span>
+                </div>
               </div>
-              <Progress
-                value={Math.min(budgetUsedPercentage, 100)}
-                className={`h-2 ${getProgressBarColor()}`}
-              />
-              <div className="flex items-center justify-between text-xs text-muted-foreground mt-1">
-                <span className="font-mono">{formatCurrency(current)} of {formatCurrency(budget)}</span>
-              </div>
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              {daysRemaining} {daysRemaining === 1 ? 'day' : 'days'} remaining this month
+              <p className="text-xs text-muted-foreground mt-2">
+                {daysRemaining} {daysRemaining === 1 ? 'day' : 'days'} remaining this month
+              </p>
+            </>
+          ) : (
+            <p className="text-xs text-muted-foreground mt-1">
+              No active budget set
             </p>
-          </>
-        ) : (
-          <p className="text-xs text-muted-foreground mt-1">
-            No active budget set
-          </p>
-        )}
-      </CardContent>
-    </Card>
+          )}
+        </CardContent>
+      </Card>
+    </HoverScale>
   );
 }

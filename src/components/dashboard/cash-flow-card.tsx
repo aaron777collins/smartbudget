@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowUpCircle, ArrowDownCircle, MinusCircle } from 'lucide-react';
-import { CountUp } from '@/components/ui/animated';
+import { CountUp, HoverScale } from '@/components/ui/animated';
 
 interface CashFlowCardProps {
   current: number;
@@ -56,41 +56,43 @@ export function CashFlowCard({
   };
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">Cash Flow</CardTitle>
-        {getTrendIcon()}
-      </CardHeader>
-      <CardContent>
-        <div className={`text-2xl font-bold font-mono ${getTrendColor()}`}>
-          <CountUp
-            to={Math.abs(current)}
-            duration={1.2}
-            decimals={2}
-            prefix={current >= 0 ? "CA$" : "-CA$"}
-            className="font-mono"
-          />
-        </div>
-
-        <div className="flex items-center text-xs text-muted-foreground mt-1">
-          <span className={getTrendColor()}>{getTrendText()}</span>
-        </div>
-
-        <div className="mt-4 pt-3 border-t">
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">
-              Projected (End of Month)
-            </span>
-            <span className={`text-xs font-medium font-mono ${getTrendColor()}`}>
-              {formatCurrency(projectedEndOfMonth)}
-            </span>
+    <HoverScale scale={1.02} className="cursor-pointer">
+      <Card className="transition-shadow duration-300 hover:shadow-lg">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Cash Flow</CardTitle>
+          {getTrendIcon()}
+        </CardHeader>
+        <CardContent>
+          <div className={`text-2xl font-bold font-mono ${getTrendColor()}`}>
+            <CountUp
+              to={Math.abs(current)}
+              duration={1.2}
+              decimals={2}
+              prefix={current >= 0 ? "CA$" : "-CA$"}
+              className="font-mono"
+            />
           </div>
-        </div>
 
-        <p className="text-xs text-muted-foreground mt-2">
-          Income minus expenses for this month
-        </p>
-      </CardContent>
-    </Card>
+          <div className="flex items-center text-xs text-muted-foreground mt-1">
+            <span className={getTrendColor()}>{getTrendText()}</span>
+          </div>
+
+          <div className="mt-4 pt-3 border-t">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">
+                Projected (End of Month)
+              </span>
+              <span className={`text-xs font-medium font-mono ${getTrendColor()}`}>
+                {formatCurrency(projectedEndOfMonth)}
+              </span>
+            </div>
+          </div>
+
+          <p className="text-xs text-muted-foreground mt-2">
+            Income minus expenses for this month
+          </p>
+        </CardContent>
+      </Card>
+    </HoverScale>
   );
 }

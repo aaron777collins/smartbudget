@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
-import { CountUp } from '@/components/ui/animated';
+import { CountUp, HoverScale } from '@/components/ui/animated';
 
 interface NetWorthCardProps {
   current: number;
@@ -37,64 +37,66 @@ export function NetWorthCard({
   };
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">Net Worth</CardTitle>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="2"
-          className="h-4 w-4 text-muted-foreground"
-        >
-          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-        </svg>
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold font-mono">
-          <CountUp
-            to={current}
-            duration={1.2}
-            decimals={2}
-            prefix="CA$"
-            className="font-mono"
-          />
-        </div>
-        <div className="flex items-center text-xs text-muted-foreground mt-1">
-          {isPositive && (
-            <>
-              <TrendingUp className="mr-1 h-4 w-4 text-green-500" />
-              <span className="text-green-500 font-mono">
-                +{formatCurrency(change)} ({formatPercentage(changePercentage)})
-              </span>
-            </>
-          )}
-          {isNegative && (
-            <>
-              <TrendingDown className="mr-1 h-4 w-4 text-red-500" />
-              <span className="text-red-500 font-mono">
-                {formatCurrency(change)} ({formatPercentage(changePercentage)})
-              </span>
-            </>
-          )}
-          {isNeutral && (
-            <>
-              <Minus className="mr-1 h-4 w-4 text-gray-500" />
-              <span className="text-gray-500">No change</span>
-            </>
-          )}
-          <span className="ml-1">from last month</span>
-        </div>
-        {sparklineData.length > 0 && (
-          <div className="mt-4">
-            <SimplifiedSparkline data={sparklineData} />
+    <HoverScale scale={1.02} className="cursor-pointer">
+      <Card className="transition-shadow duration-300 hover:shadow-lg">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Net Worth</CardTitle>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            className="h-4 w-4 text-muted-foreground"
+          >
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+          </svg>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold font-mono">
+            <CountUp
+              to={current}
+              duration={1.2}
+              decimals={2}
+              prefix="CA$"
+              className="font-mono"
+            />
           </div>
-        )}
-      </CardContent>
-    </Card>
+          <div className="flex items-center text-xs text-muted-foreground mt-1">
+            {isPositive && (
+              <>
+                <TrendingUp className="mr-1 h-4 w-4 text-green-500" />
+                <span className="text-green-500 font-mono">
+                  +{formatCurrency(change)} ({formatPercentage(changePercentage)})
+                </span>
+              </>
+            )}
+            {isNegative && (
+              <>
+                <TrendingDown className="mr-1 h-4 w-4 text-red-500" />
+                <span className="text-red-500 font-mono">
+                  {formatCurrency(change)} ({formatPercentage(changePercentage)})
+                </span>
+              </>
+            )}
+            {isNeutral && (
+              <>
+                <Minus className="mr-1 h-4 w-4 text-gray-500" />
+                <span className="text-gray-500">No change</span>
+              </>
+            )}
+            <span className="ml-1">from last month</span>
+          </div>
+          {sparklineData.length > 0 && (
+            <div className="mt-4">
+              <SimplifiedSparkline data={sparklineData} />
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </HoverScale>
   );
 }
 

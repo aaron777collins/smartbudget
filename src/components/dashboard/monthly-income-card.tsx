@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
-import { CountUp } from '@/components/ui/animated';
+import { CountUp, HoverScale } from '@/components/ui/animated';
 
 interface IncomeSource {
   id: string;
@@ -49,76 +49,78 @@ export function MonthlyIncomeCard({
   };
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">Monthly Income</CardTitle>
-        <DollarSign className="h-4 w-4 text-muted-foreground" />
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold font-mono">
-          <CountUp
-            to={current}
-            duration={1.2}
-            decimals={2}
-            prefix="CA$"
-            className="font-mono"
-          />
-        </div>
-
-        {average > 0 && (
-          <div className="flex items-center text-xs text-muted-foreground mt-1">
-            {isAboveAverage && (
-              <>
-                <TrendingUp className="mr-1 h-4 w-4 text-green-500" />
-                <span className="text-green-500 font-mono">
-                  +{Math.abs(vsAveragePercentage).toFixed(1)}%
-                </span>
-              </>
-            )}
-            {isBelowAverage && (
-              <>
-                <TrendingDown className="mr-1 h-4 w-4 text-red-500" />
-                <span className="text-red-500 font-mono">
-                  {vsAveragePercentage.toFixed(1)}%
-                </span>
-              </>
-            )}
-            {!isAboveAverage && !isBelowAverage && (
-              <span className="text-gray-500">At average</span>
-            )}
-            <span className="ml-1 font-mono">vs average ({formatCurrency(average)})</span>
+    <HoverScale scale={1.02} className="cursor-pointer">
+      <Card className="transition-shadow duration-300 hover:shadow-lg">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Monthly Income</CardTitle>
+          <DollarSign className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold font-mono">
+            <CountUp
+              to={current}
+              duration={1.2}
+              decimals={2}
+              prefix="CA$"
+              className="font-mono"
+            />
           </div>
-        )}
 
-        {topSources.length > 0 && (
-          <div className="mt-4">
-            <p className="text-xs font-medium text-muted-foreground mb-2">
-              Income Sources
-            </p>
-            <div className="space-y-2">
-              {topSources.map((source, index) => (
-                <div key={source.id} className="flex items-center">
-                  <div className={`h-2 w-2 rounded-full ${getCategoryColor(index)} mr-2`} />
-                  <div className="flex-1 flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground truncate">
-                      {source.name}
-                    </span>
-                    <span className="text-xs font-medium font-mono ml-2">
-                      {formatCurrency(source.amount)}
-                    </span>
-                  </div>
-                </div>
-              ))}
+          {average > 0 && (
+            <div className="flex items-center text-xs text-muted-foreground mt-1">
+              {isAboveAverage && (
+                <>
+                  <TrendingUp className="mr-1 h-4 w-4 text-green-500" />
+                  <span className="text-green-500 font-mono">
+                    +{Math.abs(vsAveragePercentage).toFixed(1)}%
+                  </span>
+                </>
+              )}
+              {isBelowAverage && (
+                <>
+                  <TrendingDown className="mr-1 h-4 w-4 text-red-500" />
+                  <span className="text-red-500 font-mono">
+                    {vsAveragePercentage.toFixed(1)}%
+                  </span>
+                </>
+              )}
+              {!isAboveAverage && !isBelowAverage && (
+                <span className="text-gray-500">At average</span>
+              )}
+              <span className="ml-1 font-mono">vs average ({formatCurrency(average)})</span>
             </div>
-          </div>
-        )}
+          )}
 
-        {topSources.length === 0 && (
-          <p className="text-xs text-muted-foreground mt-2">
-            No income recorded this month
-          </p>
-        )}
-      </CardContent>
-    </Card>
+          {topSources.length > 0 && (
+            <div className="mt-4">
+              <p className="text-xs font-medium text-muted-foreground mb-2">
+                Income Sources
+              </p>
+              <div className="space-y-2">
+                {topSources.map((source, index) => (
+                  <div key={source.id} className="flex items-center">
+                    <div className={`h-2 w-2 rounded-full ${getCategoryColor(index)} mr-2`} />
+                    <div className="flex-1 flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground truncate">
+                        {source.name}
+                      </span>
+                      <span className="text-xs font-medium font-mono ml-2">
+                        {formatCurrency(source.amount)}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {topSources.length === 0 && (
+            <p className="text-xs text-muted-foreground mt-2">
+              No income recorded this month
+            </p>
+          )}
+        </CardContent>
+      </Card>
+    </HoverScale>
   );
 }

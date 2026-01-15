@@ -68,14 +68,13 @@ export async function POST(request: NextRequest) {
       eventType: 'LOGIN_SUCCESS',
       severity: 'INFO',
       description: 'Refresh token generated via /api/auth/token',
-      ipAddress,
-      userAgent,
       success: true,
       metadata: {
         tokenId: refreshToken.id,
         tokenFamily: refreshToken.tokenFamily,
         expiresAt: refreshToken.expiresAt.toISOString(),
       },
+      context: { ipAddress, userAgent },
     });
 
     // Return refresh token

@@ -14,7 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { formatCurrency } from '@/lib/utils';
 import type { TimeframeValue } from './timeframe-selector';
 import { getPeriodForAPI, buildTimeframeParams } from '@/lib/timeframe';
-import { FadeIn } from '@/components/ui/animated';
+import { FadeIn, HoverScale } from '@/components/ui/animated';
 
 interface CategoryData {
   id: string;
@@ -179,12 +179,13 @@ export function CategoryBreakdownChart({ timeframe }: CategoryBreakdownChartProp
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Category Breakdown</CardTitle>
-        <CardDescription>
-          Current month spending by category
-        </CardDescription>
+    <HoverScale scale={1.01} className="h-full">
+      <Card className="h-full transition-shadow duration-300 hover:shadow-lg">
+        <CardHeader>
+          <CardTitle>Category Breakdown</CardTitle>
+          <CardDescription>
+            Current month spending by category
+          </CardDescription>
         <div className="mt-2 grid grid-cols-2 gap-4 text-sm">
           <div>
             <span className="text-muted-foreground">Total Spending: </span>
@@ -255,5 +256,6 @@ export function CategoryBreakdownChart({ timeframe }: CategoryBreakdownChartProp
         </FadeIn>
       </CardContent>
     </Card>
+    </HoverScale>
   );
 }

@@ -1,6 +1,5 @@
-import { auth } from "@/auth"
+import { auth } from "@/auth-middleware"
 import { NextResponse } from "next/server"
-import { validateSession } from "@/lib/session-manager"
 
 export default auth(async (req) => {
   const { pathname } = req.nextUrl
@@ -17,23 +16,9 @@ export default auth(async (req) => {
     return NextResponse.redirect(signInUrl)
   }
 
-  // If authenticated, validate session for inactivity/expiration
-  if (isAuthenticated && !isPublicRoute && req.auth?.user?.id) {
-    const context = {
-      ip: req.ip || req.headers.get('x-forwarded-for') || 'unknown',
-      userAgent: req.headers.get('user-agent') || 'unknown',
-    }
-
-    const validation = await validateSession(req.auth.user.id, context)
-
-    // If session is invalid, force logout and redirect to signin
-    if (!validation.valid) {
-      const signInUrl = new URL("/auth/signin", req.url)
-      signInUrl.searchParams.set("callbackUrl", pathname)
-      signInUrl.searchParams.set("session_expired", "true")
-      return NextResponse.redirect(signInUrl)
-    }
-  }
+  // Note: Session validation (inactivity/expiration) is handled client-side
+  // and in API routes to avoid Edge Runtime limitations with Prisma.
+  // The JWT token expiration (maxAge) in auth.ts provides the primary session timeout.
 
   // If accessing auth pages while authenticated, redirect to dashboard
   if (

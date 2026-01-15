@@ -83,13 +83,12 @@ export async function POST(request: NextRequest) {
           eventType: 'SUSPICIOUS_ACTIVITY',
           severity: 'CRITICAL',
           description: 'Refresh token theft detected in /api/auth/refresh',
-          ipAddress,
-          userAgent,
           success: false,
           failureReason: 'Revoked token reused',
           metadata: {
             tokenId: validation.tokenId,
           },
+          context: { ipAddress, userAgent },
         });
 
         return NextResponse.json(
@@ -108,13 +107,12 @@ export async function POST(request: NextRequest) {
           eventType: 'SESSION_EXPIRED',
           severity: 'INFO',
           description: 'Refresh token expired',
-          ipAddress,
-          userAgent,
           success: false,
           failureReason: 'Token expired',
           metadata: {
             tokenId: validation.tokenId,
           },
+          context: { ipAddress, userAgent },
         });
 
         return NextResponse.json(
@@ -131,10 +129,9 @@ export async function POST(request: NextRequest) {
         eventType: 'UNAUTHORIZED_ACCESS_ATTEMPT',
         severity: 'MEDIUM',
         description: 'Invalid refresh token provided',
-        ipAddress,
-        userAgent,
         success: false,
         failureReason: validation.reason || 'unknown',
+        context: { ipAddress, userAgent },
       });
 
       return NextResponse.json(
@@ -156,10 +153,9 @@ export async function POST(request: NextRequest) {
         eventType: 'SUSPICIOUS_ACTIVITY',
         severity: 'HIGH',
         description: 'Failed to rotate refresh token',
-        ipAddress,
-        userAgent,
         success: false,
         failureReason: 'Token rotation failed',
+        context: { ipAddress, userAgent },
       });
 
       return NextResponse.json(
@@ -170,7 +166,7 @@ export async function POST(request: NextRequest) {
 
     // Generate new access token (JWT)
     const accessToken = await signJWT({
-      userId: validation.userId,
+      userId: validation.userId!,
     });
 
     // Log successful refresh
@@ -179,14 +175,13 @@ export async function POST(request: NextRequest) {
       eventType: 'LOGIN_SUCCESS',
       severity: 'INFO',
       description: 'Access token refreshed successfully',
-      ipAddress,
-      userAgent,
       success: true,
       metadata: {
         oldTokenId: validation.tokenId,
         newTokenId: newRefreshToken.id,
         tokenFamily: newRefreshToken.tokenFamily,
       },
+      context: { ipAddress, userAgent },
     });
 
     // Return new tokens

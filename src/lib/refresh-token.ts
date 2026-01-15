@@ -124,14 +124,13 @@ export async function createRefreshToken(
     eventType: 'LOGIN_SUCCESS',
     severity: 'INFO',
     description: 'Refresh token created',
-    ipAddress: context.ipAddress,
-    userAgent: context.userAgent,
     success: true,
     metadata: {
       tokenId: refreshToken.id,
       tokenFamily,
       expiresAt: expiresAt.toISOString(),
     },
+    context,
   });
 
   // Return token data with RAW token (only time it's available)
@@ -295,14 +294,13 @@ export async function rotateRefreshToken(
     eventType: 'LOGIN_SUCCESS',
     severity: 'INFO',
     description: 'Refresh token rotated',
-    ipAddress: context.ipAddress,
-    userAgent: context.userAgent,
     success: true,
     metadata: {
       oldTokenId: oldTokenRecord.id,
       newTokenId: newTokenRecord.id,
       tokenFamily: oldTokenRecord.tokenFamily,
     },
+    context,
   });
 
   return {

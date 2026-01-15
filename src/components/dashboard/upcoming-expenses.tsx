@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Calendar, DollarSign, AlertCircle, ExternalLink } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { HoverScale } from '@/components/ui/animated';
 
 interface UpcomingExpense {
   id: string;
