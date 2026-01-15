@@ -120,23 +120,24 @@ export function UpcomingExpenses() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
-            Upcoming Recurring Expenses
-          </CardTitle>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => router.push('/recurring')}
-          >
-            View All
-            <ExternalLink className="ml-2 h-4 w-4" />
-          </Button>
-        </div>
-      </CardHeader>
+    <HoverScale scale={1.01} className="h-full">
+      <Card className="h-full transition-shadow duration-300 hover:shadow-lg">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5" />
+              Upcoming Recurring Expenses
+            </CardTitle>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => router.push('/recurring')}
+            >
+              View All
+              <ExternalLink className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+        </CardHeader>
       <CardContent className="space-y-4">
         {/* Summary Bar */}
         {summary && (
@@ -165,7 +166,7 @@ export function UpcomingExpenses() {
           {expenses.slice(0, 5).map((expense) => (
             <div
               key={expense.id}
-              className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+              className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 hover:shadow-md transition-all duration-200 cursor-pointer"
             >
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
@@ -198,5 +199,6 @@ export function UpcomingExpenses() {
         )}
       </CardContent>
     </Card>
+    </HoverScale>
   );
 }

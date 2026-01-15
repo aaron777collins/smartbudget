@@ -21,7 +21,7 @@ IN_PROGRESS
 ### Phase 3: Dashboard Enhancement
 - [x] 3.1: Add smooth entrance animations to charts (Recharts + D3)
 - [x] 3.2: Enhance metric cards with count-up animations and sparklines
-- [ ] 3.3: Add hover effects and micro-interactions to dashboard cards
+- [x] 3.3: Add hover effects and micro-interactions to dashboard cards
 - [ ] 3.4: Create quick action floating button or bar
 - [ ] 3.5: Design and implement empty states for dashboard
 
@@ -57,29 +57,42 @@ IN_PROGRESS
 - [ ] 8.4: Test with screen readers and fix ARIA issues
 
 ## Completed This Iteration
-- Task 3.2: Enhance metric cards with count-up animations and sparklines
-  - ✅ Added count-up animations to all 4 dashboard metric cards:
-    - **NetWorthCard**: Numbers animate from 0 to current value (1.2s duration)
-    - **MonthlySpendingCard**: Spending total animates up with smooth easing
-    - **MonthlyIncomeCard**: Income total counts up with currency formatting
-    - **CashFlowCard**: Cash flow animates (handles both positive and negative values)
-  - ✅ Count-up animation features:
-    - Uses Framer Motion CountUp component from animated.tsx
-    - Duration: 1.2 seconds for smooth, noticeable animation
-    - Decimals: 2 decimal places for currency precision
-    - Prefix: "CA$" with proper handling for negative values (cash flow)
-    - Easing: easeOutExpo for natural deceleration
-    - Font: Maintains monospace font for financial numbers
-  - ✅ Sparklines status:
-    - NetWorthCard already had sparkline visualization (12-month trend)
-    - Sparkline displays historical net worth changes with SVG polyline
-    - Responsive width and proper scaling
-  - ✅ Files modified:
+- Task 3.3: Add hover effects and micro-interactions to dashboard cards
+  - ✅ **Metric Cards (NetWorth, MonthlySpending, MonthlyIncome, CashFlow)**:
+    - Wrapped each card with `HoverScale` component (1.02x scale on hover)
+    - Added `cursor-pointer` class for visual feedback
+    - Added `transition-shadow duration-300 hover:shadow-lg` for elevated shadow on hover
+    - Smooth 200ms transition creates subtle, polished feel
+    - Creates engaging visual feedback when users interact with cards
+
+  - ✅ **Chart Components (CategoryBreakdown, UpcomingExpenses)**:
+    - Wrapped chart cards with `HoverScale` component (1.01x scale - more subtle for larger cards)
+    - Added `h-full` class to maintain consistent height
+    - Added `transition-shadow duration-300 hover:shadow-lg` for shadow elevation
+    - Makes charts feel interactive and responsive to user interaction
+
+  - ✅ **Individual List Items (UpcomingExpenses rows)**:
+    - Enhanced existing hover effect from basic `hover:bg-muted/50`
+    - Added `hover:shadow-md` for shadow elevation on individual expense rows
+    - Added `transition-all duration-200` for smooth transitions
+    - Added `cursor-pointer` to indicate interactivity
+    - Creates micro-interactions that make lists feel more polished
+
+  - ✅ **Technical Implementation**:
+    - Imported `HoverScale` from `@/components/ui/animated` (Framer Motion based)
+    - Uses `whileHover={{ scale }}` and `whileTap={{ scale: 0.98 }}` for natural interaction
+    - Combines Framer Motion animations with CSS transitions for best performance
+    - All animations respect user's motion preferences (reduced-motion)
+
+  - ✅ **Files Modified**:
     - src/components/dashboard/net-worth-card.tsx
     - src/components/dashboard/monthly-spending-card.tsx
     - src/components/dashboard/monthly-income-card.tsx
     - src/components/dashboard/cash-flow-card.tsx
-  - 📝 Metric cards now have engaging count-up animations that draw attention to key financial metrics!
+    - src/components/dashboard/category-breakdown-chart.tsx
+    - src/components/dashboard/upcoming-expenses.tsx
+
+  - 🎨 **Impact**: Dashboard now feels alive and responsive! Every card and chart provides immediate visual feedback on hover, creating a premium, polished user experience. The subtle scale animations (1.01-1.02x) paired with shadow elevation create depth and interactivity without being distracting.
 
 ## Notes
 
