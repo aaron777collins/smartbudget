@@ -53,12 +53,12 @@ export function NetWorthCard({
         </svg>
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{formatCurrency(current)}</div>
+        <div className="text-2xl font-bold font-mono">{formatCurrency(current)}</div>
         <div className="flex items-center text-xs text-muted-foreground mt-1">
           {isPositive && (
             <>
               <TrendingUp className="mr-1 h-4 w-4 text-green-500" />
-              <span className="text-green-500">
+              <span className="text-green-500 font-mono">
                 +{formatCurrency(change)} ({formatPercentage(changePercentage)})
               </span>
             </>
@@ -66,7 +66,7 @@ export function NetWorthCard({
           {isNegative && (
             <>
               <TrendingDown className="mr-1 h-4 w-4 text-red-500" />
-              <span className="text-red-500">
+              <span className="text-red-500 font-mono">
                 {formatCurrency(change)} ({formatPercentage(changePercentage)})
               </span>
             </>

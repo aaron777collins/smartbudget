@@ -61,7 +61,7 @@ export function CashFlowCard({
         {getTrendIcon()}
       </CardHeader>
       <CardContent>
-        <div className={`text-2xl font-bold ${getTrendColor()}`}>
+        <div className={`text-2xl font-bold font-mono ${getTrendColor()}`}>
           {formatCurrency(current)}
         </div>
 
@@ -74,7 +74,7 @@ export function CashFlowCard({
             <span className="text-xs text-muted-foreground">
               Projected (End of Month)
             </span>
-            <span className={`text-xs font-medium ${getTrendColor()}`}>
+            <span className={`text-xs font-medium font-mono ${getTrendColor()}`}>
               {formatCurrency(projectedEndOfMonth)}
             </span>
           </div>

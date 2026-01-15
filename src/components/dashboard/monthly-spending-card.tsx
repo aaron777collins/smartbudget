@@ -45,14 +45,14 @@ export function MonthlySpendingCard({
         <CreditCard className="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{formatCurrency(current)}</div>
+        <div className="text-2xl font-bold font-mono">{formatCurrency(current)}</div>
 
         {budget !== null && budgetUsedPercentage !== null ? (
           <>
             <div className="mt-3">
               <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
                 <span>Budget Progress</span>
-                <span className={getStatusColor()}>
+                <span className={`${getStatusColor()} font-mono`}>
                   {budgetUsedPercentage.toFixed(0)}%
                 </span>
               </div>
@@ -61,7 +61,7 @@ export function MonthlySpendingCard({
                 className={`h-2 ${getProgressBarColor()}`}
               />
               <div className="flex items-center justify-between text-xs text-muted-foreground mt-1">
-                <span>{formatCurrency(current)} of {formatCurrency(budget)}</span>
+                <span className="font-mono">{formatCurrency(current)} of {formatCurrency(budget)}</span>
               </div>
             </div>
             <p className="text-xs text-muted-foreground mt-2">

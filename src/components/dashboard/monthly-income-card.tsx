@@ -54,14 +54,14 @@ export function MonthlyIncomeCard({
         <DollarSign className="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{formatCurrency(current)}</div>
+        <div className="text-2xl font-bold font-mono">{formatCurrency(current)}</div>
 
         {average > 0 && (
           <div className="flex items-center text-xs text-muted-foreground mt-1">
             {isAboveAverage && (
               <>
                 <TrendingUp className="mr-1 h-4 w-4 text-green-500" />
-                <span className="text-green-500">
+                <span className="text-green-500 font-mono">
                   +{Math.abs(vsAveragePercentage).toFixed(1)}%
                 </span>
               </>
@@ -69,7 +69,7 @@ export function MonthlyIncomeCard({
             {isBelowAverage && (
               <>
                 <TrendingDown className="mr-1 h-4 w-4 text-red-500" />
-                <span className="text-red-500">
+                <span className="text-red-500 font-mono">
                   {vsAveragePercentage.toFixed(1)}%
                 </span>
               </>
@@ -77,7 +77,7 @@ export function MonthlyIncomeCard({
             {!isAboveAverage && !isBelowAverage && (
               <span className="text-gray-500">At average</span>
             )}
-            <span className="ml-1">vs average ({formatCurrency(average)})</span>
+            <span className="ml-1 font-mono">vs average ({formatCurrency(average)})</span>
           </div>
         )}
 
@@ -94,7 +94,7 @@ export function MonthlyIncomeCard({
                     <span className="text-xs text-muted-foreground truncate">
                       {source.name}
                     </span>
-                    <span className="text-xs font-medium ml-2">
+                    <span className="text-xs font-medium font-mono ml-2">
                       {formatCurrency(source.amount)}
                     </span>
                   </div>

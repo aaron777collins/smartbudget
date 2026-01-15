@@ -48,7 +48,7 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
     return (
       <div className="rounded-lg border bg-background p-3 shadow-md">
         <p className="font-semibold mb-2">{label}</p>
-        <p className="text-sm font-bold mb-2">
+        <p className="text-sm font-bold font-mono mb-2">
           Total: {formatCurrency(total)}
         </p>
         <div className="space-y-1">
@@ -62,7 +62,7 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
                   style={{ backgroundColor: entry.color }}
                 />
                 <span className="flex-1">{entry.name}:</span>
-                <span className="font-semibold">{formatCurrency(entry.value)}</span>
+                <span className="font-semibold font-mono">{formatCurrency(entry.value)}</span>
               </div>
             ))}
         </div>
@@ -148,15 +148,16 @@ export function SpendingTrendsChart({ timeframe }: SpendingTrendsChartProps) {
         <div className="mt-2 grid grid-cols-2 gap-4 text-sm">
           <div>
             <span className="text-muted-foreground">Average Monthly: </span>
-            <span className="font-semibold">
+            <span className="font-semibold font-mono">
               {formatCurrency(data.summary.averageMonthlySpending)}
             </span>
           </div>
           <div>
             <span className="text-muted-foreground">Highest: </span>
-            <span className="font-semibold">
-              {formatCurrency(data.summary.highestMonth.total)} ({data.summary.highestMonth.month})
+            <span className="font-semibold font-mono">
+              {formatCurrency(data.summary.highestMonth.total)}
             </span>
+            <span> ({data.summary.highestMonth.month})</span>
           </div>
         </div>
       </CardHeader>

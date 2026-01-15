@@ -53,10 +53,10 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
       <div className="rounded-lg border bg-background p-3 shadow-md">
         <p className="font-semibold mb-1">{data.name}</p>
         <p className="text-sm">
-          Amount: <span className="font-bold">{formatCurrency(data.amount)}</span>
+          Amount: <span className="font-bold font-mono">{formatCurrency(data.amount)}</span>
         </p>
         <p className="text-sm">
-          Percentage: <span className="font-bold">{data.percentage.toFixed(1)}%</span>
+          Percentage: <span className="font-bold font-mono">{data.percentage.toFixed(1)}%</span>
         </p>
         <p className="text-xs text-muted-foreground mt-1">
           {data.transactionCount} transaction{data.transactionCount !== 1 ? 's' : ''}
@@ -187,11 +187,11 @@ export function CategoryBreakdownChart({ timeframe }: CategoryBreakdownChartProp
         <div className="mt-2 grid grid-cols-2 gap-4 text-sm">
           <div>
             <span className="text-muted-foreground">Total Spending: </span>
-            <span className="font-semibold">{formatCurrency(data.totalSpending)}</span>
+            <span className="font-semibold font-mono">{formatCurrency(data.totalSpending)}</span>
           </div>
           <div>
             <span className="text-muted-foreground">Categories: </span>
-            <span className="font-semibold">{data.summary.categoryCount}</span>
+            <span className="font-semibold font-mono">{data.summary.categoryCount}</span>
           </div>
         </div>
       </CardHeader>
@@ -236,10 +236,10 @@ export function CategoryBreakdownChart({ timeframe }: CategoryBreakdownChartProp
                   <span className="text-sm font-medium truncate">{category.name}</span>
                 </div>
                 <div className="text-right flex-shrink-0 ml-2">
-                  <div className="text-sm font-semibold">
+                  <div className="text-sm font-semibold font-mono">
                     {formatCurrency(category.amount)}
                   </div>
-                  <div className="text-xs text-muted-foreground">
+                  <div className="text-xs text-muted-foreground font-mono">
                     {category.percentage.toFixed(1)}%
                   </div>
                 </div>

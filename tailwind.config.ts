@@ -9,6 +9,10 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['var(--font-sans)'],
+        mono: ['var(--font-mono)'],
+      },
       spacing: {
         '1': 'var(--spacing-1)',
         '2': 'var(--spacing-2)',
