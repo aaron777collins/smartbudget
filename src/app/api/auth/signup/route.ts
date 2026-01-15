@@ -1,9 +1,17 @@
 import { NextResponse } from "next/server"
 import { hash } from "bcryptjs"
 import { prisma } from "@/lib/prisma"
+import { signupLimiter, getClientIdentifier, checkRateLimit } from "@/lib/rate-limit"
 
 export async function POST(req: Request) {
   try {
+    // Apply rate limiting
+    const identifier = getClientIdentifier(req)
+    const rateLimitResult = await checkRateLimit(signupLimiter, identifier)
+    if (rateLimitResult) {
+      return rateLimitResult
+    }
+
     const { email, password, name } = await req.json()
 
     // Validate input
