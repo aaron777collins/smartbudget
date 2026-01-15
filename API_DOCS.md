@@ -57,8 +57,8 @@ SmartBudget uses **NextAuth.js** (Auth.js) for authentication with session-based
 
 ### Authentication Methods
 
-1. **Email/Password**: Standard credentials-based authentication
-2. **OAuth**: Google, Apple Sign-In
+1. **Username/Password**: Standard credentials-based authentication
+2. **OAuth**: Google, Apple Sign-In (coming soon)
 3. **API Keys**: For server-to-server integrations (future feature)
 
 ### Session Management
@@ -83,6 +83,7 @@ fetch('https://api.smartbudget.app/api/transactions', {
 {
   "user": {
     "id": "usr_1234567890",
+    "username": "johndoe",
     "email": "user@example.com",
     "name": "John Doe",
     "image": "https://example.com/avatar.jpg"
@@ -246,6 +247,7 @@ Create a new user account.
 **Request**:
 ```json
 {
+  "username": "johndoe",
   "email": "user@example.com",
   "password": "SecurePassword123!",
   "name": "John Doe"
@@ -258,6 +260,7 @@ Create a new user account.
   "data": {
     "user": {
       "id": "usr_1234567890",
+      "username": "johndoe",
       "email": "user@example.com",
       "name": "John Doe",
       "emailVerified": false
@@ -267,21 +270,21 @@ Create a new user account.
 ```
 
 **Errors**:
-- `400`: Invalid email or weak password
-- `409`: Email already registered
+- `400`: Invalid username or weak password
+- `409`: Username or email already registered
 
 ---
 
 #### Sign In
 
-Authenticate with email and password.
+Authenticate with username and password.
 
 **Endpoint**: `POST /api/auth/signin`
 
 **Request**:
 ```json
 {
-  "email": "user@example.com",
+  "username": "johndoe",
   "password": "SecurePassword123!"
 }
 ```
@@ -292,6 +295,7 @@ Authenticate with email and password.
   "data": {
     "user": {
       "id": "usr_1234567890",
+      "username": "johndoe",
       "email": "user@example.com",
       "name": "John Doe"
     },
@@ -304,7 +308,6 @@ Authenticate with email and password.
 
 **Errors**:
 - `401`: Invalid credentials
-- `403`: Email not verified
 
 ---
 
@@ -1717,10 +1720,10 @@ BASE_URL = "https://api.smartbudget.app"
 session = requests.Session()
 
 # Sign in
-def sign_in(email: str, password: str):
+def sign_in(username: str, password: str):
     response = session.post(
         f"{BASE_URL}/api/auth/signin",
-        json={"email": email, "password": password}
+        json={"username": username, "password": password}
     )
     response.raise_for_status()
     return response.json()

@@ -32,6 +32,7 @@ model User {
   filterPresets        FilterPreset[]
   jobs                 Job[]
   feedback             Feedback[]
+  refreshTokens        RefreshToken[]
   createdAt            DateTime       @default(now())
   updatedAt            DateTime       @updatedAt
 }
@@ -472,4 +473,24 @@ enum SecuritySeverity {
   MEDIUM
   HIGH
   CRITICAL
+}
+
+model RefreshToken {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token           String   @unique // Hashed refresh token
+  tokenFamily     String   // Family identifier for rotation detection
+  expiresAt       DateTime // Refresh token expiration (7 days)
+  isRevoked       Boolean  @default(false)
+  revokedAt       DateTime?
+  revokedReason   String? // "logout", "password_change", "token_theft", "manual_revocation"
+  ipAddress       String?
+  userAgent       String?
+  createdAt       DateTime @default(now())
+  lastUsedAt      DateTime @default(now())
+
+  @@index([userId, isRevoked])
+  @@index([tokenFamily, isRevoked])
+  @@index([expiresAt])
 }

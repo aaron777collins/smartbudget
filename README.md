@@ -421,11 +421,11 @@ DATABASE_URL="postgresql://user:password@host:port/database?schema=public"
 
 ### Authentication
 
-Configure NextAuth.js providers in `src/lib/auth.ts`:
+Configure NextAuth.js providers in `src/auth.ts`:
 
-- Email/Password (default)
-- Google OAuth
-- Apple Sign-In
+- Username/Password (default)
+- Google OAuth (coming soon)
+- Apple Sign-In (coming soon)
 
 ### AI Integration
 
