@@ -7,10 +7,12 @@ import {
   logLoginFailure,
   logAccountLocked,
 } from "@/lib/audit-logger"
+import { initializeSession, SESSION_CONFIG } from "@/lib/session-manager"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   session: {
     strategy: "jwt",
+    maxAge: SESSION_CONFIG.MAX_SESSION_AGE / 1000, // Convert ms to seconds (4 hours)
   },
   pages: {
     signIn: "/auth/signin",
@@ -127,6 +129,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           })
         }
 
+        // Initialize session tracking
+        await initializeSession(user.id)
+
         // Log successful login
         await logLoginSuccess(
           user.id,
@@ -144,11 +149,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user) {
         token.id = user.id
         token.username = user.username
       }
+
+      // On token creation or update, add timestamp
+      if (trigger === 'signIn' || trigger === 'signUp') {
+        token.sessionCreatedAt = Date.now()
+      }
+
       return token
     },
     async session({ session, token }) {
@@ -156,6 +167,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.id = token.id as string
         session.user.username = token.username as string
       }
+
+      // Add session creation timestamp to session
+      if (token.sessionCreatedAt) {
+        session.sessionCreatedAt = token.sessionCreatedAt as number
+      }
+
       return session
     },
   },

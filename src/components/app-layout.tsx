@@ -2,6 +2,7 @@
 
 import { Header } from "@/components/header"
 import { Sidebar } from "@/components/sidebar"
+import { PageTransition } from "@/components/page-transition"
 
 interface AppLayoutProps {
   children: React.ReactNode
@@ -16,7 +17,9 @@ export function AppLayout({ children }: AppLayoutProps) {
           <Sidebar />
         </aside>
         <main id="main-content" className="flex-1 overflow-y-auto p-8" tabIndex={-1}>
-          {children}
+          <PageTransition>
+            {children}
+          </PageTransition>
         </main>
       </div>
     </div>

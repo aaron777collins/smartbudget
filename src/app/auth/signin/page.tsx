@@ -13,6 +13,7 @@ export default function SignInPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard"
+  const sessionExpired = searchParams.get("session_expired") === "true"
 
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
@@ -56,6 +57,11 @@ export default function SignInPage() {
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
+            {sessionExpired && (
+              <div className="rounded-md bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-900/20 dark:text-amber-400">
+                Your session has expired due to inactivity. Please sign in again.
+              </div>
+            )}
             {error && (
               <div className="rounded-md bg-red-50 p-3 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-400">
                 {error}
