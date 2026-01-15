@@ -241,7 +241,20 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 - 🔄 **Every 30 days** - High-security environments
 - 🔄 **Immediately** - After security incident or employee departure
 
-**Rotation Process**:
+**Automated Rotation Script**:
+
+For convenience, use the provided rotation script:
+```bash
+# Development environment
+./scripts/rotate-db-credentials.sh development
+
+# Production environment
+./scripts/rotate-db-credentials.sh production
+```
+
+The script will guide you through the rotation process and log the rotation for audit purposes.
+
+**Manual Rotation Process**:
 
 1. **Generate new password**:
    ```bash
