@@ -3,6 +3,7 @@
 import { Header } from "@/components/header"
 import { Sidebar } from "@/components/sidebar"
 import { PageTransition } from "@/components/page-transition"
+import { QuickActionFAB } from "@/components/quick-action-fab"
 
 interface AppLayoutProps {
   children: React.ReactNode
@@ -22,6 +23,8 @@ export function AppLayout({ children }: AppLayoutProps) {
           </PageTransition>
         </main>
       </div>
+      {/* Quick Action FAB - Mobile only */}
+      <QuickActionFAB />
     </div>
   )
 }
