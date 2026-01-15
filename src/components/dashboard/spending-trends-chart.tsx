@@ -163,57 +163,64 @@ export function SpendingTrendsChart({ timeframe }: SpendingTrendsChartProps) {
         </div>
       </CardHeader>
       <CardContent>
-        <div role="img" aria-label={`Spending trends chart showing monthly spending by category. Average monthly spending is ${formatCurrency(data.summary.averageMonthlySpending)}. Highest spending month was ${data.summary.highestMonth.month} with ${formatCurrency(data.summary.highestMonth.total)}.`}>
-          <ResponsiveContainer width="100%" height={400}>
-            <AreaChart
-              data={data.chartData}
-              margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-            >
-            <defs>
-              {data.categories.map((category) => (
-                <linearGradient
-                  key={category.id}
-                  id={`color-${category.id}`}
-                  x1="0"
-                  y1="0"
-                  x2="0"
-                  y2="1"
-                >
-                  <stop offset="5%" stopColor={category.color} stopOpacity={0.8} />
-                  <stop offset="95%" stopColor={category.color} stopOpacity={0.1} />
-                </linearGradient>
-              ))}
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-            <XAxis
-              dataKey="month"
-              className="text-xs"
-              tick={{ fill: 'hsl(var(--muted-foreground))' }}
-            />
-            <YAxis
-              className="text-xs"
-              tick={{ fill: 'hsl(var(--muted-foreground))' }}
-              tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
-            />
-            <Tooltip content={<CustomTooltip />} />
-            <Legend
-              wrapperStyle={{ paddingTop: '20px' }}
-              iconType="circle"
-            />
-            {data.categories.map((category) => (
-              <Area
-                key={category.id}
-                type="monotone"
-                dataKey={category.name}
-                stackId="1"
-                stroke={category.color}
-                fill={`url(#color-${category.id})`}
-                fillOpacity={1}
+        <FadeIn duration={0.5} delay={0.1}>
+          <div role="img" aria-label={`Spending trends chart showing monthly spending by category. Average monthly spending is ${formatCurrency(data.summary.averageMonthlySpending)}. Highest spending month was ${data.summary.highestMonth.month} with ${formatCurrency(data.summary.highestMonth.total)}.`}>
+            <ResponsiveContainer width="100%" height={400}>
+              <AreaChart
+                data={data.chartData}
+                margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+              >
+              <defs>
+                {data.categories.map((category) => (
+                  <linearGradient
+                    key={category.id}
+                    id={`color-${category.id}`}
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop offset="5%" stopColor={category.color} stopOpacity={0.8} />
+                    <stop offset="95%" stopColor={category.color} stopOpacity={0.1} />
+                  </linearGradient>
+                ))}
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" animationDuration={500} />
+              <XAxis
+                dataKey="month"
+                className="text-xs"
+                tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                animationDuration={500}
               />
-            ))}
-          </AreaChart>
-        </ResponsiveContainer>
-        </div>
+              <YAxis
+                className="text-xs"
+                tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+                animationDuration={500}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend
+                wrapperStyle={{ paddingTop: '20px' }}
+                iconType="circle"
+              />
+              {data.categories.map((category, index) => (
+                <Area
+                  key={category.id}
+                  type="monotone"
+                  dataKey={category.name}
+                  stackId="1"
+                  stroke={category.color}
+                  fill={`url(#color-${category.id})`}
+                  fillOpacity={1}
+                  animationBegin={index * 100}
+                  animationDuration={800}
+                  animationEasing="ease-out"
+                />
+              ))}
+            </AreaChart>
+          </ResponsiveContainer>
+          </div>
+        </FadeIn>
       </CardContent>
     </Card>
   );

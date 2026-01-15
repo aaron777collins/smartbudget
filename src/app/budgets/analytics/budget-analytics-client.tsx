@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { FadeIn } from '@/components/ui/animated';
 
 interface HistoricalPerformance {
   month: string;
@@ -327,33 +328,41 @@ export default function BudgetAnalyticsClient() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={400}>
-                <AreaChart data={performanceChartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip
-                    formatter={(value: number | undefined) => value ? `$${value.toFixed(2)}` : '$0.00'}
-                  />
-                  <Legend />
-                  <Area
-                    type="monotone"
-                    dataKey="Budgeted"
-                    stackId="1"
-                    stroke="#8884d8"
-                    fill="#8884d8"
-                    fillOpacity={0.6}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="Spent"
-                    stackId="2"
-                    stroke="#ef4444"
-                    fill="#ef4444"
-                    fillOpacity={0.6}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+              <FadeIn duration={0.5} delay={0.1}>
+                <ResponsiveContainer width="100%" height={400}>
+                  <AreaChart data={performanceChartData}>
+                    <CartesianGrid strokeDasharray="3 3" animationDuration={500} />
+                    <XAxis dataKey="month" animationDuration={500} />
+                    <YAxis animationDuration={500} />
+                    <Tooltip
+                      formatter={(value: number | undefined) => value ? `$${value.toFixed(2)}` : '$0.00'}
+                    />
+                    <Legend />
+                    <Area
+                      type="monotone"
+                      dataKey="Budgeted"
+                      stackId="1"
+                      stroke="#8884d8"
+                      fill="#8884d8"
+                      fillOpacity={0.6}
+                      animationBegin={0}
+                      animationDuration={800}
+                      animationEasing="ease-out"
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="Spent"
+                      stackId="2"
+                      stroke="#ef4444"
+                      fill="#ef4444"
+                      fillOpacity={0.6}
+                      animationBegin={100}
+                      animationDuration={800}
+                      animationEasing="ease-out"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </FadeIn>
             </CardContent>
           </Card>
 
@@ -419,18 +428,26 @@ export default function BudgetAnalyticsClient() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={utilizationChartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip
-                    formatter={(value: number | undefined) => value ? `${value.toFixed(1)}%` : '0.0%'}
-                  />
-                  <Legend />
-                  <Bar dataKey="Budget Used (%)" fill="#8884d8" />
-                </BarChart>
-              </ResponsiveContainer>
+              <FadeIn duration={0.5} delay={0.1}>
+                <ResponsiveContainer width="100%" height={400}>
+                  <BarChart data={utilizationChartData}>
+                    <CartesianGrid strokeDasharray="3 3" animationDuration={500} />
+                    <XAxis dataKey="month" animationDuration={500} />
+                    <YAxis animationDuration={500} />
+                    <Tooltip
+                      formatter={(value: number | undefined) => value ? `${value.toFixed(1)}%` : '0.0%'}
+                    />
+                    <Legend />
+                    <Bar
+                      dataKey="Budget Used (%)"
+                      fill="#8884d8"
+                      animationBegin={0}
+                      animationDuration={800}
+                      animationEasing="ease-out"
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </FadeIn>
             </CardContent>
           </Card>
         </TabsContent>
