@@ -18,7 +18,7 @@ IN_PROGRESS
 - [x] Task 2.4: Add secrets management documentation
 
 ### Phase 3: Session & Token Security (Priority 3)
-- [ ] Task 3.1: Implement session timeout/inactivity detection
+- [x] Task 3.1: Implement session timeout/inactivity detection
 - [ ] Task 3.2: Add JWT token refresh mechanism
 - [ ] Task 3.3: Implement token revocation on password change
 - [ ] Task 3.4: Add security notifications (email on password change, new device login)
@@ -74,6 +74,45 @@ IN_PROGRESS
 - Security notifications
 
 ## Completed This Iteration
+- Task 3.1: Implemented session timeout/inactivity detection
+  - Verified comprehensive session timeout infrastructure already exists:
+    - Session manager library (src/lib/session-manager.ts) with all core functions
+    - Client-side monitoring hook (src/hooks/useSessionTimeout.ts)
+    - Warning modal component (src/components/session-timeout-modal.tsx)
+    - Session provider wrapper (src/components/session-provider.tsx)
+    - Database schema fields (User.lastActivityAt, User.sessionCreatedAt)
+    - Database migrations applied (20260115160000_add_session_tracking)
+    - Configuration: 30-minute inactivity timeout, 4-hour max session, 5-minute warning
+  - Created missing activity update API endpoint:
+    - POST /api/auth/activity: Updates user's last activity timestamp
+    - GET /api/auth/activity: Returns current session status without update
+    - Both endpoints return session status for client-side monitoring
+  - Enhanced client-side hook (src/hooks/useSessionTimeout.ts):
+    - updateActivity() now calls POST /api/auth/activity to update database
+    - resetActivity() now calls POST /api/auth/activity to extend session
+    - Non-blocking API calls - failures don't interrupt user experience
+    - Already has activity listeners (mouse, keyboard, scroll, touch)
+    - Already throttled to max 1 update every 5 seconds
+  - Session timeout now fully functional:
+    - Client tracks user activity (mouse, keyboard, scroll, touch)
+    - Activity updates propagate to database via API endpoint
+    - Warning modal appears 5 minutes before timeout
+    - User can click "Continue Session" to extend (calls API)
+    - Auto-logout on expiration with redirect to signin
+    - All session events logged to SecurityEvent table
+  - Integration verified:
+    - SessionProvider included in root layout (src/app/layout.tsx)
+    - SessionTimeoutModal automatically rendered for all authenticated users
+    - Hook monitors inactivity and triggers UI warnings
+    - Middleware validates JWT expiration (Edge Runtime compatible)
+    - API routes can call validateSession() for server-side validation
+  - Documentation:
+    - Comprehensive docs in docs/SESSION_TIMEOUT.md (680 lines)
+    - Covers architecture, configuration, testing, troubleshooting
+    - User experience flow documented
+    - Security considerations and threat mitigation
+
+## Previously Completed This Iteration
 - Task 2.4: Verified secrets management documentation is comprehensive
   - Confirmed docs/SECRETS_MANAGEMENT.md exists and is thorough (877 lines)
   - Documentation covers:

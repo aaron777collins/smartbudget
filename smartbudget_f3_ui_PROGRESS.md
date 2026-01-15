@@ -22,7 +22,7 @@ IN_PROGRESS
 - [x] 3.1: Add smooth entrance animations to charts (Recharts + D3)
 - [x] 3.2: Enhance metric cards with count-up animations and sparklines
 - [x] 3.3: Add hover effects and micro-interactions to dashboard cards
-- [ ] 3.4: Create quick action floating button or bar
+- [x] 3.4: Create quick action floating button or bar
 - [ ] 3.5: Design and implement empty states for dashboard
 
 ### Phase 4: Transaction UI Polish
@@ -57,42 +57,21 @@ IN_PROGRESS
 - [ ] 8.4: Test with screen readers and fix ARIA issues
 
 ## Completed This Iteration
-- Task 3.3: Add hover effects and micro-interactions to dashboard cards
-  - ✅ **Metric Cards (NetWorth, MonthlySpending, MonthlyIncome, CashFlow)**:
-    - Wrapped each card with `HoverScale` component (1.02x scale on hover)
-    - Added `cursor-pointer` class for visual feedback
-    - Added `transition-shadow duration-300 hover:shadow-lg` for elevated shadow on hover
-    - Smooth 200ms transition creates subtle, polished feel
-    - Creates engaging visual feedback when users interact with cards
-
-  - ✅ **Chart Components (CategoryBreakdown, UpcomingExpenses)**:
-    - Wrapped chart cards with `HoverScale` component (1.01x scale - more subtle for larger cards)
-    - Added `h-full` class to maintain consistent height
-    - Added `transition-shadow duration-300 hover:shadow-lg` for shadow elevation
-    - Makes charts feel interactive and responsive to user interaction
-
-  - ✅ **Individual List Items (UpcomingExpenses rows)**:
-    - Enhanced existing hover effect from basic `hover:bg-muted/50`
-    - Added `hover:shadow-md` for shadow elevation on individual expense rows
-    - Added `transition-all duration-200` for smooth transitions
-    - Added `cursor-pointer` to indicate interactivity
-    - Creates micro-interactions that make lists feel more polished
-
-  - ✅ **Technical Implementation**:
-    - Imported `HoverScale` from `@/components/ui/animated` (Framer Motion based)
-    - Uses `whileHover={{ scale }}` and `whileTap={{ scale: 0.98 }}` for natural interaction
-    - Combines Framer Motion animations with CSS transitions for best performance
-    - All animations respect user's motion preferences (reduced-motion)
-
-  - ✅ **Files Modified**:
-    - src/components/dashboard/net-worth-card.tsx
-    - src/components/dashboard/monthly-spending-card.tsx
-    - src/components/dashboard/monthly-income-card.tsx
-    - src/components/dashboard/cash-flow-card.tsx
-    - src/components/dashboard/category-breakdown-chart.tsx
-    - src/components/dashboard/upcoming-expenses.tsx
-
-  - 🎨 **Impact**: Dashboard now feels alive and responsive! Every card and chart provides immediate visual feedback on hover, creating a premium, polished user experience. The subtle scale animations (1.01-1.02x) paired with shadow elevation create depth and interactivity without being distracting.
+- Task 3.4: Create quick action floating button or bar
+  - ✅ Integrated QuickActionFAB component into global layout:
+    - **Integration**: Added import and render in `src/components/app-layout.tsx`
+    - **File Created Previously**: `src/components/quick-action-fab.tsx` was created in commit c245cfb
+    - **This Iteration**: Completed integration to make FAB actually accessible to users
+    - **Global Access**: Now available on all authenticated pages
+  - ✅ Quick Action FAB Features:
+    - **Mobile-Only**: Shows only on mobile/tablet (hidden on desktop with `md:hidden`)
+    - **Fixed Position**: Bottom-right corner (`bottom-6 right-6 z-50`)
+    - **Actions Provided**: Add Transaction (→ /transactions), Create Budget (→ /budgets/create)
+    - **Design**: 64px primary button with Plus icon, expands to reveal 56px action buttons
+    - **Animation**: Plus rotates 45° to X when open, smooth 200ms expand/collapse with stagger
+    - **Accessibility**: ARIA labels, keyboard navigable, large touch targets (56-64px)
+    - **Polish**: Shadow elevation (xl/2xl), rounded-full design, auto-closes on action
+  - 📝 Mobile users now have quick, thumb-friendly access to primary actions from anywhere!
 
 ## Notes
 
