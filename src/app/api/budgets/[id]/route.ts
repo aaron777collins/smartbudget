@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { updateBudgetSchema } from '@/lib/validations';
+import { z } from 'zod';
 
 // GET /api/budgets/:id - Get budget details
 export async function GET(
@@ -82,54 +84,35 @@ export async function PATCH(
 
     const body = await request.json();
 
+    // Validate request body
+    const validatedData = updateBudgetSchema.parse(body);
+
     // Build update data
     const updateData: any = {};
 
-    if (body.name !== undefined) updateData.name = body.name;
-    if (body.type !== undefined) {
-      const validBudgetTypes = ['ENVELOPE', 'PERCENTAGE', 'FIXED_AMOUNT', 'GOAL_BASED'];
-      if (!validBudgetTypes.includes(body.type)) {
-        return NextResponse.json({ error: 'Invalid budget type' }, { status: 400 });
-      }
-      updateData.type = body.type;
-    }
-    if (body.period !== undefined) {
-      const validBudgetPeriods = ['WEEKLY', 'BI_WEEKLY', 'MONTHLY', 'QUARTERLY', 'YEARLY'];
-      if (!validBudgetPeriods.includes(body.period)) {
-        return NextResponse.json({ error: 'Invalid budget period' }, { status: 400 });
-      }
-      updateData.period = body.period;
-    }
-    if (body.startDate !== undefined) updateData.startDate = new Date(body.startDate);
-    if (body.endDate !== undefined) updateData.endDate = body.endDate ? new Date(body.endDate) : null;
-    if (body.totalAmount !== undefined) updateData.totalAmount = body.totalAmount;
-    if (body.rollover !== undefined) updateData.rollover = body.rollover;
+    if (validatedData.name !== undefined) updateData.name = validatedData.name;
+    if (validatedData.type !== undefined) updateData.type = validatedData.type;
+    if (validatedData.period !== undefined) updateData.period = validatedData.period;
+    if (validatedData.startDate !== undefined) updateData.startDate = validatedData.startDate;
+    if (validatedData.endDate !== undefined) updateData.endDate = validatedData.endDate;
+    if (validatedData.totalAmount !== undefined) updateData.totalAmount = validatedData.totalAmount;
+    if (validatedData.rollover !== undefined) updateData.rollover = validatedData.rollover;
 
     // Handle isActive flag - deactivate other budgets if this one is being activated
-    if (body.isActive !== undefined) {
-      if (body.isActive && !existingBudget.isActive) {
+    if (validatedData.isActive !== undefined) {
+      if (validatedData.isActive && !existingBudget.isActive) {
         await prisma.budget.updateMany({
           where: { userId, isActive: true, id: { not: budgetId } },
           data: { isActive: false },
         });
       }
-      updateData.isActive = body.isActive;
+      updateData.isActive = validatedData.isActive;
     }
 
     // Handle category updates if provided
-    if (body.categories && Array.isArray(body.categories)) {
-      // Validate categories
-      for (const cat of body.categories) {
-        if (!cat.categoryId) {
-          return NextResponse.json({ error: 'Category ID is required for each category' }, { status: 400 });
-        }
-        if (cat.amount === undefined || cat.amount === null || cat.amount < 0) {
-          return NextResponse.json({ error: 'Valid amount is required for each category' }, { status: 400 });
-        }
-      }
-
+    if (validatedData.categories && Array.isArray(validatedData.categories)) {
       // Verify all categories exist
-      const categoryIds = body.categories.map((c: any) => c.categoryId);
+      const categoryIds = validatedData.categories.map((c: any) => c.categoryId);
       const categories = await prisma.category.findMany({
         where: { id: { in: categoryIds } },
       });
@@ -144,10 +127,10 @@ export async function PATCH(
       });
 
       updateData.categories = {
-        create: body.categories.map((cat: any) => ({
+        create: validatedData.categories.map((cat: any) => ({
           categoryId: cat.categoryId,
           amount: cat.amount,
-          spent: cat.spent !== undefined ? cat.spent : 0,
+          spent: 0,
         })),
       };
     }
@@ -176,6 +159,14 @@ export async function PATCH(
     return NextResponse.json(budget);
   } catch (error) {
     console.error('Error updating budget:', error);
+
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Invalid data', issues: error.issues },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
       { error: 'Failed to update budget' },
       { status: 500 }

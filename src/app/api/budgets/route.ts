@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { createBudgetSchema } from '@/lib/validations';
+import { z } from 'zod';
 
 // GET /api/budgets - List user's budgets
 export async function GET(request: NextRequest) {
@@ -88,60 +90,23 @@ export async function POST(request: NextRequest) {
     const userId = session.user.id;
     const body = await request.json();
 
-    // Validate required fields
-    if (!body.name) {
-      return NextResponse.json({ error: 'Budget name is required' }, { status: 400 });
-    }
-    if (!body.type) {
-      return NextResponse.json({ error: 'Budget type is required' }, { status: 400 });
-    }
-    if (!body.period) {
-      return NextResponse.json({ error: 'Budget period is required' }, { status: 400 });
-    }
-    if (!body.startDate) {
-      return NextResponse.json({ error: 'Start date is required' }, { status: 400 });
-    }
-    if (body.totalAmount === undefined || body.totalAmount === null) {
-      return NextResponse.json({ error: 'Total amount is required' }, { status: 400 });
-    }
-    if (!body.categories || !Array.isArray(body.categories) || body.categories.length === 0) {
-      return NextResponse.json({ error: 'At least one budget category is required' }, { status: 400 });
-    }
-
-    // Validate budget type
-    const validBudgetTypes = ['ENVELOPE', 'PERCENTAGE', 'FIXED_AMOUNT', 'GOAL_BASED'];
-    if (!validBudgetTypes.includes(body.type)) {
-      return NextResponse.json({ error: 'Invalid budget type' }, { status: 400 });
-    }
-
-    // Validate budget period
-    const validBudgetPeriods = ['WEEKLY', 'BI_WEEKLY', 'MONTHLY', 'QUARTERLY', 'YEARLY'];
-    if (!validBudgetPeriods.includes(body.period)) {
-      return NextResponse.json({ error: 'Invalid budget period' }, { status: 400 });
-    }
-
-    // Validate categories
-    for (const cat of body.categories) {
-      if (!cat.categoryId) {
-        return NextResponse.json({ error: 'Category ID is required for each category' }, { status: 400 });
-      }
-      if (cat.amount === undefined || cat.amount === null || cat.amount < 0) {
-        return NextResponse.json({ error: 'Valid amount is required for each category' }, { status: 400 });
-      }
-    }
+    // Validate request body
+    const validatedData = createBudgetSchema.parse(body);
 
     // Verify all categories exist
-    const categoryIds = body.categories.map((c: any) => c.categoryId);
-    const categories = await prisma.category.findMany({
-      where: { id: { in: categoryIds } },
-    });
+    if (validatedData.categories && validatedData.categories.length > 0) {
+      const categoryIds = validatedData.categories.map((c: any) => c.categoryId);
+      const categories = await prisma.category.findMany({
+        where: { id: { in: categoryIds } },
+      });
 
-    if (categories.length !== categoryIds.length) {
-      return NextResponse.json({ error: 'One or more categories do not exist' }, { status: 400 });
+      if (categories.length !== categoryIds.length) {
+        return NextResponse.json({ error: 'One or more categories do not exist' }, { status: 400 });
+      }
     }
 
     // If this is set as active, deactivate other budgets
-    if (body.isActive) {
+    if (validatedData.isActive) {
       await prisma.budget.updateMany({
         where: { userId, isActive: true },
         data: { isActive: false },
@@ -152,21 +117,21 @@ export async function POST(request: NextRequest) {
     const budget = await prisma.budget.create({
       data: {
         userId,
-        name: body.name,
-        type: body.type,
-        period: body.period,
-        startDate: new Date(body.startDate),
-        endDate: body.endDate ? new Date(body.endDate) : null,
-        totalAmount: body.totalAmount,
-        isActive: body.isActive !== undefined ? body.isActive : true,
-        rollover: body.rollover !== undefined ? body.rollover : false,
-        categories: {
-          create: body.categories.map((cat: any) => ({
+        name: validatedData.name,
+        type: validatedData.type,
+        period: validatedData.period,
+        startDate: validatedData.startDate,
+        endDate: validatedData.endDate || null,
+        totalAmount: validatedData.totalAmount,
+        isActive: validatedData.isActive,
+        rollover: validatedData.rollover,
+        categories: validatedData.categories ? {
+          create: validatedData.categories.map((cat: any) => ({
             categoryId: cat.categoryId,
             amount: cat.amount,
             spent: 0,
           })),
-        },
+        } : undefined,
       },
       include: {
         categories: {
@@ -188,6 +153,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(budget, { status: 201 });
   } catch (error) {
     console.error('Error creating budget:', error);
+
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Invalid data', issues: error.issues },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
       { error: 'Failed to create budget' },
       { status: 500 }

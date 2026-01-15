@@ -98,32 +98,66 @@ Use CSS variables directly:
 
 ### Semantic Colors
 
-Our color system uses HSL values defined as CSS variables for easy theme switching.
+Our color system uses HSL values defined as CSS variables for easy theme switching and WCAG AA compliance.
 
-#### Light Mode
+#### Core Colors (Light Mode)
 - **Background**: Pure white (`0 0% 100%`)
 - **Foreground**: Dark blue-gray (`222.2 84% 4.9%`)
 - **Primary**: Blue (`221.2 83.2% 53.3%`)
 - **Secondary**: Light blue-gray (`210 40% 96.1%`)
-- **Destructive**: Red (`0 84.2% 60.2%`)
 - **Muted**: Light gray (`210 40% 96.1%`)
 
-#### Dark Mode
+#### Core Colors (Dark Mode)
 - **Background**: Dark blue-gray (`222.2 84% 4.9%`)
 - **Foreground**: Near white (`210 40% 98%`)
 - **Primary**: Bright blue (`217.2 91.2% 59.8%`)
 - **Secondary**: Dark gray (`217.2 32.6% 17.5%`)
-- **Destructive**: Dark red (`0 62.8% 30.6%`)
 - **Muted**: Medium gray (`217.2 32.6% 17.5%`)
+
+#### Semantic Status Colors
+
+Use these for feedback, alerts, and status indicators:
+
+| Color | Purpose | Light Mode | Dark Mode | Usage Example |
+|-------|---------|------------|-----------|---------------|
+| **Success** | Positive actions, confirmations | Green `142.1 76.2% 36.3%` | Lighter green `142.1 70.6% 45.3%` | Budget on track, successful save |
+| **Warning** | Caution, pending states | Amber `38 92% 50%` | Amber `38 92% 50%` | Budget approaching limit |
+| **Error** | Errors, destructive actions | Red `0 84.2% 60.2%` | Dark red `0 62.8% 30.6%` | Failed validation, delete confirm |
+| **Info** | Informational messages | Cyan `199 89.1% 48.4%` | Cyan `199 89.1% 48.4%` | Tips, help text, notifications |
+
+Note: `destructive` and `error` are aliases for the same red color.
 
 ### Usage
 
 ```tsx
-// Use semantic color classes
+// Core colors
 <div className="bg-background text-foreground">
 <Button className="bg-primary text-primary-foreground">
-<Alert className="bg-destructive text-destructive-foreground">
+
+// Semantic status colors
+<Alert className="bg-success text-success-foreground">Budget on track!</Alert>
+<Alert className="bg-warning text-warning-foreground">Approaching limit</Alert>
+<Alert className="bg-error text-error-foreground">Invalid input</Alert>
+<Alert className="bg-info text-info-foreground">Helpful tip</Alert>
+
+// Using destructive (alias for error)
+<Button variant="destructive">Delete</Button>
 ```
+
+### Color Guidelines
+
+**DO:**
+- ✅ Use semantic colors for their intended purpose (success for positive, error for negative)
+- ✅ Always pair color with foreground color for proper contrast
+- ✅ Test colors in both light and dark modes
+- ✅ Use color variables, never hardcode hex/rgb values
+- ✅ Ensure WCAG AA contrast ratio (4.5:1 for text, 3:1 for UI)
+
+**DON'T:**
+- ❌ Use hardcoded colors like `text-red-500` - use `text-error` instead
+- ❌ Rely solely on color to convey meaning (add icons or text)
+- ❌ Use warning/error colors for decorative purposes
+- ❌ Skip testing in dark mode
 
 ## Typography
 

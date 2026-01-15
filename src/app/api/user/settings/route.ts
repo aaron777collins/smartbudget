@@ -8,6 +8,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { updateUserSettingsSchema } from '@/lib/validations';
+import { z } from 'zod';
 
 /**
  * GET /api/user/settings
@@ -72,24 +74,14 @@ export async function PATCH(request: NextRequest) {
     const userId = session.user.id;
     const body = await request.json();
 
-    // Validate and sanitize input
-    const allowedFields = [
-      'currency',
-      'dateFormat',
-      'firstDayOfWeek',
-      'theme',
-      'notificationsEnabled',
-      'emailDigest',
-      'digestFrequency',
-      'budgetAlertThreshold',
-      'hasCompletedOnboarding',
-      'onboardingStep',
-    ];
+    // Validate request body
+    const validatedData = updateUserSettingsSchema.parse(body);
 
+    // Build update data from validated fields
     const updateData: Record<string, any> = {};
-    for (const field of allowedFields) {
-      if (body[field] !== undefined) {
-        updateData[field] = body[field];
+    for (const [key, value] of Object.entries(validatedData)) {
+      if (value !== undefined) {
+        updateData[key] = value;
       }
     }
 
@@ -128,6 +120,14 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json(settings);
   } catch (error) {
     console.error('Error updating user settings:', error);
+
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Invalid data', issues: error.issues },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
       { error: 'Failed to update user settings' },
       { status: 500 }

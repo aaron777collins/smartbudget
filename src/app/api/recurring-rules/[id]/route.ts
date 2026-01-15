@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { Frequency } from '@prisma/client';
+import { updateRecurringRuleSchema } from '@/lib/validations';
+import { z } from 'zod';
 
 // GET - Fetch a specific recurring rule
 export async function GET(
@@ -55,26 +57,22 @@ export async function PATCH(
 
     const { id } = await params;
     const body = await request.json();
-    const { merchantName, frequency, amount, categoryId, nextDueDate } = body;
 
-    // Validate frequency if provided
-    if (frequency && !Object.values(Frequency).includes(frequency)) {
-      return NextResponse.json(
-        { error: 'Invalid frequency' },
-        { status: 400 }
-      );
-    }
+    // Validate request body
+    const validatedData = updateRecurringRuleSchema.parse(body);
+
+    // Build update data
+    const updateData: any = {};
+    if (validatedData.merchantName !== undefined) updateData.merchantName = validatedData.merchantName;
+    if (validatedData.frequency !== undefined) updateData.frequency = validatedData.frequency;
+    if (validatedData.amount !== undefined) updateData.amount = validatedData.amount;
+    if (validatedData.categoryId !== undefined) updateData.categoryId = validatedData.categoryId;
+    if (validatedData.nextDueDate !== undefined) updateData.nextDueDate = validatedData.nextDueDate;
 
     // Update recurring rule
     const recurringRule = await prisma.recurringRule.update({
       where: { id },
-      data: {
-        ...(merchantName && { merchantName }),
-        ...(frequency && { frequency }),
-        ...(amount !== undefined && { amount }),
-        ...(categoryId && { categoryId }),
-        ...(nextDueDate && { nextDueDate: new Date(nextDueDate) }),
-      },
+      data: updateData,
       include: {
         transactions: true,
         _count: {
@@ -86,6 +84,14 @@ export async function PATCH(
     return NextResponse.json({ recurringRule });
   } catch (error) {
     console.error('Error updating recurring rule:', error);
+
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Invalid data', issues: error.issues },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
       { error: 'Failed to update recurring rule' },
       { status: 500 }

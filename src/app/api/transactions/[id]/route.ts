@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { updateTransactionSchema } from '@/lib/validations';
+import { z } from 'zod';
 
 interface RouteParams {
   params: Promise<{
@@ -121,6 +123,9 @@ export async function PATCH(
     const { id } = await params;
     const body = await request.json();
 
+    // Validate request body
+    const validatedData = updateTransactionSchema.parse(body);
+
     // Verify transaction belongs to user
     const existingTransaction = await prisma.transaction.findFirst({
       where: {
@@ -136,23 +141,9 @@ export async function PATCH(
       );
     }
 
-    // Build update data
-    const updateData: any = {};
-
-    if (body.date !== undefined) updateData.date = new Date(body.date);
-    if (body.postedDate !== undefined) updateData.postedDate = body.postedDate ? new Date(body.postedDate) : null;
-    if (body.description !== undefined) updateData.description = body.description;
-    if (body.merchantName !== undefined) updateData.merchantName = body.merchantName;
-    if (body.amount !== undefined) updateData.amount = body.amount;
-    if (body.type !== undefined) updateData.type = body.type;
-    if (body.categoryId !== undefined) updateData.categoryId = body.categoryId;
-    if (body.subcategoryId !== undefined) updateData.subcategoryId = body.subcategoryId;
-    if (body.notes !== undefined) updateData.notes = body.notes;
-    if (body.isReconciled !== undefined) updateData.isReconciled = body.isReconciled;
-    if (body.isRecurring !== undefined) updateData.isRecurring = body.isRecurring;
-
     // Mark as user-corrected if category was changed
-    if (body.categoryId !== undefined && body.categoryId !== existingTransaction.categoryId) {
+    const updateData: any = { ...validatedData };
+    if (validatedData.categoryId !== undefined && validatedData.categoryId !== existingTransaction.categoryId) {
       updateData.userCorrected = true;
     }
 
@@ -200,6 +191,14 @@ export async function PATCH(
 
   } catch (error) {
     console.error('Transaction update error:', error);
+
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Invalid transaction data', issues: error.issues },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
       { error: 'Failed to update transaction', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }

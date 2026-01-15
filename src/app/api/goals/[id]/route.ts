@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { GoalType } from '@prisma/client';
+import { updateGoalSchema } from '@/lib/validations';
+import { z } from 'zod';
 
 interface RouteParams {
   params: Promise<{
@@ -81,52 +83,20 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const {
-      name,
-      type,
-      targetAmount,
-      currentAmount,
-      targetDate,
-      icon,
-      color,
-      isCompleted,
-    } = body;
 
-    // Validation
-    if (type && !Object.values(GoalType).includes(type)) {
-      return NextResponse.json(
-        {
-          error: `Invalid goal type. Must be one of: ${Object.values(GoalType).join(', ')}`,
-        },
-        { status: 400 }
-      );
-    }
-
-    if (targetAmount !== undefined && targetAmount <= 0) {
-      return NextResponse.json(
-        { error: 'Target amount must be greater than 0' },
-        { status: 400 }
-      );
-    }
-
-    if (currentAmount !== undefined && currentAmount < 0) {
-      return NextResponse.json(
-        { error: 'Current amount cannot be negative' },
-        { status: 400 }
-      );
-    }
+    // Validate request body
+    const validatedData = updateGoalSchema.parse(body);
 
     // Build update data object (only include fields that are provided)
     const updateData: any = {};
-    if (name !== undefined) updateData.name = name;
-    if (type !== undefined) updateData.type = type;
-    if (targetAmount !== undefined) updateData.targetAmount = targetAmount;
-    if (currentAmount !== undefined) updateData.currentAmount = currentAmount;
-    if (targetDate !== undefined)
-      updateData.targetDate = targetDate ? new Date(targetDate) : null;
-    if (icon !== undefined) updateData.icon = icon;
-    if (color !== undefined) updateData.color = color;
-    if (isCompleted !== undefined) updateData.isCompleted = isCompleted;
+    if (validatedData.name !== undefined) updateData.name = validatedData.name;
+    if (validatedData.type !== undefined) updateData.type = validatedData.type;
+    if (validatedData.targetAmount !== undefined) updateData.targetAmount = validatedData.targetAmount;
+    if (validatedData.currentAmount !== undefined) updateData.currentAmount = validatedData.currentAmount;
+    if (validatedData.targetDate !== undefined) updateData.targetDate = validatedData.targetDate;
+    if (validatedData.icon !== undefined) updateData.icon = validatedData.icon;
+    if (validatedData.color !== undefined) updateData.color = validatedData.color;
+    if (validatedData.isCompleted !== undefined) updateData.isCompleted = validatedData.isCompleted;
 
     const updatedGoal = await prisma.goal.update({
       where: {
@@ -138,6 +108,14 @@ export async function PATCH(
     return NextResponse.json(updatedGoal);
   } catch (error) {
     console.error('Error updating goal:', error);
+
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Invalid data', issues: error.issues },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
       { error: 'Failed to update goal' },
       { status: 500 }

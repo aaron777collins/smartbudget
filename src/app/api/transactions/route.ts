@@ -248,6 +248,14 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Transaction create error:', error);
+
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Invalid transaction data', issues: error.issues },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
       { error: 'Failed to create transaction', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }

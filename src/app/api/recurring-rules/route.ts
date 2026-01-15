@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { Frequency } from '@prisma/client';
+import { createRecurringRuleSchema } from '@/lib/validations';
+import { z } from 'zod';
 
 // GET - Fetch all recurring rules
 export async function GET(request: NextRequest) {
@@ -45,32 +47,20 @@ export async function POST(request: NextRequest) {
     const userId = session.user.id;
 
     const body = await request.json();
-    const { merchantName, frequency, amount, categoryId, nextDueDate, transactionIds } = body;
 
-    // Validate required fields
-    if (!merchantName || !frequency || !amount || !categoryId || !nextDueDate) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      );
-    }
+    // Validate request body
+    const validatedData = createRecurringRuleSchema.parse(body);
 
-    // Validate frequency
-    if (!Object.values(Frequency).includes(frequency)) {
-      return NextResponse.json(
-        { error: 'Invalid frequency' },
-        { status: 400 }
-      );
-    }
+    const { transactionIds } = body;
 
     // Create recurring rule
     const recurringRule = await prisma.recurringRule.create({
       data: {
-        merchantName,
-        frequency,
-        amount,
-        categoryId,
-        nextDueDate: new Date(nextDueDate),
+        merchantName: validatedData.merchantName,
+        frequency: validatedData.frequency,
+        amount: validatedData.amount,
+        categoryId: validatedData.categoryId,
+        nextDueDate: validatedData.nextDueDate,
       },
       include: {
         transactions: true,
@@ -97,6 +87,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ recurringRule }, { status: 201 });
   } catch (error) {
     console.error('Error creating recurring rule:', error);
+
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Invalid data', issues: error.issues },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
       { error: 'Failed to create recurring rule' },
       { status: 500 }

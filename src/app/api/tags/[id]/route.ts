@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { updateTagSchema } from '@/lib/validations';
+import { z } from 'zod';
 
 // GET /api/tags/:id - Get tag details
 export async function GET(
@@ -64,21 +66,19 @@ export async function PATCH(
 
     const body = await request.json();
 
+    // Validate request body
+    const validatedData = updateTagSchema.parse(body);
+
     // Build update data
     const updateData: any = {};
 
-    if (body.name !== undefined) {
-      const normalizedName = body.name.trim();
-      if (!normalizedName) {
-        return NextResponse.json({ error: 'Tag name cannot be empty' }, { status: 400 });
-      }
-
+    if (validatedData.name !== undefined) {
       // Check for duplicate tag name (case-insensitive, excluding current tag)
       const duplicate = await prisma.tag.findFirst({
         where: {
           userId,
           name: {
-            equals: normalizedName,
+            equals: validatedData.name,
             mode: 'insensitive',
           },
           id: { not: tagId },
@@ -92,11 +92,11 @@ export async function PATCH(
         );
       }
 
-      updateData.name = normalizedName;
+      updateData.name = validatedData.name;
     }
 
-    if (body.color !== undefined) {
-      updateData.color = body.color;
+    if (validatedData.color !== undefined) {
+      updateData.color = validatedData.color;
     }
 
     // Update tag
@@ -113,6 +113,14 @@ export async function PATCH(
     return NextResponse.json(tag);
   } catch (error) {
     console.error('Error updating tag:', error);
+
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Invalid data', issues: error.issues },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
       { error: 'Failed to update tag' },
       { status: 500 }
