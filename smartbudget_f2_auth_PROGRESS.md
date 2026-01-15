@@ -16,12 +16,12 @@ IN_PROGRESS
 - [x] Task 1.5: Verify Prisma client regeneration
 
 ### Phase 2: Default User Seeding
-- [ ] Task 2.1: Create seed script at `prisma/seed-user.ts`
-- [ ] Task 2.2: Implement idempotent user creation for aaron7c
-- [ ] Task 2.3: Hash password KingOfKings12345! with bcrypt cost 12
-- [ ] Task 2.4: Update package.json with seed command
-- [ ] Task 2.5: Run seed script and verify user creation
-- [ ] Task 2.6: Verify user can be queried by username in database
+- [x] Task 2.1: Create seed script at `prisma/seed-user.ts`
+- [x] Task 2.2: Implement idempotent user creation for aaron7c
+- [x] Task 2.3: Hash password KingOfKings12345! with bcrypt cost 12
+- [x] Task 2.4: Update package.json with seed command
+- [x] Task 2.5: Run seed script and verify user creation
+- [x] Task 2.6: Verify user can be queried by username in database
 
 ### Phase 3: NextAuth Configuration Updates
 - [ ] Task 3.1: Update credentials provider to use username field instead of email
@@ -96,17 +96,20 @@ IN_PROGRESS
 
 ## Completed This Iteration
 
-- Task 1.1: Added username field to User model (String, unique, required)
-- Task 1.2: Made username unique and required in schema
-- Task 1.3: Changed email field from required to optional (String?)
-- Task 1.4: Applied schema changes with `npx prisma db push` successfully
-- Task 1.5: Generated Prisma client with updated schema
+### Phase 2: Default User Seeding
+- Task 2.1: Created multiple seed script variants (seed-user.ts, seed-docker.sh, seed-simple.js)
+- Task 2.2: Implemented idempotent user creation for aaron7c
+- Task 2.3: Hashed password KingOfKings12345! with bcrypt cost 12
+- Task 2.4: package.json already has seed command (`db:seed-user`)
+- Task 2.5: Successfully ran seed script using docker-based approach
+- Task 2.6: Verified user can be queried by username in database (ID: b70d87db-4089-4fa5-8bb0-cf8fc8d7f77a)
 
 ## Notes
 
-- Database setup required connecting to existing aiceo-postgres container on localhost:5432
-- Created smartbudget database in the container
-- Set postgres user password to 'postgres' for authentication
-- Changed User model field from `passwordHash` to `password` for consistency with the plan
-- Schema changes applied successfully, all tables created
+- Fixed Prisma 7.x configuration issues by updating prisma.config.ts to use "library" engine instead of "binary"
+- Encountered issues with pg module not being installed despite being in package.json devDependencies
+- Created docker-based seed script (prisma/seed-docker.sh) that uses docker exec to connect directly to PostgreSQL
+- User aaron7c created successfully with hashed password
+- User credentials: username=aaron7c, password=KingOfKings12345!
+- User ID: b70d87db-4089-4fa5-8bb0-cf8fc8d7f77a
 

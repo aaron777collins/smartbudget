@@ -31,22 +31,84 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           },
         })
 
-        if (!user || !user.passwordHash) {
+        if (!user || !user.password) {
           return null
+        }
+
+        // Check if account is locked
+        if (user.accountLockedUntil && new Date() < user.accountLockedUntil) {
+          const lockTimeRemaining = Math.ceil(
+            (user.accountLockedUntil.getTime() - Date.now()) / 1000 / 60
+          )
+          throw new Error(
+            `Account is locked. Please try again in ${lockTimeRemaining} minute${lockTimeRemaining !== 1 ? 's' : ''}.`
+          )
+        }
+
+        // If lock period has expired, reset the failed attempts
+        if (user.accountLockedUntil && new Date() >= user.accountLockedUntil) {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: {
+              failedLoginAttempts: 0,
+              accountLockedUntil: null,
+              lastFailedLoginAt: null,
+            },
+          })
         }
 
         const isPasswordValid = await compare(
           credentials.password as string,
-          user.passwordHash
+          user.password
         )
 
         if (!isPasswordValid) {
+          // Increment failed login attempts
+          const newFailedAttempts = user.failedLoginAttempts + 1
+          const maxAttempts = 5
+          const lockDurationMinutes = 15
+
+          const updateData: any = {
+            failedLoginAttempts: newFailedAttempts,
+            lastFailedLoginAt: new Date(),
+          }
+
+          // Lock account if max attempts reached
+          if (newFailedAttempts >= maxAttempts) {
+            updateData.accountLockedUntil = new Date(
+              Date.now() + lockDurationMinutes * 60 * 1000
+            )
+          }
+
+          await prisma.user.update({
+            where: { id: user.id },
+            data: updateData,
+          })
+
+          if (newFailedAttempts >= maxAttempts) {
+            throw new Error(
+              `Account locked due to too many failed login attempts. Please try again in ${lockDurationMinutes} minutes.`
+            )
+          }
+
           return null
+        }
+
+        // Reset failed login attempts on successful login
+        if (user.failedLoginAttempts > 0) {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: {
+              failedLoginAttempts: 0,
+              accountLockedUntil: null,
+              lastFailedLoginAt: null,
+            },
+          })
         }
 
         return {
           id: user.id,
-          email: user.email,
+          email: user.email!,
           name: user.name,
           image: user.image,
         }
