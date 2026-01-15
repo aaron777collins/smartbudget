@@ -14,6 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { formatCurrency } from '@/lib/utils';
 import type { TimeframeValue } from './timeframe-selector';
 import { getPeriodForAPI, buildTimeframeParams } from '@/lib/timeframe';
+import { FadeIn } from '@/components/ui/animated';
 
 interface CategoryData {
   id: string;
@@ -196,57 +197,62 @@ export function CategoryBreakdownChart({ timeframe }: CategoryBreakdownChartProp
         </div>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Pie Chart */}
-          <div className="flex-1" role="img" aria-label={`Category breakdown pie chart showing spending across ${data.summary.categoryCount} categories. Total spending: ${formatCurrency(data.totalSpending)}.${data.topCategories.length > 0 ? ` Top category: ${data.topCategories[0].name} with ${formatCurrency(data.topCategories[0].amount)}.` : ''}`}>
-            <ResponsiveContainer width="100%" height={400}>
-              <PieChart>
-                <Pie
-                  data={data.chartData as any[]}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={CustomLabel}
-                  outerRadius={120}
-                  fill="#8884d8"
-                  dataKey="amount"
-                >
-                  {data.chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip content={<CustomTooltip />} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
+        <FadeIn duration={0.5} delay={0.1}>
+          <div className="flex flex-col lg:flex-row gap-6">
+            {/* Pie Chart */}
+            <div className="flex-1" role="img" aria-label={`Category breakdown pie chart showing spending across ${data.summary.categoryCount} categories. Total spending: ${formatCurrency(data.totalSpending)}.${data.topCategories.length > 0 ? ` Top category: ${data.topCategories[0].name} with ${formatCurrency(data.topCategories[0].amount)}.` : ''}`}>
+              <ResponsiveContainer width="100%" height={400}>
+                <PieChart>
+                  <Pie
+                    data={data.chartData as any[]}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={CustomLabel}
+                    outerRadius={120}
+                    fill="#8884d8"
+                    dataKey="amount"
+                    animationBegin={0}
+                    animationDuration={800}
+                    animationEasing="ease-out"
+                  >
+                    {data.chartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<CustomTooltip />} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
 
-          {/* Top Categories List */}
-          <div className="lg:w-64 space-y-3">
-            <h3 className="font-semibold text-sm">Top Categories</h3>
-            {data.topCategories.map((category, index) => (
-              <div
-                key={category.id}
-                className="flex items-center justify-between p-2 rounded-lg bg-muted/50"
-              >
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <div
-                    className="h-3 w-3 rounded-full flex-shrink-0"
-                    style={{ backgroundColor: category.color }}
-                  />
-                  <span className="text-sm font-medium truncate">{category.name}</span>
-                </div>
-                <div className="text-right flex-shrink-0 ml-2">
-                  <div className="text-sm font-semibold font-mono">
-                    {formatCurrency(category.amount)}
+            {/* Top Categories List */}
+            <div className="lg:w-64 space-y-3">
+              <h3 className="font-semibold text-sm">Top Categories</h3>
+              {data.topCategories.map((category, index) => (
+                <div
+                  key={category.id}
+                  className="flex items-center justify-between p-2 rounded-lg bg-muted/50"
+                >
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <div
+                      className="h-3 w-3 rounded-full flex-shrink-0"
+                      style={{ backgroundColor: category.color }}
+                    />
+                    <span className="text-sm font-medium truncate">{category.name}</span>
                   </div>
-                  <div className="text-xs text-muted-foreground font-mono">
-                    {category.percentage.toFixed(1)}%
+                  <div className="text-right flex-shrink-0 ml-2">
+                    <div className="text-sm font-semibold font-mono">
+                      {formatCurrency(category.amount)}
+                    </div>
+                    <div className="text-xs text-muted-foreground font-mono">
+                      {category.percentage.toFixed(1)}%
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        </FadeIn>
       </CardContent>
     </Card>
   );

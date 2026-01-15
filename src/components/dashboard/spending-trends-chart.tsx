@@ -16,6 +16,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { formatCurrency } from '@/lib/utils';
 import type { TimeframeValue } from './timeframe-selector';
 import { getMonthsFromTimeframe, buildTimeframeParams } from '@/lib/timeframe';
+import { FadeIn } from '@/components/ui/animated';
 
 interface CategoryMetadata {
   id: string;
