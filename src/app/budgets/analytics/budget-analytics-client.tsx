@@ -475,31 +475,39 @@ export default function BudgetAnalyticsClient() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ResponsiveContainer width="100%" height={200}>
-                    <LineChart data={trend.data}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="month" />
-                      <YAxis />
-                      <Tooltip
-                        formatter={(value: number | undefined) => value ? `$${value.toFixed(2)}` : '$0.00'}
-                      />
-                      <Legend />
-                      <Line
-                        type="monotone"
-                        dataKey="budgeted"
-                        stroke={trend.categoryInfo.color}
-                        strokeDasharray="5 5"
-                        name="Budgeted"
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="spent"
-                        stroke={trend.categoryInfo.color}
-                        strokeWidth={2}
-                        name="Spent"
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
+                  <FadeIn duration={0.5} delay={0.1}>
+                    <ResponsiveContainer width="100%" height={200}>
+                      <LineChart data={trend.data}>
+                        <CartesianGrid strokeDasharray="3 3" animationDuration={500} />
+                        <XAxis dataKey="month" animationDuration={500} />
+                        <YAxis animationDuration={500} />
+                        <Tooltip
+                          formatter={(value: number | undefined) => value ? `$${value.toFixed(2)}` : '$0.00'}
+                        />
+                        <Legend />
+                        <Line
+                          type="monotone"
+                          dataKey="budgeted"
+                          stroke={trend.categoryInfo.color}
+                          strokeDasharray="5 5"
+                          name="Budgeted"
+                          animationBegin={0}
+                          animationDuration={800}
+                          animationEasing="ease-out"
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="spent"
+                          stroke={trend.categoryInfo.color}
+                          strokeWidth={2}
+                          name="Spent"
+                          animationBegin={100}
+                          animationDuration={800}
+                          animationEasing="ease-out"
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </FadeIn>
                 </CardContent>
               </Card>
             ))
