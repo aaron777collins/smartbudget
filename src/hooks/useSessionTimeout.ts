@@ -29,12 +29,23 @@ export function useSessionTimeout() {
   const [lastActivity, setLastActivity] = useState<number>(Date.now())
 
   // Update last activity on user interaction
-  const updateActivity = useCallback(() => {
+  const updateActivity = useCallback(async () => {
     setLastActivity(Date.now())
+
+    // Update activity in the database (non-blocking)
+    try {
+      await fetch('/api/auth/activity', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      })
+    } catch (error) {
+      // Silently fail - don't interrupt user experience
+      console.error('Failed to update activity:', error)
+    }
   }, [])
 
   // Reset activity timer (called when user dismisses warning)
-  const resetActivity = useCallback(() => {
+  const resetActivity = useCallback(async () => {
     setLastActivity(Date.now())
     setState((prev) => ({
       ...prev,
@@ -42,6 +53,17 @@ export function useSessionTimeout() {
       isExpired: false,
       timeRemaining: SESSION_CONFIG.INACTIVITY_TIMEOUT,
     }))
+
+    // Update activity in the database to extend session
+    try {
+      await fetch('/api/auth/activity', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      })
+    } catch (error) {
+      // Silently fail - don't interrupt user experience
+      console.error('Failed to update activity:', error)
+    }
   }, [])
 
   // Setup activity listeners
