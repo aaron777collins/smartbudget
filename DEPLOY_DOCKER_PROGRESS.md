@@ -24,7 +24,7 @@ IN_PROGRESS
 - [x] Task 3.3: Verify health check passes
 
 ### Block 4: Post-Deployment Testing
-- [ ] Task 4.1: Test local container access
+- [x] Task 4.1: Test local container access
 - [ ] Task 4.2: Test CSS rendering
 - [ ] Task 4.3: Test authentication flow
 - [ ] Task 4.4: Test database connection
@@ -116,6 +116,16 @@ IN_PROGRESS
   - Health check interval: 30 seconds
   - Multiple successful health checks confirmed
   - Container is stable and responsive
+
+### Iteration 10
+- Task 4.1: Test local container access - PASSED
+  - Command: `curl -s http://localhost:3002`
+  - ✅ Container responds successfully with HTML content
+  - ✅ Next.js app serving correctly
+  - ✅ No 500 errors
+  - ✅ Stylesheet references present in HTML
+  - ✅ Port mapping 3002 → 3000 working correctly
+  - Response includes SmartBudget HTML with navigation, theme toggle, and all expected UI elements
 
 ## Notes
 - All required environment variables are present in .env file
