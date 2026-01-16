@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
-import { COLORS } from '@/lib/design-tokens';
+import { COLORS, ELEVATION } from '@/lib/design-tokens';
 import { useCounterAnimation } from '@/hooks/use-counter-animation';
 
 interface NetWorthCardProps {
@@ -42,7 +42,7 @@ export function NetWorthCard({
   };
 
   return (
-    <Card className={`transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 duration-300 ${COLORS.gradient.blue}`}>
+    <Card className={`${ELEVATION.medium} transition-all duration-300 hover:${ELEVATION.highest} hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 duration-300 ${COLORS.gradient.blue}`}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">Net Worth</CardTitle>
         <svg

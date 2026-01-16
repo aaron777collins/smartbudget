@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { CreditCard } from 'lucide-react';
 import { useCounterAnimation } from '@/hooks/use-counter-animation';
-import { COLORS } from '@/lib/design-tokens';
+import { COLORS, ELEVATION } from '@/lib/design-tokens';
 
 interface MonthlySpendingCardProps {
   current: number;
@@ -44,7 +44,7 @@ export function MonthlySpendingCard({
   };
 
   return (
-    <Card className={`transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 duration-300 delay-100 ${COLORS.gradient.orange}`}>
+    <Card className={`${ELEVATION.medium} transition-all duration-300 hover:${ELEVATION.highest} hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 duration-300 delay-100 ${COLORS.gradient.orange}`}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">Monthly Spending</CardTitle>
         <CreditCard className="h-4 w-4 text-muted-foreground transition-transform duration-300 group-hover:scale-110" />

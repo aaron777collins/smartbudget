@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowUpCircle, ArrowDownCircle, MinusCircle } from 'lucide-react';
 import { useCounterAnimation } from '@/hooks/use-counter-animation';
-import { COLORS } from '@/lib/design-tokens';
+import { COLORS, ELEVATION } from '@/lib/design-tokens';
 
 interface CashFlowCardProps {
   current: number;
@@ -59,7 +59,7 @@ export function CashFlowCard({
   };
 
   return (
-    <Card className={`transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 duration-300 delay-200 ${COLORS.gradient.purple}`}>
+    <Card className={`${ELEVATION.medium} transition-all duration-300 hover:${ELEVATION.highest} hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 duration-300 delay-200 ${COLORS.gradient.purple}`}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">Cash Flow</CardTitle>
         <div className="animate-in zoom-in duration-200 delay-300">

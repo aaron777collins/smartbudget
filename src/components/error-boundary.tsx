@@ -4,6 +4,7 @@ import { Component, ReactNode } from 'react';
 import * as Sentry from '@sentry/nextjs';
 import { Button } from '@/components/ui/button';
 import { AlertCircle } from 'lucide-react';
+import { ELEVATION } from '@/lib/design-tokens';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -62,7 +63,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       // Default fallback UI
       return (
         <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-          <div className="w-full max-w-md rounded-lg border border-red-200 bg-white p-8 shadow-lg">
+          <div className={`w-full max-w-md rounded-lg border border-red-200 bg-white p-8 ${ELEVATION.high}`}>
             <div className="mb-4 flex items-center justify-center">
               <div className="rounded-full bg-red-100 p-3">
                 <AlertCircle className="h-8 w-8 text-red-600" />

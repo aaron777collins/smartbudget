@@ -12,6 +12,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatCurrency } from '@/lib/utils';
+import { ELEVATION } from '@/lib/design-tokens';
 import type { TimeframeValue } from './timeframe-selector';
 import { getPeriodForAPI, buildTimeframeParams } from '@/lib/timeframe';
 
@@ -50,7 +51,7 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
-      <div className="rounded-lg border bg-background p-3 shadow-md">
+      <div className={`rounded-lg border bg-background p-3 ${ELEVATION.medium}`}>
         <p className="font-semibold mb-1">{data.name}</p>
         <p className="text-sm">
           Amount: <span className="font-bold">{formatCurrency(data.amount)}</span>
