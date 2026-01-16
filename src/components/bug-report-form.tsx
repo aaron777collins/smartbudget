@@ -2,8 +2,7 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Input } from "@/components/ui/input"
+import { FormField } from "@/components/ui/form-field"
 import { Label } from "@/components/ui/label"
 import {
   Select,
@@ -34,12 +33,14 @@ export function BugReportForm({ onSuccess }: BugReportFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle")
   const [errorMessage, setErrorMessage] = useState("")
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
     setSubmitStatus("idle")
     setErrorMessage("")
+    setFieldErrors({})
 
     // Collect browser info automatically
     const browserDetails = {
@@ -70,6 +71,9 @@ export function BugReportForm({ onSuccess }: BugReportFormProps) {
 
       if (!response.ok) {
         const error = await response.json()
+        if (error.fieldErrors) {
+          setFieldErrors(error.fieldErrors)
+        }
         throw new Error(error.message || "Failed to submit feedback")
       }
 
@@ -159,90 +163,79 @@ export function BugReportForm({ onSuccess }: BugReportFormProps) {
         </div>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="title">Title *</Label>
-        <Input
-          id="title"
-          placeholder="Brief summary of the issue or suggestion"
-          value={title}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
-          required
-          maxLength={200}
-        />
-      </div>
+      <FormField
+        id="title"
+        label="Title"
+        type="text"
+        placeholder="Brief summary of the issue or suggestion"
+        value={title}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
+        required
+        maxLength={200}
+        showCharCount
+        error={fieldErrors.title}
+      />
 
-      <div className="space-y-2">
-        <Label htmlFor="description">Description *</Label>
-        <Textarea
-          id="description"
-          placeholder="Provide a detailed description..."
-          value={description}
-          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value)}
-          required
-          rows={4}
-          className="resize-none"
-        />
-      </div>
+      <FormField
+        id="description"
+        label="Description"
+        type="textarea"
+        placeholder="Provide a detailed description..."
+        value={description}
+        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value)}
+        required
+        rows={4}
+        error={fieldErrors.description}
+      />
 
       {type === "bug" && (
         <>
-          <div className="space-y-2">
-            <Label htmlFor="steps">Steps to Reproduce</Label>
-            <Textarea
-              id="steps"
-              placeholder="1. Go to...&#10;2. Click on...&#10;3. See error..."
-              value={stepsToReproduce}
-              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setStepsToReproduce(e.target.value)}
-              rows={4}
-              className="resize-none font-mono text-sm"
-            />
-            <p className="text-xs text-muted-foreground">
-              Help us reproduce the bug by listing the exact steps
-            </p>
-          </div>
+          <FormField
+            id="steps"
+            label="Steps to Reproduce"
+            type="textarea"
+            placeholder="1. Go to...&#10;2. Click on...&#10;3. See error..."
+            value={stepsToReproduce}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setStepsToReproduce(e.target.value)}
+            rows={4}
+            className="font-mono text-sm"
+            helperText="Help us reproduce the bug by listing the exact steps"
+          />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="expected">Expected Behavior</Label>
-              <Textarea
-                id="expected"
-                placeholder="What should happen?"
-                value={expectedBehavior}
-                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setExpectedBehavior(e.target.value)}
-                rows={3}
-                className="resize-none"
-              />
-            </div>
+            <FormField
+              id="expected"
+              label="Expected Behavior"
+              type="textarea"
+              placeholder="What should happen?"
+              value={expectedBehavior}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setExpectedBehavior(e.target.value)}
+              rows={3}
+            />
 
-            <div className="space-y-2">
-              <Label htmlFor="actual">Actual Behavior</Label>
-              <Textarea
-                id="actual"
-                placeholder="What actually happens?"
-                value={actualBehavior}
-                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setActualBehavior(e.target.value)}
-                rows={3}
-                className="resize-none"
-              />
-            </div>
+            <FormField
+              id="actual"
+              label="Actual Behavior"
+              type="textarea"
+              placeholder="What actually happens?"
+              value={actualBehavior}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setActualBehavior(e.target.value)}
+              rows={3}
+            />
           </div>
         </>
       )}
 
-      <div className="space-y-2">
-        <Label htmlFor="browser">Additional Information</Label>
-        <Textarea
-          id="browser"
-          placeholder="Any other details that might help (screenshots description, etc.)"
-          value={browserInfo}
-          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setBrowserInfo(e.target.value)}
-          rows={2}
-          className="resize-none"
-        />
-        <p className="text-xs text-muted-foreground">
-          Browser info will be collected automatically
-        </p>
-      </div>
+      <FormField
+        id="browser"
+        label="Additional Information"
+        type="textarea"
+        placeholder="Any other details that might help (screenshots description, etc.)"
+        value={browserInfo}
+        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setBrowserInfo(e.target.value)}
+        rows={2}
+        helperText="Browser info will be collected automatically"
+      />
 
       <div className="flex justify-end gap-3 pt-4 border-t">
         <Button
