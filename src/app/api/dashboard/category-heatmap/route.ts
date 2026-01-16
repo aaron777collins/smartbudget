@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { startOfMonth, endOfMonth, subMonths, format } from 'date-fns';
+import {
+  getCached,
+  setCached,
+  generateCacheKey,
+  CACHE_KEYS,
+  CACHE_TTL,
+} from '@/lib/redis-cache';
 
 export async function GET(request: NextRequest) {
   try {
@@ -17,6 +24,13 @@ export async function GET(request: NextRequest) {
     // Get query parameters for timeframe (default to 12 months)
     const searchParams = request.nextUrl.searchParams;
     const months = parseInt(searchParams.get('months') || '12', 10);
+
+    // Check cache first
+    const cacheKey = generateCacheKey(CACHE_KEYS.DASHBOARD_CATEGORY_HEATMAP, userId, { months });
+    const cached = await getCached<unknown>(cacheKey);
+    if (cached) {
+      return NextResponse.json(cached);
+    }
 
     // Get all categories first
     const categories = await prisma.category.findMany({
@@ -167,7 +181,7 @@ export async function GET(request: NextRequest) {
     // If no data, set sensible defaults
     if (minValue === Infinity) minValue = 0;
 
-    return NextResponse.json({
+    const responseData = {
       data: heatmapData,
       scale: {
         min: minValue,
@@ -176,7 +190,12 @@ export async function GET(request: NextRequest) {
       period: {
         months,
       },
-    });
+    };
+
+    // Cache the response
+    await setCached(cacheKey, responseData, CACHE_TTL.DASHBOARD);
+
+    return NextResponse.json(responseData);
   } catch (error) {
     console.error('Category heatmap error:', error);
     return NextResponse.json(

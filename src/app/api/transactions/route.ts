@@ -3,6 +3,7 @@ import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import type { TransactionType } from '@prisma/client';
 import { getTransactionsQuerySchema, validateQueryParams } from '@/lib/validation';
+import { invalidateDashboardCache } from '@/lib/redis-cache';
 
 // GET /api/transactions - List transactions with filtering
 export async function GET(request: NextRequest) {
@@ -273,6 +274,9 @@ export async function POST(request: NextRequest) {
         }
       }
     });
+
+    // Invalidate dashboard cache after transaction creation
+    await invalidateDashboardCache(userId);
 
     return NextResponse.json(transaction, { status: 201 });
 

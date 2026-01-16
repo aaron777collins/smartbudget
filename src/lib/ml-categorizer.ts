@@ -12,6 +12,12 @@
 
 import { pipeline, env, cos_sim } from '@xenova/transformers';
 import { prisma } from './prisma';
+import {
+  getCached,
+  setCached,
+  CACHE_KEYS,
+  CACHE_TTL,
+} from './redis-cache';
 
 // Configure Transformers.js to use local cache
 env.cacheDir = './.transformers-cache';
@@ -90,22 +96,34 @@ interface TrainingExample {
   embedding?: number[];
 }
 
+// In-memory fallback for when Redis is unavailable
 let trainingData: TrainingExample[] | null = null;
 let trainingDataLastLoaded: number = 0;
 const TRAINING_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 /**
- * Load training data from merchant knowledge base
+ * Load training data from merchant knowledge base with Redis caching
  */
 async function loadTrainingData(): Promise<TrainingExample[]> {
   const now = Date.now();
 
-  // Use cached training data if recent
+  // Try Redis cache first (shared across instances)
+  const cacheKey = `${CACHE_KEYS.ML_TRAINING_DATA}:global`;
+  const cached = await getCached<TrainingExample[]>(cacheKey);
+  if (cached && cached.length > 0) {
+    console.log(`[ML] Loaded ${cached.length} training examples from Redis cache`);
+    trainingData = cached;
+    trainingDataLastLoaded = now;
+    return cached;
+  }
+
+  // Use in-memory cache if Redis unavailable and data is recent
   if (trainingData && (now - trainingDataLastLoaded) < TRAINING_CACHE_DURATION) {
+    console.log(`[ML] Using in-memory cached training data (${trainingData.length} examples)`);
     return trainingData;
   }
 
-  console.log('Loading ML training data from merchant knowledge base...');
+  console.log('[ML] Loading training data from database...');
 
   // Fetch all categorized merchants from knowledge base
   const merchants = await prisma.merchantKnowledge.findMany({
@@ -134,23 +152,38 @@ async function loadTrainingData(): Promise<TrainingExample[]> {
     }));
 
   trainingDataLastLoaded = now;
-  console.log(`Loaded ${trainingData.length} training examples`);
+  console.log(`[ML] Loaded ${trainingData.length} training examples from database`);
+
+  // Cache in Redis (permanent with manual invalidation)
+  await setCached(cacheKey, trainingData, CACHE_TTL.ML_EMBEDDINGS);
 
   return trainingData || [];
 }
 
 /**
- * Generate embeddings for all training data (lazy initialization)
+ * Generate embeddings for all training data (lazy initialization) with Redis caching
  */
 async function ensureTrainingEmbeddings(): Promise<TrainingExample[]> {
   const data = await loadTrainingData();
 
-  // Check if embeddings already generated
+  // Try to get cached embeddings from Redis
+  const embeddingsCacheKey = `${CACHE_KEYS.ML_EMBEDDINGS}:global`;
+  const cachedEmbeddings = await getCached<TrainingExample[]>(embeddingsCacheKey);
+
+  if (cachedEmbeddings && cachedEmbeddings.length > 0 && cachedEmbeddings[0].embedding) {
+    console.log(`[ML] Loaded ${cachedEmbeddings.length} pre-computed embeddings from Redis cache`);
+    // Update in-memory data with cached embeddings
+    trainingData = cachedEmbeddings;
+    return cachedEmbeddings;
+  }
+
+  // Check if embeddings already generated in memory
   if (data.length > 0 && data[0].embedding) {
+    console.log('[ML] Using in-memory cached embeddings');
     return data;
   }
 
-  console.log('Generating embeddings for training data...');
+  console.log('[ML] Generating embeddings for training data...');
 
   // Generate embeddings in batches to avoid memory issues
   const batchSize = 50;
@@ -163,10 +196,14 @@ async function ensureTrainingEmbeddings(): Promise<TrainingExample[]> {
         }
       })
     );
-    console.log(`Generated embeddings for ${Math.min(i + batchSize, data.length)}/${data.length} examples`);
+    console.log(`[ML] Generated embeddings for ${Math.min(i + batchSize, data.length)}/${data.length} examples`);
   }
 
-  console.log('All training embeddings generated');
+  console.log('[ML] All training embeddings generated');
+
+  // Cache embeddings in Redis (permanent with manual invalidation)
+  await setCached(embeddingsCacheKey, data, CACHE_TTL.ML_EMBEDDINGS);
+
   return data;
 }
 

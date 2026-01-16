@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { invalidateDashboardCache } from '@/lib/redis-cache';
 
 interface RouteParams {
   params: Promise<{
@@ -196,6 +197,9 @@ export async function PATCH(
       }
     });
 
+    // Invalidate dashboard cache after transaction update
+    await invalidateDashboardCache(userId);
+
     return NextResponse.json(transaction);
 
   } catch (error) {
@@ -243,6 +247,9 @@ export async function DELETE(
     await prisma.transaction.delete({
       where: { id }
     });
+
+    // Invalidate dashboard cache after transaction deletion
+    await invalidateDashboardCache(userId);
 
     return NextResponse.json({ success: true });
 

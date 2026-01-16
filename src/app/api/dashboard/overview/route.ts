@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { startOfMonth, endOfMonth, subMonths, startOfDay, endOfDay } from 'date-fns';
+import {
+  getCached,
+  setCached,
+  generateCacheKey,
+  CACHE_KEYS,
+  CACHE_TTL,
+} from '@/lib/redis-cache';
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,6 +20,13 @@ export async function GET(request: NextRequest) {
 
     const userId = session.user.id;
     const now = new Date();
+
+    // Check cache first
+    const cacheKey = generateCacheKey(CACHE_KEYS.DASHBOARD_OVERVIEW, userId);
+    const cached = await getCached<unknown>(cacheKey);
+    if (cached) {
+      return NextResponse.json(cached);
+    }
     const currentMonthStart = startOfMonth(now);
     const currentMonthEnd = endOfMonth(now);
     const lastMonthStart = startOfMonth(subMonths(now, 1));
@@ -243,7 +257,7 @@ export async function GET(request: NextRequest) {
     const currentDay = now.getDate();
     const daysRemaining = daysInMonth - currentDay;
 
-    return NextResponse.json({
+    const responseData = {
       netWorth: {
         current: netWorth,
         change: netWorthChange,
@@ -271,7 +285,12 @@ export async function GET(request: NextRequest) {
         projectedEndOfMonth: monthlyIncome - monthlySpending,
       },
       monthlyData,
-    });
+    };
+
+    // Cache the response
+    await setCached(cacheKey, responseData, CACHE_TTL.DASHBOARD);
+
+    return NextResponse.json(responseData);
   } catch (error) {
     console.error('Dashboard overview error:', error);
     return NextResponse.json(

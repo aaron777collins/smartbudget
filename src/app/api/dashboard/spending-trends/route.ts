@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { startOfMonth, endOfMonth, subMonths, format } from 'date-fns';
+import {
+  getCached,
+  setCached,
+  generateCacheKey,
+  CACHE_KEYS,
+  CACHE_TTL,
+} from '@/lib/redis-cache';
 
 export async function GET(request: NextRequest) {
   try {
@@ -17,6 +24,13 @@ export async function GET(request: NextRequest) {
     // Get query parameters for timeframe (default to 12 months)
     const searchParams = request.nextUrl.searchParams;
     const months = parseInt(searchParams.get('months') || '12', 10);
+
+    // Check cache first
+    const cacheKey = generateCacheKey(CACHE_KEYS.DASHBOARD_SPENDING_TRENDS, userId, { months });
+    const cached = await getCached<unknown>(cacheKey);
+    if (cached) {
+      return NextResponse.json(cached);
+    }
 
     // Get spending data for the last N months, grouped by category
     // OPTIMIZED: Single query instead of N queries
@@ -155,7 +169,7 @@ export async function GET(request: NextRequest) {
       color: info.color,
     }));
 
-    return NextResponse.json({
+    const responseData = {
       chartData,
       categories: categoryMetadata,
       summary: {
@@ -164,7 +178,12 @@ export async function GET(request: NextRequest) {
         highestMonth: monthlyData.reduce((max, m) => m.total > max.total ? m : max, monthlyData[0]),
         lowestMonth: monthlyData.reduce((min, m) => m.total < min.total ? m : min, monthlyData[0]),
       },
-    });
+    };
+
+    // Cache the response
+    await setCached(cacheKey, responseData, CACHE_TTL.DASHBOARD);
+
+    return NextResponse.json(responseData);
   } catch (error) {
     console.error('Spending trends error:', error);
     return NextResponse.json(
