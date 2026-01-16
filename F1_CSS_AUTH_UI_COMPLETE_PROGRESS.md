@@ -171,7 +171,7 @@ Block 6 (Testing - FINAL):
 
 ### Phase 2: Update Authentication Schema
 
-- [ ] Task 2.1: Update Prisma User model
+- [x] Task 2.1: Update Prisma User model
   - Add `username` field (String, @unique, required)
   - Keep `email` field (String, @unique, optional) for backward compatibility
   - Ensure `passwordHash` remains optional (for OAuth users)
@@ -418,6 +418,15 @@ Block 6 (Testing - FINAL):
 ---
 
 ## Completed This Iteration
+
+**Task 2.1: Update Prisma User model** ✓
+- Added `username` field (String, @unique, required) to User model
+- Changed `email` field from required to optional (@unique preserved)
+- Kept `passwordHash` as optional for OAuth users
+- Added index on username field for efficient queries
+- Ready for migration in next task
+
+## Previously Completed This Session
 
 **Task 1.5: Test Tailwind classes render in browser** ✓
 - Started Next.js dev server on http://localhost:3000
