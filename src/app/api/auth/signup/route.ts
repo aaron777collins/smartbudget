@@ -1,10 +1,33 @@
 import { NextResponse } from "next/server"
 import { hash } from "bcryptjs"
 import { prisma } from "@/lib/prisma"
-import { logUserCreated } from "@/lib/audit-log"
+import { logUserCreated, getIpFromRequest } from "@/lib/audit-log"
+import { checkRateLimit } from "@/lib/rate-limit"
 
 export async function POST(req: Request) {
   try {
+    // Check rate limit
+    const ip = getIpFromRequest(req) || "unknown"
+    const rateLimitResult = checkRateLimit(ip)
+
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        {
+          error: "Too many signup attempts. Please try again later.",
+          retryAfter: rateLimitResult.retryAfter
+        },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": rateLimitResult.retryAfter?.toString() || "900",
+            "X-RateLimit-Limit": rateLimitResult.limit.toString(),
+            "X-RateLimit-Remaining": rateLimitResult.remaining.toString(),
+            "X-RateLimit-Reset": new Date(rateLimitResult.reset).toISOString(),
+          }
+        }
+      )
+    }
+
     const { username, password, name } = await req.json()
 
     // Validate input

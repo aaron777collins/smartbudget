@@ -5,6 +5,7 @@ import GitHub from "next-auth/providers/github"
 import { compare } from "bcryptjs"
 import { prisma } from "@/lib/prisma"
 import { logLoginSuccess, logLoginFailure } from "@/lib/audit-log"
+import { checkRateLimit, resetRateLimit } from "@/lib/rate-limit"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -37,16 +38,31 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null
         }
 
+        // Check rate limit for this username
+        const username = credentials.username as string
+        const rateLimitResult = checkRateLimit(`auth:${username}`)
+
+        if (!rateLimitResult.success) {
+          // Rate limit exceeded
+          await logLoginFailure(
+            username,
+            `Rate limit exceeded - ${rateLimitResult.remaining} attempts remaining`
+          )
+          // NextAuth doesn't support custom error messages easily,
+          // but returning null will trigger a generic error
+          return null
+        }
+
         const user = await prisma.user.findUnique({
           where: {
-            username: credentials.username as string,
+            username: username,
           },
         })
 
         if (!user || !user.passwordHash) {
           // Log failed login attempt - user not found or no password hash
           await logLoginFailure(
-            credentials.username as string,
+            username,
             user ? "No password hash" : "User not found"
           )
           return null
@@ -60,11 +76,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (!isPasswordValid) {
           // Log failed login attempt - invalid password
           await logLoginFailure(
-            credentials.username as string,
+            username,
             "Invalid password"
           )
           return null
         }
+
+        // Login successful - reset rate limit for this username
+        resetRateLimit(`auth:${username}`)
 
         // Log successful login
         await logLoginSuccess(user.id, user.username)

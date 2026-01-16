@@ -252,7 +252,7 @@ Block 6 (Testing - FINAL):
   - Add cleanup mechanism for old entries
   - Return time until reset on limit exceeded
 
-- [ ] Task 4.6: Apply rate limiting to auth routes
+- [x] Task 4.6: Apply rate limiting to auth routes
   - Add rate limit check to signin route
   - Add rate limit check to signup route
   - Return 429 status with retry-after header
@@ -418,6 +418,37 @@ Block 6 (Testing - FINAL):
 ---
 
 ## Completed This Iteration
+
+**Task 4.6: Apply rate limiting to auth routes** ✓
+- Added rate limiting to NextAuth credentials provider in `src/auth.ts`:
+  - Check rate limit at the start of authorize callback using `checkRateLimit(`auth:${username}`)`
+  - Uses username-based rate limiting (per-account brute force protection)
+  - Prefix `auth:` added to identifier to separate from other rate limit types
+  - Rate limit check happens before password verification for efficiency
+  - Failed login attempts are logged with rate limit exceeded reason
+  - Successful login resets the rate limit for that username using `resetRateLimit()`
+- Added rate limiting to signup route in `src/app/api/auth/signup/route.ts`:
+  - IP-based rate limiting using `getIpFromRequest(req)` to extract client IP
+  - Check rate limit at the start of POST handler before processing request
+  - Returns 429 status code with comprehensive headers when rate limit exceeded:
+    - `Retry-After` - seconds until rate limit resets
+    - `X-RateLimit-Limit` - maximum attempts allowed (5)
+    - `X-RateLimit-Remaining` - attempts remaining in current window
+    - `X-RateLimit-Reset` - ISO timestamp when window resets
+  - Error response includes `retryAfter` field for client-side handling
+- Rate limiting configuration (from Task 4.5):
+  - 5 attempts per identifier per 15-minute window
+  - Automatic cleanup of expired entries every 60 seconds
+  - In-memory implementation (suitable for single-instance deployments)
+- Design decisions:
+  - **Signin**: Username-based rate limiting (protects against brute force on specific accounts)
+  - **Signup**: IP-based rate limiting (protects against mass account creation)
+  - Both approaches align with OWASP security best practices
+  - Rate limits reset on successful authentication to avoid locking out legitimate users
+- Verified build passes without errors
+- **Phase 4 (Implement Security Features) is now COMPLETE** ✓
+
+## Previously Completed This Iteration
 
 **Task 4.5: Implement in-memory rate limiting** ✓
 - Created comprehensive rate limiting utility at `src/lib/rate-limit.ts` (240+ lines)
