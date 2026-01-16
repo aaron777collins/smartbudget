@@ -68,17 +68,17 @@ export default function JobsPage() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'COMPLETED':
-        return <CheckCircle2 className="h-5 w-5 text-green-500" />;
+        return <CheckCircle2 className="h-5 w-5 text-success" />;
       case 'FAILED':
-        return <XCircle className="h-5 w-5 text-red-500" />;
+        return <XCircle className="h-5 w-5 text-error" />;
       case 'RUNNING':
-        return <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />;
+        return <Loader2 className="h-5 w-5 text-primary animate-spin" />;
       case 'PENDING':
-        return <Clock className="h-5 w-5 text-gray-500" />;
+        return <Clock className="h-5 w-5 text-muted-foreground" />;
       case 'CANCELLED':
-        return <AlertCircle className="h-5 w-5 text-orange-500" />;
+        return <AlertCircle className="h-5 w-5 text-warning" />;
       default:
-        return <Clock className="h-5 w-5 text-gray-500" />;
+        return <Clock className="h-5 w-5 text-muted-foreground" />;
     }
   };
 
@@ -109,7 +109,7 @@ export default function JobsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -132,7 +132,7 @@ export default function JobsPage() {
       {jobs.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
-            <Clock className="h-12 w-12 text-gray-400 mb-4" />
+            <Clock className="h-12 w-12 text-muted-foreground mb-4" />
             <p className="text-muted-foreground">No background jobs found</p>
           </CardContent>
         </Card>
@@ -177,9 +177,9 @@ export default function JobsPage() {
                         {job.processed} / {job.total || '?'} ({job.progress}%)
                       </span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                    <div className="w-full bg-muted rounded-full h-2 ">
                       <div
-                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                        className="bg-primary h-2 rounded-full transition-all duration-300"
                         style={{ width: `${job.progress}%` }}
                       />
                     </div>
@@ -196,8 +196,8 @@ export default function JobsPage() {
 
                 {/* Error Message */}
                 {job.error && (
-                  <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-md p-3">
-                    <p className="text-sm text-red-800 dark:text-red-200">
+                  <div className="bg-error/10 border border-error/20 rounded-md p-3">
+                    <p className="text-sm text-error ">
                       <strong>Error:</strong> {job.error}
                     </p>
                   </div>

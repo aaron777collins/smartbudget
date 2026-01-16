@@ -64,9 +64,9 @@ export function UpcomingExpenses() {
     if (expense.isOverdue) {
       return <Badge variant="destructive">Overdue</Badge>;
     } else if (expense.isDueToday) {
-      return <Badge className="bg-orange-500">Due Today</Badge>;
+      return <Badge className="bg-warning">Due Today</Badge>;
     } else if (expense.isDueSoon) {
-      return <Badge className="bg-yellow-500">Due Soon</Badge>;
+      return <Badge className="bg-warning">Due Soon</Badge>;
     } else {
       return <Badge variant="secondary">{expense.daysUntil} days</Badge>;
     }
@@ -152,11 +152,11 @@ export function UpcomingExpenses() {
             </div>
             <div className="text-center">
               <p className="text-xs text-muted-foreground">Due Soon</p>
-              <p className="font-bold text-yellow-600">{summary.dueSoon}</p>
+              <p className="font-bold text-warning">{summary.dueSoon}</p>
             </div>
             <div className="text-center">
               <p className="text-xs text-muted-foreground">Overdue</p>
-              <p className="font-bold text-red-600">{summary.overdue}</p>
+              <p className="font-bold text-error">{summary.overdue}</p>
             </div>
           </div>
         )}

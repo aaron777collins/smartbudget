@@ -101,8 +101,8 @@ export function DashboardClient() {
         <div className="flex items-center justify-between space-y-2">
           <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
         </div>
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
-          <p className="text-sm text-red-800">
+        <div className="rounded-lg border border-error/20 bg-error/10 p-4">
+          <p className="text-sm text-error">
             Error loading dashboard: {error}
           </p>
         </div>

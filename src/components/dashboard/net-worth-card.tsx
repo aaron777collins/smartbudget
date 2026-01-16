@@ -67,24 +67,24 @@ export function NetWorthCard({
           <div className="flex items-center text-xs text-muted-foreground mt-1">
             {isPositive && (
               <>
-                <TrendingUp className="mr-1 h-4 w-4 text-green-500" />
-                <span className="text-green-500 font-mono">
+                <TrendingUp className="mr-1 h-4 w-4 text-success" />
+                <span className="text-success font-mono">
                   +{formatCurrency(change)} ({formatPercentage(changePercentage)})
                 </span>
               </>
             )}
             {isNegative && (
               <>
-                <TrendingDown className="mr-1 h-4 w-4 text-red-500" />
-                <span className="text-red-500 font-mono">
+                <TrendingDown className="mr-1 h-4 w-4 text-error" />
+                <span className="text-error font-mono">
                   {formatCurrency(change)} ({formatPercentage(changePercentage)})
                 </span>
               </>
             )}
             {isNeutral && (
               <>
-                <Minus className="mr-1 h-4 w-4 text-gray-500" />
-                <span className="text-gray-500">No change</span>
+                <Minus className="mr-1 h-4 w-4 text-muted-foreground" />
+                <span className="text-muted-foreground">No change</span>
               </>
             )}
             <span className="ml-1">from last month</span>
@@ -125,7 +125,7 @@ function SimplifiedSparkline({ data }: { data: Array<{ month: string; value: num
       width="100%"
       height={height}
       viewBox={`0 0 ${width} ${height}`}
-      className="text-blue-500"
+      className="text-primary"
     >
       <polyline
         fill="none"

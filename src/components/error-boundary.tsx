@@ -61,29 +61,29 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
       // Default fallback UI
       return (
-        <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-          <div className="w-full max-w-md rounded-lg border border-red-200 bg-white p-8 shadow-lg">
+        <div className="flex min-h-screen items-center justify-center bg-muted px-4">
+          <div className="w-full max-w-md rounded-lg border border-error/20 bg-card p-8 shadow-lg">
             <div className="mb-4 flex items-center justify-center">
-              <div className="rounded-full bg-red-100 p-3">
-                <AlertCircle className="h-8 w-8 text-red-600" />
+              <div className="rounded-full bg-error/10 p-3">
+                <AlertCircle className="h-8 w-8 text-error" />
               </div>
             </div>
 
-            <h2 className="mb-2 text-center text-2xl font-bold text-gray-900">
+            <h2 className="mb-2 text-center text-2xl font-bold text-foreground">
               Something went wrong
             </h2>
 
-            <p className="mb-6 text-center text-gray-600">
+            <p className="mb-6 text-center text-muted-foreground">
               We're sorry for the inconvenience. An error occurred while loading this page.
               Our team has been notified and is working on a fix.
             </p>
 
             {process.env.NODE_ENV === 'development' && this.state.error && (
-              <div className="mb-6 rounded-md bg-gray-100 p-4">
-                <p className="mb-2 text-sm font-semibold text-gray-700">
+              <div className="mb-6 rounded-md bg-muted p-4">
+                <p className="mb-2 text-sm font-semibold text-foreground">
                   Error Details (Development Only):
                 </p>
-                <pre className="max-h-40 overflow-auto text-xs text-red-600">
+                <pre className="max-h-40 overflow-auto text-xs text-error">
                   {this.state.error.message}
                 </pre>
               </div>
@@ -117,18 +117,18 @@ export function ErrorBoundaryWrapper({ children, name }: { children: ReactNode; 
   return (
     <ErrorBoundary
       fallback={(error, reset) => (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+        <div className="rounded-lg border border-error/20 bg-error/10 p-4">
           <div className="flex items-start gap-3">
-            <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-600" />
+            <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-error" />
             <div className="flex-1">
-              <h3 className="font-semibold text-red-900">
+              <h3 className="font-semibold text-error">
                 {name ? `Error in ${name}` : 'An error occurred'}
               </h3>
-              <p className="mt-1 text-sm text-red-700">
+              <p className="mt-1 text-sm text-error">
                 Failed to load this section. Please try refreshing the page.
               </p>
               {process.env.NODE_ENV === 'development' && (
-                <pre className="mt-2 text-xs text-red-600">
+                <pre className="mt-2 text-xs text-error">
                   {error.message}
                 </pre>
               )}

@@ -31,8 +31,8 @@ export function SessionTimeoutModal() {
   if (isExpired) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-        <div className="mx-4 max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
-          <div className="flex items-center gap-3 text-red-600 dark:text-red-400">
+        <div className="mx-4 max-w-md rounded-lg bg-card p-6 shadow-xl bg-card">
+          <div className="flex items-center gap-3 text-error">
             <svg
               className="h-6 w-6"
               fill="none"
@@ -48,7 +48,7 @@ export function SessionTimeoutModal() {
             </svg>
             <h2 className="text-lg font-semibold">Session Expired</h2>
           </div>
-          <p className="mt-3 text-gray-700 dark:text-gray-300">
+          <p className="mt-3 text-foreground">
             Your session has expired due to inactivity. You will be redirected to
             the login page.
           </p>
@@ -60,8 +60,8 @@ export function SessionTimeoutModal() {
   // Warning modal - session about to expire
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="mx-4 max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
-        <div className="flex items-center gap-3 text-amber-600 dark:text-amber-400">
+      <div className="mx-4 max-w-md rounded-lg bg-card p-6 shadow-xl bg-card">
+        <div className="flex items-center gap-3 text-warning">
           <svg
             className="h-6 w-6"
             fill="none"
@@ -78,22 +78,22 @@ export function SessionTimeoutModal() {
           <h2 className="text-lg font-semibold">Session Timeout Warning</h2>
         </div>
 
-        <p className="mt-3 text-gray-700 dark:text-gray-300">
+        <p className="mt-3 text-foreground">
           Your session will expire in{' '}
-          <span className="font-semibold text-amber-600 dark:text-amber-400">
+          <span className="font-semibold text-warning">
             {timeRemainingFormatted}
           </span>{' '}
           due to inactivity.
         </p>
 
-        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+        <p className="mt-2 text-sm text-muted-foreground">
           Would you like to continue your session?
         </p>
 
         <div className="mt-6 flex gap-3">
           <button
             onClick={resetActivity}
-            className="flex-1 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:bg-blue-500 dark:hover:bg-blue-600"
+            className="flex-1 rounded-lg bg-primary px-4 py-2 font-medium text-white transition-colors hover:bg-primary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 "
           >
             Continue Session
           </button>
@@ -101,7 +101,7 @@ export function SessionTimeoutModal() {
             onClick={() =>
               signOut({ callbackUrl: '/auth/signin?session_expired=true' })
             }
-            className="rounded-lg border border-gray-300 px-4 py-2 font-medium text-gray-700 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+            className="rounded-lg border border-border px-4 py-2 font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 "
           >
             Logout
           </button>

@@ -455,7 +455,7 @@ export default function TransactionsPage() {
                           {transaction.merchantName}
                           {transaction.isRecurring && (
                             <span title="Recurring transaction">
-                              <Repeat className="h-3.5 w-3.5 text-purple-600" />
+                              <Repeat className="h-3.5 w-3.5 text-primary" />
                             </span>
                           )}
                         </div>
@@ -491,8 +491,8 @@ export default function TransactionsPage() {
                       <span
                         className={
                           transaction.type === 'DEBIT'
-                            ? 'text-red-600 dark:text-red-400'
-                            : 'text-green-600 dark:text-green-400'
+                            ? 'text-error'
+                            : 'text-success'
                         }
                       >
                         {formatAmount(transaction.amount, transaction.type)}

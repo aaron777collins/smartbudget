@@ -100,8 +100,8 @@ export function BugReportForm({ onSuccess }: BugReportFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="flex items-center gap-3 pb-4 border-b">
-        <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-          <Bug className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+        <div className="p-2 bg-primary/10 rounded-lg">
+          <Bug className="h-6 w-6 text-primary" />
         </div>
         <div>
           <h2 className="text-2xl font-bold">Report an Issue or Share Feedback</h2>
@@ -112,9 +112,9 @@ export function BugReportForm({ onSuccess }: BugReportFormProps) {
       </div>
 
       {submitStatus === "success" && (
-        <Alert className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
-          <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
-          <AlertDescription className="text-green-800 dark:text-green-200">
+        <Alert className="bg-success/10 border-success/20">
+          <Check className="h-4 w-4 text-success" />
+          <AlertDescription className="text-success">
             Thank you! Your feedback has been submitted successfully.
           </AlertDescription>
         </Alert>

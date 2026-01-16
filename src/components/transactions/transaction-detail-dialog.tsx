@@ -345,8 +345,8 @@ export function TransactionDetailDialog({
                   <div
                     className={`text-2xl font-bold ${
                       transaction.type === 'DEBIT'
-                        ? 'text-red-600 dark:text-red-400'
-                        : 'text-green-600 dark:text-green-400'
+                        ? 'text-error'
+                        : 'text-success'
                     }`}
                   >
                     {formatAmount(transaction.amount, transaction.type)}
@@ -437,13 +437,13 @@ export function TransactionDetailDialog({
 
               {/* Research Results */}
               {researchResult && (
-                <div className="p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg space-y-3">
+                <div className="p-4 bg-primary/10 border border-primary/20 rounded-lg space-y-3">
                   <div className="flex items-start justify-between">
                     <div className="space-y-1">
-                      <h4 className="font-semibold text-blue-900 dark:text-blue-100">
+                      <h4 className="font-semibold text-primary">
                         Research Results
                       </h4>
-                      <p className="text-sm text-blue-700 dark:text-blue-300">
+                      <p className="text-sm text-primary">
                         Claude AI found information about this merchant
                       </p>
                     </div>
@@ -452,19 +452,19 @@ export function TransactionDetailDialog({
                   <div className="space-y-2 text-sm">
                     {researchResult.businessName && (
                       <div>
-                        <strong className="text-blue-900 dark:text-blue-100">Business Name:</strong>{' '}
-                        <span className="text-blue-700 dark:text-blue-300">{researchResult.businessName}</span>
+                        <strong className="text-primary">Business Name:</strong>{' '}
+                        <span className="text-primary">{researchResult.businessName}</span>
                       </div>
                     )}
                     {researchResult.businessType && (
                       <div>
-                        <strong className="text-blue-900 dark:text-blue-100">Business Type:</strong>{' '}
-                        <span className="text-blue-700 dark:text-blue-300">{researchResult.businessType}</span>
+                        <strong className="text-primary">Business Type:</strong>{' '}
+                        <span className="text-primary">{researchResult.businessType}</span>
                       </div>
                     )}
                     {researchResult.categoryName && (
                       <div>
-                        <strong className="text-blue-900 dark:text-blue-100">Suggested Category:</strong>{' '}
+                        <strong className="text-primary">Suggested Category:</strong>{' '}
                         <Badge
                           variant="secondary"
                           className="ml-1"
@@ -476,26 +476,26 @@ export function TransactionDetailDialog({
                     )}
                     {researchResult.confidence !== undefined && (
                       <div>
-                        <strong className="text-blue-900 dark:text-blue-100">Confidence:</strong>{' '}
-                        <span className="text-blue-700 dark:text-blue-300">
+                        <strong className="text-primary">Confidence:</strong>{' '}
+                        <span className="text-primary">
                           {Math.round(researchResult.confidence * 100)}%
                         </span>
                       </div>
                     )}
                     {researchResult.reasoning && (
                       <div>
-                        <strong className="text-blue-900 dark:text-blue-100">Reasoning:</strong>{' '}
-                        <span className="text-blue-700 dark:text-blue-300">{researchResult.reasoning}</span>
+                        <strong className="text-primary">Reasoning:</strong>{' '}
+                        <span className="text-primary">{researchResult.reasoning}</span>
                       </div>
                     )}
                     {researchResult.website && (
                       <div>
-                        <strong className="text-blue-900 dark:text-blue-100">Website:</strong>{' '}
+                        <strong className="text-primary">Website:</strong>{' '}
                         <a
                           href={researchResult.website}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-600 dark:text-blue-400 hover:underline"
+                          className="text-primary hover:underline"
                         >
                           {researchResult.website}
                         </a>
@@ -503,13 +503,13 @@ export function TransactionDetailDialog({
                     )}
                     {researchResult.location && (
                       <div>
-                        <strong className="text-blue-900 dark:text-blue-100">Location:</strong>{' '}
-                        <span className="text-blue-700 dark:text-blue-300">{researchResult.location}</span>
+                        <strong className="text-primary">Location:</strong>{' '}
+                        <span className="text-primary">{researchResult.location}</span>
                       </div>
                     )}
                     {researchResult.sources && researchResult.sources.length > 0 && (
                       <div>
-                        <strong className="text-blue-900 dark:text-blue-100">Sources:</strong>
+                        <strong className="text-primary">Sources:</strong>
                         <ul className="mt-1 space-y-1">
                           {researchResult.sources.map((source: string, idx: number) => (
                             <li key={idx}>
@@ -517,7 +517,7 @@ export function TransactionDetailDialog({
                                 href={source}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                                className="text-xs text-primary hover:underline"
                               >
                                 {source}
                               </a>
@@ -529,8 +529,8 @@ export function TransactionDetailDialog({
                   </div>
 
                   {editing && researchResult.categorySlug && (
-                    <div className="pt-2 border-t border-blue-200 dark:border-blue-800">
-                      <p className="text-xs text-blue-700 dark:text-blue-300">
+                    <div className="pt-2 border-t border-primary/20">
+                      <p className="text-xs text-primary">
                         The suggested category has been applied. Review and save when ready.
                       </p>
                     </div>
@@ -540,8 +540,8 @@ export function TransactionDetailDialog({
 
               {/* Research Error */}
               {researchError && (
-                <div className="p-4 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg">
-                  <p className="text-sm text-red-700 dark:text-red-300">
+                <div className="p-4 bg-error/10 border border-error/20 rounded-lg">
+                  <p className="text-sm text-error">
                     <strong>Research failed:</strong> {researchError}
                   </p>
                 </div>
@@ -592,7 +592,7 @@ export function TransactionDetailDialog({
               <>
                 {/* Split Status Display */}
                 {transaction.splits && transaction.splits.length > 0 && (
-                  <div className="space-y-2 p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
+                  <div className="space-y-2 p-4 bg-primary/10 border border-primary/20 rounded-lg">
                     <div className="flex items-center justify-between">
                       <Label className="flex items-center gap-2">
                         <Split className="h-4 w-4" />

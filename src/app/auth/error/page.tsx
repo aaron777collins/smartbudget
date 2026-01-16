@@ -19,10 +19,10 @@ export default function AuthErrorPage() {
   const errorMessage = error ? errorMessages[error] || errorMessages.Default : errorMessages.Default
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 dark:bg-gray-900">
+    <div className="flex min-h-screen items-center justify-center bg-muted px-4 py-12 bg-background">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-red-600 dark:text-red-400">
+          <CardTitle className="text-2xl font-bold text-error">
             Authentication Error
           </CardTitle>
           <CardDescription>
@@ -30,7 +30,7 @@ export default function AuthErrorPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-muted-foreground">
             Please try signing in again. If the problem persists, contact support.
           </p>
         </CardContent>

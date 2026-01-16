@@ -217,9 +217,9 @@ export default function BudgetDetailClient({ budgetId }: { budgetId: string }) {
   }
 
   function getProgressColor(percentage: number) {
-    if (percentage < 80) return 'bg-green-500';
-    if (percentage < 100) return 'bg-yellow-500';
-    return 'bg-red-500';
+    if (percentage < 80) return 'bg-success';
+    if (percentage < 100) return 'bg-warning';
+    return 'bg-error';
   }
 
   if (loading) {
@@ -302,7 +302,7 @@ export default function BudgetDetailClient({ budgetId }: { budgetId: string }) {
             variant="outline"
             size="icon"
             onClick={deleteBudget}
-            className="text-red-500 hover:text-red-700 hover:bg-red-50"
+            className="text-error "
           >
             <Trash2 className="h-4 w-4" />
           </Button>
@@ -328,7 +328,7 @@ export default function BudgetDetailClient({ budgetId }: { budgetId: string }) {
           <div className="grid grid-cols-3 gap-4 pt-4">
             <div className="text-center">
               <p className="text-sm text-muted-foreground">Spent</p>
-              <p className="text-2xl font-bold text-red-500">
+              <p className="text-2xl font-bold text-error">
                 ${totalSpent.toLocaleString()}
               </p>
             </div>
@@ -340,7 +340,7 @@ export default function BudgetDetailClient({ budgetId }: { budgetId: string }) {
             </div>
             <div className="text-center">
               <p className="text-sm text-muted-foreground">Remaining</p>
-              <p className={`text-2xl font-bold ${remaining >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+              <p className={`text-2xl font-bold ${remaining >= 0 ? 'text-success' : 'text-error'}`}>
                 ${Math.abs(remaining).toLocaleString()}
               </p>
             </div>
@@ -374,16 +374,16 @@ export default function BudgetDetailClient({ budgetId }: { budgetId: string }) {
                 <p className="text-sm text-muted-foreground">Spending Pace</p>
                 <div className="flex items-center gap-2 mt-1">
                   <p className={`text-2xl font-bold ${
-                    spendingVelocity > 110 ? 'text-red-500' :
-                    spendingVelocity > 100 ? 'text-yellow-500' :
-                    'text-green-500'
+                    spendingVelocity > 110 ? 'text-error' :
+                    spendingVelocity > 100 ? 'text-warning' :
+                    'text-success'
                   }`}>
                     {spendingVelocity.toFixed(0)}%
                   </p>
                   {spendingVelocity > 100 ? (
-                    <TrendingUp className="h-5 w-5 text-red-500" />
+                    <TrendingUp className="h-5 w-5 text-error" />
                   ) : (
-                    <TrendingDown className="h-5 w-5 text-green-500" />
+                    <TrendingDown className="h-5 w-5 text-success" />
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
@@ -396,7 +396,7 @@ export default function BudgetDetailClient({ budgetId }: { budgetId: string }) {
               <div>
                 <p className="text-sm text-muted-foreground">Projected Total</p>
                 <p className={`text-2xl font-bold mt-1 ${
-                  projectedTotal > totalBudget ? 'text-red-500' : 'text-green-500'
+                  projectedTotal > totalBudget ? 'text-error' : 'text-success'
                 }`}>
                   ${projectedTotal.toFixed(0).toLocaleString()}
                 </p>
@@ -427,7 +427,7 @@ export default function BudgetDetailClient({ budgetId }: { budgetId: string }) {
               <div className="flex justify-between text-sm mt-1">
                 <span className="text-muted-foreground">Difference:</span>
                 <span className={`font-medium ${
-                  totalSpent > expectedSpentByNow ? 'text-red-500' : 'text-green-500'
+                  totalSpent > expectedSpentByNow ? 'text-error' : 'text-success'
                 }`}>
                   ${Math.abs(totalSpent - expectedSpentByNow).toFixed(0).toLocaleString()}
                   {totalSpent > expectedSpentByNow ? ' over' : ' under'}
@@ -474,11 +474,11 @@ export default function BudgetDetailClient({ budgetId }: { budgetId: string }) {
                   <div className="flex items-center gap-2">
                     <Progress value={percentage} className={`flex-1 ${getProgressColor(percentage)}`} />
                     {percentage > 100 ? (
-                      <TrendingUp className="h-4 w-4 text-red-500" />
+                      <TrendingUp className="h-4 w-4 text-error" />
                     ) : percentage > 80 ? (
-                      <AlertCircle className="h-4 w-4 text-yellow-500" />
+                      <AlertCircle className="h-4 w-4 text-warning" />
                     ) : (
-                      <TrendingDown className="h-4 w-4 text-green-500" />
+                      <TrendingDown className="h-4 w-4 text-success" />
                     )}
                   </div>
                 </div>

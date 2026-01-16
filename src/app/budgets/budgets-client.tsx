@@ -124,7 +124,7 @@ export default function BudgetsClient() {
       <div className="container mx-auto p-6">
         <Card>
           <CardContent className="pt-6">
-            <p className="text-red-500">Error: {error}</p>
+            <p className="text-error">Error: {error}</p>
             <Button onClick={fetchBudgets} className="mt-4">
               Try Again
             </Button>
@@ -237,7 +237,7 @@ export default function BudgetsClient() {
                     variant="ghost"
                     size="icon"
                     onClick={() => deleteBudget(budget.id)}
-                    className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                    className="text-error "
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>

@@ -47,7 +47,7 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 dark:bg-gray-900">
+    <div className="flex min-h-screen items-center justify-center bg-muted px-4 py-12 bg-background">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">Sign in</CardTitle>
@@ -58,12 +58,12 @@ export default function SignInPage() {
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             {sessionExpired && (
-              <div className="rounded-md bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-900/20 dark:text-amber-400">
+              <div className="rounded-md bg-warning/10 p-3 text-sm text-warning">
                 Your session has expired due to inactivity. Please sign in again.
               </div>
             )}
             {error && (
-              <div className="rounded-md bg-red-50 p-3 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-400">
+              <div className="rounded-md bg-error/10 p-3 text-sm text-error ">
                 {error}
               </div>
             )}
@@ -102,11 +102,11 @@ export default function SignInPage() {
             >
               {isLoading ? "Signing in..." : "Sign in"}
             </Button>
-            <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-center text-sm text-muted-foreground">
               Don&apos;t have an account?{" "}
               <Link
                 href="/auth/signup"
-                className="font-semibold text-blue-600 hover:underline dark:text-blue-400"
+                className="font-semibold text-primary hover:underline "
               >
                 Sign up
               </Link>

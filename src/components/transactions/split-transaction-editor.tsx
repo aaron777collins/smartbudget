@@ -369,15 +369,15 @@ export function SplitTransactionEditor({
           <span
             className={`font-medium ${
               Math.abs(remaining) < 0.01
-                ? 'text-green-600 dark:text-green-400'
-                : 'text-red-600 dark:text-red-400'
+                ? 'text-success'
+                : 'text-error'
             }`}
           >
             ${remaining.toFixed(2)}
           </span>
         </div>
         {isValid && (
-          <div className="flex items-center gap-2 text-green-600 dark:text-green-400 text-sm pt-2">
+          <div className="flex items-center gap-2 text-success text-sm pt-2">
             <Check className="h-4 w-4" />
             <span>Split amounts match transaction total</span>
           </div>
@@ -394,8 +394,8 @@ export function SplitTransactionEditor({
 
       {/* Success Display */}
       {success && (
-        <Alert className="border-green-500 text-green-900 dark:text-green-100">
-          <Check className="h-4 w-4 text-green-600" />
+        <Alert className="border-success/20 text-success">
+          <Check className="h-4 w-4 text-success" />
           <AlertDescription>Splits saved successfully!</AlertDescription>
         </Alert>
       )}

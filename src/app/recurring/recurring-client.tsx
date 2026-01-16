@@ -113,9 +113,9 @@ export default function RecurringClient() {
     if (daysUntil < 0) {
       return <Badge variant="destructive">Overdue</Badge>;
     } else if (daysUntil === 0) {
-      return <Badge className="bg-orange-500">Due Today</Badge>;
+      return <Badge className="bg-warning">Due Today</Badge>;
     } else if (daysUntil <= 7) {
-      return <Badge className="bg-yellow-500">Due Soon</Badge>;
+      return <Badge className="bg-warning">Due Soon</Badge>;
     } else {
       return <Badge variant="secondary">{daysUntil} days</Badge>;
     }

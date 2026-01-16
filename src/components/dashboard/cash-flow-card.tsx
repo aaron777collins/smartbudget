@@ -25,22 +25,22 @@ export function CashFlowCard({
   const getTrendIcon = () => {
     switch (trend) {
       case 'positive':
-        return <ArrowUpCircle className="h-4 w-4 text-green-500" />;
+        return <ArrowUpCircle className="h-4 w-4 text-success" />;
       case 'negative':
-        return <ArrowDownCircle className="h-4 w-4 text-red-500" />;
+        return <ArrowDownCircle className="h-4 w-4 text-error" />;
       default:
-        return <MinusCircle className="h-4 w-4 text-gray-500" />;
+        return <MinusCircle className="h-4 w-4 text-muted-foreground" />;
     }
   };
 
   const getTrendColor = () => {
     switch (trend) {
       case 'positive':
-        return 'text-green-600';
+        return 'text-success';
       case 'negative':
-        return 'text-red-600';
+        return 'text-error';
       default:
-        return 'text-gray-600';
+        return 'text-muted-foreground';
     }
   };
 

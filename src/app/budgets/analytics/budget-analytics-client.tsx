@@ -259,7 +259,7 @@ export default function BudgetAnalyticsClient() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
+            <div className="text-2xl font-bold text-success">
               ${totalSaved.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
@@ -275,7 +275,7 @@ export default function BudgetAnalyticsClient() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">
+            <div className="text-2xl font-bold text-error">
               ${totalOverspent.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
@@ -401,7 +401,7 @@ export default function BudgetAnalyticsClient() {
                       </span>
                       <div
                         className={`flex items-center gap-1 font-medium ${
-                          perf.underBudget ? 'text-green-600' : 'text-red-600'
+                          perf.underBudget ? 'text-success' : 'text-error'
                         }`}
                       >
                         {perf.underBudget ? (

@@ -156,8 +156,8 @@ export function InsightsClient() {
         <div className="flex items-center justify-between space-y-2">
           <h2 className="text-3xl font-bold tracking-tight">Financial Insights</h2>
         </div>
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
-          <p className="text-sm text-red-800">
+        <div className="rounded-lg border border-error/20 bg-error/10 p-4">
+          <p className="text-sm text-error">
             Error loading insights: {error}
           </p>
         </div>
@@ -176,9 +176,9 @@ export function InsightsClient() {
 
   const getSeverityIcon = (severity: string) => {
     switch (severity) {
-      case 'high': return <AlertTriangle className="h-5 w-5 text-red-500" />;
-      case 'medium': return <Info className="h-5 w-5 text-yellow-500" />;
-      case 'low': return <CheckCircle2 className="h-5 w-5 text-blue-500" />;
+      case 'high': return <AlertTriangle className="h-5 w-5 text-error" />;
+      case 'medium': return <Info className="h-5 w-5 text-warning" />;
+      case 'low': return <CheckCircle2 className="h-5 w-5 text-primary" />;
       default: return <Info className="h-5 w-5" />;
     }
   };
@@ -195,7 +195,7 @@ export function InsightsClient() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-blue-600" />
+              <Calendar className="h-5 w-5 text-primary" />
               <CardTitle>Weekly Digest</CardTitle>
             </div>
             <CardDescription>{weeklyDigest.period.label}</CardDescription>
@@ -204,19 +204,19 @@ export function InsightsClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Income</p>
-                <p className="text-2xl font-bold text-green-600">
+                <p className="text-2xl font-bold text-success">
                   ${weeklyDigest.summary.income.toLocaleString()}
                 </p>
               </div>
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Expenses</p>
-                <p className="text-2xl font-bold text-red-600">
+                <p className="text-2xl font-bold text-error">
                   ${weeklyDigest.summary.expenses.toLocaleString()}
                 </p>
               </div>
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Net Cash Flow</p>
-                <p className={`text-2xl font-bold ${weeklyDigest.summary.netCashFlow >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                <p className={`text-2xl font-bold ${weeklyDigest.summary.netCashFlow >= 0 ? 'text-success' : 'text-error'}`}>
                   ${weeklyDigest.summary.netCashFlow.toLocaleString()}
                 </p>
               </div>
@@ -230,9 +230,9 @@ export function InsightsClient() {
               <div className="space-y-2 pt-4 border-t">
                 {weeklyDigest.insights.map((insight, idx) => (
                   <div key={idx} className="flex items-start gap-2">
-                    {insight.type === 'positive' && <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />}
-                    {insight.type === 'warning' && <AlertTriangle className="h-5 w-5 text-yellow-500 mt-0.5" />}
-                    {insight.type === 'info' && <Info className="h-5 w-5 text-blue-500 mt-0.5" />}
+                    {insight.type === 'positive' && <CheckCircle2 className="h-5 w-5 text-success mt-0.5" />}
+                    {insight.type === 'warning' && <AlertTriangle className="h-5 w-5 text-warning mt-0.5" />}
+                    {insight.type === 'info' && <Info className="h-5 w-5 text-primary mt-0.5" />}
                     <p className="text-sm">{insight.message}</p>
                   </div>
                 ))}
@@ -247,7 +247,7 @@ export function InsightsClient() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-purple-600" />
+              <TrendingUp className="h-5 w-5 text-primary" />
               <CardTitle>Spending Patterns</CardTitle>
             </div>
             <CardDescription>Insights from your transaction history</CardDescription>
@@ -277,7 +277,7 @@ export function InsightsClient() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Lightbulb className="h-5 w-5 text-yellow-600" />
+              <Lightbulb className="h-5 w-5 text-warning" />
               <CardTitle>Savings Opportunities</CardTitle>
             </div>
             <CardDescription>
@@ -299,7 +299,7 @@ export function InsightsClient() {
                   </div>
                   <div className="text-right">
                     <p className="text-sm text-muted-foreground">Potential Savings</p>
-                    <p className="text-lg font-bold text-green-600">
+                    <p className="text-lg font-bold text-success">
                       ${opportunity.potentialSavings.toFixed(2)}/mo
                     </p>
                   </div>
@@ -315,7 +315,7 @@ export function InsightsClient() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-red-600" />
+              <AlertTriangle className="h-5 w-5 text-error" />
               <CardTitle>Unusual Activity Detected</CardTitle>
             </div>
             <CardDescription>Transactions that differ from your usual patterns</CardDescription>
@@ -341,7 +341,7 @@ export function InsightsClient() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Repeat className="h-5 w-5 text-indigo-600" />
+              <Repeat className="h-5 w-5 text-primary" />
               <CardTitle>Subscription Audit</CardTitle>
             </div>
             <CardDescription>

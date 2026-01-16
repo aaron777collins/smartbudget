@@ -67,15 +67,15 @@ export function FileUpload({
   const getStatusIcon = (status: UploadedFile["status"]) => {
     switch (status) {
       case "success":
-        return <CheckCircle2 className="h-5 w-5 text-green-600" />;
+        return <CheckCircle2 className="h-5 w-5 text-success" />;
       case "error":
-        return <AlertCircle className="h-5 w-5 text-red-600" />;
+        return <AlertCircle className="h-5 w-5 text-error" />;
       case "processing":
         return (
-          <div className="h-5 w-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          <div className="h-5 w-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
         );
       default:
-        return <File className="h-5 w-5 text-gray-400" />;
+        return <File className="h-5 w-5 text-muted-foreground" />;
     }
   };
 
@@ -88,8 +88,8 @@ export function FileUpload({
           border-2 border-dashed cursor-pointer transition-all
           ${
             isDragActive || dragActive
-              ? "border-blue-500 bg-blue-50 dark:bg-blue-950"
-              : "border-gray-300 dark:border-gray-700 hover:border-gray-400"
+              ? "border-primary/20 bg-primary/10 dark:bg-primary/10"
+              : "border-border hover:border-border"
           }
         `}
       >
@@ -98,8 +98,8 @@ export function FileUpload({
           <Upload
             className={`mx-auto h-12 w-12 mb-4 ${
               isDragActive || dragActive
-                ? "text-blue-500"
-                : "text-gray-400"
+                ? "text-primary"
+                : "text-muted-foreground"
             }`}
           />
           <div className="space-y-2">
@@ -108,10 +108,10 @@ export function FileUpload({
                 ? "Drop files here..."
                 : "Drag & drop files here"}
             </p>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-muted-foreground">
               or click to browse your computer
             </p>
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-muted-foreground">
               Supported formats: {acceptedFileTypes.join(", ")} (max {formatFileSize(maxSize)})
             </p>
           </div>
@@ -134,18 +134,18 @@ export function FileUpload({
                       <p className="text-sm font-medium truncate">
                         {uploadedFile.file.name}
                       </p>
-                      <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <span>{formatFileSize(uploadedFile.file.size)}</span>
                         {uploadedFile.status === "error" && uploadedFile.error && (
                           <>
                             <span>•</span>
-                            <span className="text-red-600">{uploadedFile.error}</span>
+                            <span className="text-error">{uploadedFile.error}</span>
                           </>
                         )}
                         {uploadedFile.status === "success" && uploadedFile.previewData && (
                           <>
                             <span>•</span>
-                            <span className="text-green-600">
+                            <span className="text-success">
                               {uploadedFile.previewData.transactionCount || 0} transactions
                             </span>
                           </>

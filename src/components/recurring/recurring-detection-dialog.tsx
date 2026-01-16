@@ -134,9 +134,9 @@ export function RecurringDetectionDialog({
 
   const getConfidenceBadge = (confidence: number) => {
     if (confidence >= 0.8) {
-      return <Badge className="bg-green-500">High: {(confidence * 100).toFixed(0)}%</Badge>;
+      return <Badge className="bg-success">High: {(confidence * 100).toFixed(0)}%</Badge>;
     } else if (confidence >= 0.7) {
-      return <Badge className="bg-yellow-500">Medium: {(confidence * 100).toFixed(0)}%</Badge>;
+      return <Badge className="bg-warning">Medium: {(confidence * 100).toFixed(0)}%</Badge>;
     } else {
       return <Badge variant="secondary">Low: {(confidence * 100).toFixed(0)}%</Badge>;
     }

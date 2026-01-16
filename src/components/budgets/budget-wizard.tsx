@@ -399,7 +399,7 @@ export default function BudgetWizard() {
               >
                 <CardContent className="p-4">
                   <div className="flex items-start gap-3">
-                    <Sparkles className="h-5 w-5 text-amber-500 mt-0.5" />
+                    <Sparkles className="h-5 w-5 text-warning mt-0.5" />
                     <div>
                       <h4 className="font-semibold">Suggested (AI)</h4>
                       <p className="text-sm text-muted-foreground">
@@ -420,7 +420,7 @@ export default function BudgetWizard() {
               >
                 <CardContent className="p-4">
                   <div className="flex items-start gap-3">
-                    <Target className="h-5 w-5 text-blue-500 mt-0.5" />
+                    <Target className="h-5 w-5 text-primary mt-0.5" />
                     <div>
                       <h4 className="font-semibold">50/30/20 Rule</h4>
                       <p className="text-sm text-muted-foreground">
@@ -441,7 +441,7 @@ export default function BudgetWizard() {
               >
                 <CardContent className="p-4">
                   <div className="flex items-start gap-3">
-                    <CalendarIcon className="h-5 w-5 text-purple-500 mt-0.5" />
+                    <CalendarIcon className="h-5 w-5 text-primary mt-0.5" />
                     <div>
                       <h4 className="font-semibold">Copy Previous</h4>
                       <p className="text-sm text-muted-foreground">
@@ -462,7 +462,7 @@ export default function BudgetWizard() {
               >
                 <CardContent className="p-4">
                   <div className="flex items-start gap-3">
-                    <Plus className="h-5 w-5 text-green-500 mt-0.5" />
+                    <Plus className="h-5 w-5 text-success mt-0.5" />
                     <div>
                       <h4 className="font-semibold">Start from Scratch</h4>
                       <p className="text-sm text-muted-foreground">
@@ -567,7 +567,7 @@ export default function BudgetWizard() {
                         variant="ghost"
                         size="icon"
                         onClick={() => removeCategory(allocation.categoryId)}
-                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                        className="text-error "
                       >
                         <Minus className="h-4 w-4" />
                       </Button>
