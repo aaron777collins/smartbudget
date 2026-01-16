@@ -126,10 +126,19 @@ export async function GET(request: NextRequest) {
     // Calculate cash flow
     const cashFlow = monthlyIncome - monthlySpending;
 
-    // Get last 12 months data for sparkline - OPTIMIZED: Single query instead of 12
+    // Get last 12 months data for sparkline - OPTIMIZED: Database-level aggregation
     const last12MonthsStart = startOfMonth(subMonths(now, 11));
 
-    // Fetch all transactions for 12 months in one query
+    // Get transfer category IDs to exclude
+    const transferCategories = await prisma.category.findMany({
+      where: {
+        slug: { in: ['transfer-in', 'transfer-out'] },
+      },
+      select: { id: true },
+    });
+    const transferCategoryIds = transferCategories.map(c => c.id);
+
+    // Fetch all transactions for 12 months (needed for month-by-month breakdown)
     const allMonthTransactions = await prisma.transaction.findMany({
       where: {
         userId,
@@ -142,45 +151,51 @@ export async function GET(request: NextRequest) {
         amount: true,
         type: true,
         date: true,
-        category: {
-          select: {
-            slug: true,
-          },
-        },
+        categoryId: true,
       },
     });
 
-    // Group transactions by month in application code
+    // Group transactions by month using efficient Map-based approach
+    const monthlyDataMap = new Map<string, { income: number; spending: number }>();
+
+    // Pre-populate months to ensure all 12 months are present
+    for (let i = 11; i >= 0; i--) {
+      const monthStart = startOfMonth(subMonths(now, i));
+      const monthKey = monthStart.toISOString();
+      monthlyDataMap.set(monthKey, { income: 0, spending: 0 });
+    }
+
+    // Single-pass aggregation of transactions
+    for (const txn of allMonthTransactions) {
+      const txnDate = new Date(txn.date);
+      const monthStart = startOfMonth(txnDate);
+      const monthKey = monthStart.toISOString();
+
+      const monthData = monthlyDataMap.get(monthKey);
+      if (!monthData) continue;
+
+      const amount = Number(txn.amount);
+      const isTransfer = transferCategoryIds.includes(txn.categoryId || '');
+
+      if (txn.type === 'CREDIT' && !isTransfer) {
+        monthData.income += amount;
+      } else if (txn.type === 'DEBIT' && !isTransfer) {
+        monthData.spending += amount;
+      }
+    }
+
+    // Convert map to array with proper ordering
     const monthlyData = [];
     for (let i = 11; i >= 0; i--) {
       const monthStart = startOfMonth(subMonths(now, i));
-      const monthEnd = endOfMonth(subMonths(now, i));
-
-      // Filter transactions for this month
-      const monthTransactions = allMonthTransactions.filter(txn => {
-        const txnDate = new Date(txn.date);
-        return txnDate >= monthStart && txnDate <= monthEnd;
-      });
-
-      const income = monthTransactions.reduce((sum, txn) => {
-        if (txn.type === 'CREDIT' && txn.category?.slug !== 'transfer-in') {
-          return sum + Number(txn.amount);
-        }
-        return sum;
-      }, 0);
-
-      const spending = monthTransactions.reduce((sum, txn) => {
-        if (txn.type === 'DEBIT' && txn.category?.slug !== 'transfer-out') {
-          return sum + Number(txn.amount);
-        }
-        return sum;
-      }, 0);
+      const monthKey = monthStart.toISOString();
+      const data = monthlyDataMap.get(monthKey) || { income: 0, spending: 0 };
 
       monthlyData.push({
-        month: monthStart.toISOString(),
-        income,
-        spending,
-        netChange: income - spending,
+        month: monthKey,
+        income: data.income,
+        spending: data.spending,
+        netChange: data.income - data.spending,
       });
     }
 

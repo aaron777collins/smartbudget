@@ -66,7 +66,44 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // Build heat map data by grouping in application code
+    // Build heat map data using single-pass aggregation (optimized from O(n×m×k) to O(n+m×k))
+    // Create a map of category ID to category data for fast lookup
+    const categoryMap = new Map(
+      categories
+        .filter(cat => cat.slug !== 'transfer-in' && cat.slug !== 'transfer-out')
+        .map(cat => [cat.id, cat])
+    );
+
+    // Create nested map: categoryId -> monthKey -> amount
+    const aggregationMap = new Map<string, Map<string, number>>();
+
+    // Initialize all categories with all months at 0
+    for (const category of categoryMap.values()) {
+      const monthMap = new Map<string, number>();
+      for (let i = months - 1; i >= 0; i--) {
+        const monthStart = startOfMonth(subMonths(now, i));
+        const monthKey = monthStart.toISOString();
+        monthMap.set(monthKey, 0);
+      }
+      aggregationMap.set(category.id, monthMap);
+    }
+
+    // Single-pass aggregation of all transactions
+    for (const txn of allTransactions) {
+      if (!txn.categoryId) continue;
+
+      const txnDate = new Date(txn.date);
+      const monthStart = startOfMonth(txnDate);
+      const monthKey = monthStart.toISOString();
+
+      const categoryMonthMap = aggregationMap.get(txn.categoryId);
+      if (categoryMonthMap) {
+        const currentAmount = categoryMonthMap.get(monthKey) || 0;
+        categoryMonthMap.set(monthKey, currentAmount + Number(txn.amount));
+      }
+    }
+
+    // Convert aggregation map to output format
     const heatmapData: Array<{
       category: string;
       categoryId: string;
@@ -78,11 +115,9 @@ export async function GET(request: NextRequest) {
       }>;
     }> = [];
 
-    for (const category of categories) {
-      // Skip transfer categories
-      if (category.slug === 'transfer-in' || category.slug === 'transfer-out') {
-        continue;
-      }
+    for (const [categoryId, monthMap] of aggregationMap.entries()) {
+      const category = categoryMap.get(categoryId);
+      if (!category) continue;
 
       const monthlyAmounts: Array<{
         month: string;
@@ -92,25 +127,13 @@ export async function GET(request: NextRequest) {
 
       for (let i = months - 1; i >= 0; i--) {
         const monthStart = startOfMonth(subMonths(now, i));
-        const monthEnd = endOfMonth(subMonths(now, i));
-
-        // Filter transactions for this category and month
-        const categoryTransactions = allTransactions.filter(txn => {
-          const txnDate = new Date(txn.date);
-          return txn.categoryId === category.id &&
-                 txnDate >= monthStart &&
-                 txnDate <= monthEnd;
-        });
-
-        const totalAmount = categoryTransactions.reduce(
-          (sum, txn) => sum + Number(txn.amount),
-          0
-        );
+        const monthKey = monthStart.toISOString();
+        const amount = monthMap.get(monthKey) || 0;
 
         monthlyAmounts.push({
           month: format(monthStart, 'MMM yyyy'),
-          monthDate: monthStart.toISOString(),
-          amount: totalAmount,
+          monthDate: monthKey,
+          amount,
         });
       }
 

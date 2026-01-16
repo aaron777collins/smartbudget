@@ -48,54 +48,70 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // Group transactions by month in application code
-    const monthlyData = [];
+    // Optimize: Single-pass aggregation using nested Maps (from O(n×m) to O(n+m))
+    // monthKey -> categoryId -> amount
+    const monthCategoryMap = new Map<string, Map<string, { name: string; color: string; amount: number }>>();
 
+    // Pre-populate all months
     for (let i = months - 1; i >= 0; i--) {
       const monthStart = startOfMonth(subMonths(now, i));
-      const monthEnd = endOfMonth(subMonths(now, i));
+      const monthKey = monthStart.toISOString();
+      monthCategoryMap.set(monthKey, new Map());
+    }
 
-      // Filter transactions for this month
-      const monthTransactions = allTransactions.filter(txn => {
-        const txnDate = new Date(txn.date);
-        return txnDate >= monthStart && txnDate <= monthEnd;
-      });
+    // Single-pass aggregation
+    for (const txn of allTransactions) {
+      // Skip transfers
+      if (txn.category?.slug === 'transfer-out') {
+        continue;
+      }
 
-      // Group spending by category
-      const categorySpending = monthTransactions.reduce((acc, txn) => {
-        // Skip transfers
-        if (txn.category?.slug === 'transfer-out') {
-          return acc;
-        }
+      const txnDate = new Date(txn.date);
+      const monthStart = startOfMonth(txnDate);
+      const monthKey = monthStart.toISOString();
 
-        const categoryName = txn.category?.name || 'Uncategorized';
-        const categoryId = txn.category?.id || 'uncategorized';
-        const categoryColor = txn.category?.color || '#6B7280';
+      const categoryMap = monthCategoryMap.get(monthKey);
+      if (!categoryMap) continue;
 
-        if (!acc[categoryId]) {
-          acc[categoryId] = {
-            id: categoryId,
-            name: categoryName,
-            color: categoryColor,
-            amount: 0,
-          };
-        }
+      const categoryId = txn.category?.id || 'uncategorized';
+      const categoryName = txn.category?.name || 'Uncategorized';
+      const categoryColor = txn.category?.color || '#6B7280';
 
-        acc[categoryId].amount += Number(txn.amount);
-        return acc;
-      }, {} as Record<string, { id: string; name: string; color: string; amount: number }>);
+      const existing = categoryMap.get(categoryId);
+      if (existing) {
+        existing.amount += Number(txn.amount);
+      } else {
+        categoryMap.set(categoryId, {
+          name: categoryName,
+          color: categoryColor,
+          amount: Number(txn.amount),
+        });
+      }
+    }
 
-      // Calculate total spending for this month
-      const totalSpending = Object.values(categorySpending).reduce(
-        (sum, cat) => sum + cat.amount,
-        0
-      );
+    // Convert to output format
+    const monthlyData = [];
+    for (let i = months - 1; i >= 0; i--) {
+      const monthStart = startOfMonth(subMonths(now, i));
+      const monthKey = monthStart.toISOString();
+      const categoryMap = monthCategoryMap.get(monthKey);
+
+      const categories = categoryMap
+        ? Array.from(categoryMap.entries()).map(([id, data]) => ({
+            id,
+            name: data.name,
+            color: data.color,
+            amount: data.amount,
+          }))
+        : [];
+
+      const totalSpending = categories.reduce((sum, cat) => sum + cat.amount, 0);
 
       monthlyData.push({
         month: format(monthStart, 'MMM yyyy'),
-        monthDate: monthStart.toISOString(),
+        monthDate: monthKey,
         total: totalSpending,
-        categories: Object.values(categorySpending),
+        categories,
       });
     }
 
