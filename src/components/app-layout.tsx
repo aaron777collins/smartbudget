@@ -2,6 +2,7 @@
 
 import { Header } from "@/components/header"
 import { Sidebar } from "@/components/sidebar"
+import { MobileBottomNav } from "@/components/mobile-bottom-nav"
 
 interface AppLayoutProps {
   children: React.ReactNode
@@ -15,10 +16,11 @@ export function AppLayout({ children }: AppLayoutProps) {
         <aside className="hidden md:flex w-64 border-r" aria-label="Main navigation">
           <Sidebar />
         </aside>
-        <main id="main-content" className="flex-1 overflow-y-auto p-8" tabIndex={-1}>
+        <main id="main-content" className="flex-1 overflow-y-auto p-8 pb-20 md:pb-8" tabIndex={-1}>
           {children}
         </main>
       </div>
+      <MobileBottomNav />
     </div>
   )
 }
