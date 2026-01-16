@@ -224,7 +224,7 @@ Block 6 (Testing - FINAL):
 
 ### Phase 4: Implement Security Features
 
-- [ ] Task 4.1: Create AuditLog Prisma model
+- [x] Task 4.1: Create AuditLog Prisma model
   - Fields: id, userId (optional), action, ipAddress, userAgent, metadata (Json), timestamp
   - Add indexes for efficient querying
   - Include types: LOGIN_SUCCESS, LOGIN_FAILURE, PASSWORD_CHANGE, USER_CREATED
@@ -418,6 +418,30 @@ Block 6 (Testing - FINAL):
 ---
 
 ## Completed This Iteration
+
+**Task 4.1: Create AuditLog Prisma model** ✓
+- Added AuditLog model to Prisma schema (prisma/schema.prisma:384-408)
+- Fields included:
+  - id: String @id @default(uuid())
+  - userId: String? (optional - for unauthenticated events)
+  - action: AuditLogAction (enum)
+  - ipAddress: String? (optional)
+  - userAgent: String? (optional)
+  - metadata: Json? (additional context like username attempted, error details)
+  - timestamp: DateTime @default(now())
+- Added three indexes for efficient querying:
+  - @@index([userId, timestamp]) - for user-specific audit logs
+  - @@index([action, timestamp]) - for action-specific queries
+  - @@index([timestamp]) - for time-based queries
+- Created AuditLogAction enum with comprehensive action types:
+  - LOGIN_SUCCESS, LOGIN_FAILURE, LOGOUT
+  - PASSWORD_CHANGE
+  - USER_CREATED, USER_UPDATED, USER_DELETED
+  - SESSION_CREATED, SESSION_EXPIRED
+- Verified build passes without errors
+- Ready for migration in Task 4.2
+
+## Previously Completed This Iteration
 
 **Task 3.5: Test authentication flow end-to-end** ✓
 - Restarted Next.js dev server (previous instance was hung)

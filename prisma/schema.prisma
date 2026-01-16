@@ -380,3 +380,29 @@ enum FeedbackStatus {
   CLOSED
   WONT_FIX
 }
+
+model AuditLog {
+  id         String         @id @default(uuid())
+  userId     String?
+  action     AuditLogAction
+  ipAddress  String?
+  userAgent  String?
+  metadata   Json?          // Additional context (username attempted, error details, etc.)
+  timestamp  DateTime       @default(now())
+
+  @@index([userId, timestamp])
+  @@index([action, timestamp])
+  @@index([timestamp])
+}
+
+enum AuditLogAction {
+  LOGIN_SUCCESS
+  LOGIN_FAILURE
+  LOGOUT
+  PASSWORD_CHANGE
+  USER_CREATED
+  USER_UPDATED
+  USER_DELETED
+  SESSION_CREATED
+  SESSION_EXPIRED
+}
