@@ -209,24 +209,28 @@ export const COLORS = {
       text: 'text-green-700 dark:text-green-400',
       border: 'border-green-500/30 dark:border-green-500/40',
       solid: 'bg-green-500',
+      icon: 'text-green-600 dark:text-green-400',
     },
     warning: {
       bg: 'bg-yellow-500/10 dark:bg-yellow-500/20',
       text: 'text-yellow-700 dark:text-yellow-400',
       border: 'border-yellow-500/30 dark:border-yellow-500/40',
       solid: 'bg-yellow-500',
+      icon: 'text-yellow-600 dark:text-yellow-400',
     },
     error: {
       bg: 'bg-red-500/10 dark:bg-red-500/20',
       text: 'text-red-700 dark:text-red-400',
       border: 'border-red-500/30 dark:border-red-500/40',
       solid: 'bg-red-500',
+      icon: 'text-red-600 dark:text-red-400',
     },
     info: {
       bg: 'bg-blue-500/10 dark:bg-blue-500/20',
       text: 'text-blue-700 dark:text-blue-400',
       border: 'border-blue-500/30 dark:border-blue-500/40',
       solid: 'bg-blue-500',
+      icon: 'text-blue-600 dark:text-blue-400',
     },
   },
 
@@ -262,6 +266,132 @@ export const COLORS = {
     hover: 'hover:bg-primary/90',
     active: 'active:bg-primary/80',
     disabled: 'disabled:opacity-50 disabled:cursor-not-allowed',
+  },
+
+  // Navigation icon colors (semantic categories)
+  nav: {
+    dashboard: 'text-sky-500 dark:text-sky-400',
+    transactions: 'text-violet-500 dark:text-violet-400',
+    budgets: 'text-orange-700 dark:text-orange-400',
+    accounts: 'text-pink-700 dark:text-pink-400',
+    recurring: 'text-purple-600 dark:text-purple-400',
+    tags: 'text-cyan-600 dark:text-cyan-400',
+    goals: 'text-emerald-500 dark:text-emerald-400',
+    insights: 'text-green-700 dark:text-green-400',
+    import: 'text-blue-500 dark:text-blue-400',
+    jobs: 'text-indigo-500 dark:text-indigo-400',
+    settings: 'text-gray-700 dark:text-gray-400',
+  },
+
+  // Chart and data visualization colors
+  chart: {
+    // Primary chart colors (ordered by visual harmony)
+    primary: [
+      'hsl(217.2 91.2% 59.8%)',  // Blue
+      'hsl(142.1 76.2% 36.3%)',  // Green
+      'hsl(38.8 92.7% 50.2%)',   // Orange
+      'hsl(346.8 77.2% 49.8%)',  // Red
+      'hsl(262.1 83.3% 57.8%)',  // Purple
+      'hsl(189.9 94.5% 42.7%)',  // Cyan
+      'hsl(330.3 81.2% 60.4%)',  // Pink
+      'hsl(236.6 85% 62.7%)',    // Indigo
+    ],
+
+    // Category-based colors (for consistent category representation)
+    categories: {
+      income: 'hsl(142.1 76.2% 36.3%)',       // Green
+      expense: 'hsl(346.8 77.2% 49.8%)',      // Red
+      transfer: 'hsl(217.2 91.2% 59.8%)',     // Blue
+      investment: 'hsl(262.1 83.3% 57.8%)',   // Purple
+    },
+
+    // Gradient color stops for heatmaps and intensity visualizations
+    gradient: {
+      blue: {
+        start: 'hsl(214 100% 97%)',    // Very light blue
+        middle: 'hsl(217.2 91.2% 59.8%)',  // Primary blue
+        end: 'hsl(221.2 83.2% 30%)',   // Dark blue
+      },
+      green: {
+        start: 'hsl(142 76% 96%)',     // Very light green
+        middle: 'hsl(142.1 76.2% 36.3%)',  // Primary green
+        end: 'hsl(142.1 70% 20%)',     // Dark green
+      },
+      red: {
+        start: 'hsl(0 86% 97%)',       // Very light red
+        middle: 'hsl(346.8 77.2% 49.8%)',  // Primary red
+        end: 'hsl(346.8 70% 25%)',     // Dark red
+      },
+    },
+
+    // Text colors for charts (theme-aware)
+    text: {
+      primary: 'hsl(222.2 47.4% 11.2%)',     // Dark text (light mode)
+      secondary: 'hsl(215.4 16.3% 46.9%)',   // Gray text
+      light: 'hsl(210 40% 98%)',             // Light text (dark mode)
+    },
+  },
+
+  // Dashboard card gradients (theme-aware subtle gradients)
+  gradient: {
+    blue: 'bg-gradient-to-br from-card via-card to-blue-500/5 dark:to-blue-500/10',
+    green: 'bg-gradient-to-br from-card via-card to-green-500/5 dark:to-green-500/10',
+    purple: 'bg-gradient-to-br from-card via-card to-purple-500/5 dark:to-purple-500/10',
+    orange: 'bg-gradient-to-br from-card via-card to-orange-500/5 dark:to-orange-500/10',
+    pink: 'bg-gradient-to-br from-card via-card to-pink-500/5 dark:to-pink-500/10',
+    cyan: 'bg-gradient-to-br from-card via-card to-cyan-500/5 dark:to-cyan-500/10',
+  },
+
+  // Account type colors (for account selection and display)
+  account: {
+    colors: [
+      { hex: '#2563EB', name: 'Blue' },        // Blue
+      { hex: '#10B981', name: 'Green' },       // Emerald/Green
+      { hex: '#F59E0B', name: 'Amber' },       // Amber/Orange
+      { hex: '#EF4444', name: 'Red' },         // Red
+      { hex: '#8B5CF6', name: 'Purple' },      // Violet/Purple
+      { hex: '#EC4899', name: 'Pink' },        // Pink
+      { hex: '#14B8A6', name: 'Teal' },        // Teal
+      { hex: '#6366F1', name: 'Indigo' },      // Indigo
+    ],
+  },
+
+  // Trend indicators
+  trend: {
+    up: 'text-green-600 dark:text-green-400',
+    down: 'text-red-600 dark:text-red-400',
+    neutral: 'text-gray-600 dark:text-gray-400',
+  },
+
+  // Budget usage thresholds
+  budget: {
+    safe: {
+      text: 'text-green-600 dark:text-green-400',
+      progress: 'bg-green-500',
+    },
+    warning: {
+      text: 'text-yellow-600 dark:text-yellow-400',
+      progress: 'bg-yellow-500',
+    },
+    danger: {
+      text: 'text-red-600 dark:text-red-400',
+      progress: 'bg-red-500',
+    },
+  },
+
+  // Goal status colors
+  goal: {
+    notStarted: 'text-gray-600 dark:text-gray-400',
+    inProgress: 'text-blue-600 dark:text-blue-400',
+    completed: 'text-green-600 dark:text-green-400',
+    paused: 'text-purple-600 dark:text-purple-400',
+  },
+
+  // Insight risk levels
+  insight: {
+    low: 'text-blue-600 dark:text-blue-400',
+    medium: 'text-yellow-600 dark:text-yellow-400',
+    high: 'text-red-600 dark:text-red-400',
   },
 } as const;
 

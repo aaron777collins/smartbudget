@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowUpCircle, ArrowDownCircle, MinusCircle } from 'lucide-react';
 import { useCounterAnimation } from '@/hooks/use-counter-animation';
+import { COLORS } from '@/lib/design-tokens';
 
 interface CashFlowCardProps {
   current: number;
@@ -27,22 +28,22 @@ export function CashFlowCard({
   const getTrendIcon = () => {
     switch (trend) {
       case 'positive':
-        return <ArrowUpCircle className="h-4 w-4 text-green-500" />;
+        return <ArrowUpCircle className={`h-4 w-4 ${COLORS.trend.up}`} />;
       case 'negative':
-        return <ArrowDownCircle className="h-4 w-4 text-red-500" />;
+        return <ArrowDownCircle className={`h-4 w-4 ${COLORS.trend.down}`} />;
       default:
-        return <MinusCircle className="h-4 w-4 text-gray-500" />;
+        return <MinusCircle className={`h-4 w-4 ${COLORS.trend.neutral}`} />;
     }
   };
 
   const getTrendColor = () => {
     switch (trend) {
       case 'positive':
-        return 'text-green-600';
+        return COLORS.trend.up;
       case 'negative':
-        return 'text-red-600';
+        return COLORS.trend.down;
       default:
-        return 'text-gray-600';
+        return COLORS.trend.neutral;
     }
   };
 
@@ -58,7 +59,7 @@ export function CashFlowCard({
   };
 
   return (
-    <Card className="transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 duration-500 delay-[225ms] bg-gradient-to-br from-card via-card to-purple-50/50 dark:to-purple-950/20">
+    <Card className={`transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 duration-500 delay-[225ms] ${COLORS.gradient.purple}`}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">Cash Flow</CardTitle>
         <div className="animate-in zoom-in duration-300 delay-300">

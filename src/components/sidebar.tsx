@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
+import { COLORS } from "@/lib/design-tokens"
 import {
   LayoutDashboard,
   CreditCard,
@@ -22,67 +23,67 @@ const routes = [
     label: "Dashboard",
     icon: LayoutDashboard,
     href: "/dashboard",
-    color: "text-sky-500",
+    color: COLORS.nav.dashboard,
   },
   {
     label: "Transactions",
     icon: CreditCard,
     href: "/transactions",
-    color: "text-violet-500",
+    color: COLORS.nav.transactions,
   },
   {
     label: "Accounts",
     icon: Wallet,
     href: "/accounts",
-    color: "text-pink-700",
+    color: COLORS.nav.accounts,
   },
   {
     label: "Budgets",
     icon: PieChart,
     href: "/budgets",
-    color: "text-orange-700",
+    color: COLORS.nav.budgets,
   },
   {
     label: "Recurring",
     icon: Repeat,
     href: "/recurring",
-    color: "text-purple-600",
+    color: COLORS.nav.recurring,
   },
   {
     label: "Tags",
     icon: Hash,
     href: "/tags",
-    color: "text-cyan-600",
+    color: COLORS.nav.tags,
   },
   {
     label: "Goals",
     icon: Target,
     href: "/goals",
-    color: "text-emerald-500",
+    color: COLORS.nav.goals,
   },
   {
     label: "Insights",
     icon: TrendingUp,
     href: "/insights",
-    color: "text-green-700",
+    color: COLORS.nav.insights,
   },
   {
     label: "Import",
     icon: Upload,
     href: "/import",
-    color: "text-blue-500",
+    color: COLORS.nav.import,
   },
   {
     label: "Jobs",
     icon: ListTodo,
     href: "/jobs",
-    color: "text-indigo-500",
+    color: COLORS.nav.jobs,
   },
   {
     label: "Settings",
     icon: Settings,
     href: "/settings",
-    color: "text-gray-700",
+    color: COLORS.nav.settings,
   },
 ]
 

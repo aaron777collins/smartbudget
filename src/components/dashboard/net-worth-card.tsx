@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { COLORS } from '@/lib/design-tokens';
 import { useCounterAnimation } from '@/hooks/use-counter-animation';
 
 interface NetWorthCardProps {
@@ -41,7 +42,7 @@ export function NetWorthCard({
   };
 
   return (
-    <Card className="transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 duration-500 bg-gradient-to-br from-card via-card to-blue-50/50 dark:to-blue-950/20">
+    <Card className={`transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 duration-500 ${COLORS.gradient.blue}`}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">Net Worth</CardTitle>
         <svg
@@ -62,24 +63,24 @@ export function NetWorthCard({
         <div className="flex items-center text-xs text-muted-foreground mt-1 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-150">
           {isPositive && (
             <>
-              <TrendingUp className="mr-1 h-4 w-4 text-green-500 animate-in zoom-in duration-300 delay-300" />
-              <span className="text-green-500 tabular-nums">
+              <TrendingUp className={`mr-1 h-4 w-4 ${COLORS.trend.up} animate-in zoom-in duration-300 delay-300`} />
+              <span className={`${COLORS.trend.up} tabular-nums`}>
                 +{formatCurrency(animatedChange)} ({formatPercentage(animatedPercentage)})
               </span>
             </>
           )}
           {isNegative && (
             <>
-              <TrendingDown className="mr-1 h-4 w-4 text-red-500 animate-in zoom-in duration-300 delay-300" />
-              <span className="text-red-500 tabular-nums">
+              <TrendingDown className={`mr-1 h-4 w-4 ${COLORS.trend.down} animate-in zoom-in duration-300 delay-300`} />
+              <span className={`${COLORS.trend.down} tabular-nums`}>
                 {formatCurrency(animatedChange)} ({formatPercentage(animatedPercentage)})
               </span>
             </>
           )}
           {isNeutral && (
             <>
-              <Minus className="mr-1 h-4 w-4 text-gray-500 animate-in zoom-in duration-300 delay-300" />
-              <span className="text-gray-500">No change</span>
+              <Minus className={`mr-1 h-4 w-4 ${COLORS.trend.neutral} animate-in zoom-in duration-300 delay-300`} />
+              <span className={COLORS.trend.neutral}>No change</span>
             </>
           )}
           <span className="ml-1">from last month</span>

@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { CreditCard } from 'lucide-react';
 import { useCounterAnimation } from '@/hooks/use-counter-animation';
+import { COLORS } from '@/lib/design-tokens';
 
 interface MonthlySpendingCardProps {
   current: number;
@@ -30,20 +31,20 @@ export function MonthlySpendingCard({
 
   const getStatusColor = () => {
     if (!budgetUsedPercentage) return 'text-muted-foreground';
-    if (budgetUsedPercentage < 80) return 'text-green-600';
-    if (budgetUsedPercentage < 100) return 'text-yellow-600';
-    return 'text-red-600';
+    if (budgetUsedPercentage < 80) return COLORS.budget.safe.text;
+    if (budgetUsedPercentage < 100) return COLORS.budget.warning.text;
+    return COLORS.budget.danger.text;
   };
 
   const getProgressBarColor = () => {
     if (!budgetUsedPercentage) return '[&>div]:bg-blue-500';
-    if (budgetUsedPercentage < 80) return '[&>div]:bg-green-500';
-    if (budgetUsedPercentage < 100) return '[&>div]:bg-yellow-500';
-    return '[&>div]:bg-red-500';
+    if (budgetUsedPercentage < 80) return `[&>div]:${COLORS.budget.safe.progress}`;
+    if (budgetUsedPercentage < 100) return `[&>div]:${COLORS.budget.warning.progress}`;
+    return `[&>div]:${COLORS.budget.danger.progress}`;
   };
 
   return (
-    <Card className="transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 duration-500 delay-75 bg-gradient-to-br from-card via-card to-orange-50/50 dark:to-orange-950/20">
+    <Card className={`transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 duration-500 delay-75 ${COLORS.gradient.orange}`}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">Monthly Spending</CardTitle>
         <CreditCard className="h-4 w-4 text-muted-foreground transition-transform duration-300 group-hover:scale-110" />

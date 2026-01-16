@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
 import { useCounterAnimation } from '@/hooks/use-counter-animation';
+import { COLORS } from '@/lib/design-tokens';
 
 interface IncomeSource {
   id: string;
@@ -52,7 +53,7 @@ export function MonthlyIncomeCard({
   };
 
   return (
-    <Card className="transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150 bg-gradient-to-br from-card via-card to-green-50/50 dark:to-green-950/20">
+    <Card className={`transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150 ${COLORS.gradient.green}`}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">Monthly Income</CardTitle>
         <DollarSign className="h-4 w-4 text-muted-foreground transition-transform duration-300 group-hover:scale-110" />
@@ -64,16 +65,16 @@ export function MonthlyIncomeCard({
           <div className="flex items-center text-xs text-muted-foreground mt-1 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-200">
             {isAboveAverage && (
               <>
-                <TrendingUp className="mr-1 h-4 w-4 text-green-500 animate-in zoom-in duration-300 delay-300" />
-                <span className="text-green-500 tabular-nums">
+                <TrendingUp className={`mr-1 h-4 w-4 ${COLORS.trend.up} animate-in zoom-in duration-300 delay-300`} />
+                <span className={`${COLORS.trend.up} tabular-nums`}>
                   +{Math.abs(animatedPercentage).toFixed(1)}%
                 </span>
               </>
             )}
             {isBelowAverage && (
               <>
-                <TrendingDown className="mr-1 h-4 w-4 text-red-500 animate-in zoom-in duration-300 delay-300" />
-                <span className="text-red-500 tabular-nums">
+                <TrendingDown className={`mr-1 h-4 w-4 ${COLORS.trend.down} animate-in zoom-in duration-300 delay-300`} />
+                <span className={`${COLORS.trend.down} tabular-nums`}>
                   {animatedPercentage.toFixed(1)}%
                 </span>
               </>
