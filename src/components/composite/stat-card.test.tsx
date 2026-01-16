@@ -10,6 +10,7 @@ vi.mock('lucide-react', () => ({
   TrendingUp: () => <span data-testid="trending-up">↑</span>,
   TrendingDown: () => <span data-testid="trending-down">↓</span>,
   Minus: () => <span data-testid="minus">−</span>,
+  Info: () => <span data-testid="info-icon">ℹ</span>,
 }))
 
 describe('StatCard', () => {
@@ -499,6 +500,245 @@ describe('StatCard', () => {
       expect(screen.getByText('from last month')).toBeInTheDocument()
       expect(screen.getByText('Active')).toBeInTheDocument()
       expect(screen.getByRole('button')).toBeInTheDocument()
+    })
+  })
+
+  describe('Sparklines', () => {
+    it('renders sparkline when data is provided', () => {
+      const { container } = render(
+        <StatCard
+          title="Revenue"
+          value="$1,000"
+          sparkline={[
+            { label: 'Jan', value: 100 },
+            { label: 'Feb', value: 150 },
+            { label: 'Mar', value: 120 },
+          ]}
+        />
+      )
+
+      const svg = container.querySelector('svg')
+      expect(svg).toBeInTheDocument()
+      expect(svg).toHaveAttribute('aria-hidden', 'true')
+    })
+
+    it('does not render sparkline when data is empty', () => {
+      const { container } = render(
+        <StatCard
+          title="Revenue"
+          value="$1,000"
+          sparkline={[]}
+        />
+      )
+
+      const svg = container.querySelector('svg')
+      expect(svg).not.toBeInTheDocument()
+    })
+
+    it('renders sparkline with proper SVG structure', () => {
+      const { container } = render(
+        <StatCard
+          title="Revenue"
+          value="$1,000"
+          sparkline={[
+            { label: 'Jan', value: 100 },
+            { label: 'Feb', value: 200 },
+            { label: 'Mar', value: 150 },
+          ]}
+        />
+      )
+
+      const polyline = container.querySelector('polyline')
+      expect(polyline).toBeInTheDocument()
+      expect(polyline).toHaveAttribute('fill', 'none')
+      expect(polyline).toHaveAttribute('stroke', 'currentColor')
+    })
+
+    it('handles sparkline with single data point', () => {
+      const { container } = render(
+        <StatCard
+          title="Revenue"
+          value="$1,000"
+          sparkline={[{ label: 'Jan', value: 100 }]}
+        />
+      )
+
+      const svg = container.querySelector('svg')
+      expect(svg).toBeInTheDocument()
+    })
+  })
+
+  describe('Hover Details', () => {
+    it('renders info icon when hover details provided', () => {
+      render(
+        <StatCard
+          title="Revenue"
+          value="$1,000"
+          hoverDetails={{
+            title: 'Details',
+            items: [{ label: 'Item 1', value: '100' }]
+          }}
+        />
+      )
+
+      expect(screen.getByTestId('info-icon')).toBeInTheDocument()
+      expect(screen.getByLabelText('Additional details available on hover')).toBeInTheDocument()
+    })
+
+    it('does not render info icon without hover details', () => {
+      render(<StatCard title="Revenue" value="$1,000" />)
+
+      expect(screen.queryByTestId('info-icon')).not.toBeInTheDocument()
+    })
+
+    it('renders hover details with title', async () => {
+      const user = userEvent.setup()
+
+      render(
+        <StatCard
+          title="Revenue"
+          value="$1,000"
+          hoverDetails={{
+            title: 'Revenue Breakdown',
+            items: [
+              { label: 'This month', value: '$1,000' },
+              { label: 'Last month', value: '$800' },
+            ]
+          }}
+        />
+      )
+
+      // Click to open popover
+      const card = screen.getByText('Revenue').closest('[role="button"]')
+      if (card) await user.click(card)
+
+      expect(screen.getByText('Revenue Breakdown')).toBeInTheDocument()
+      expect(screen.getByText('This month')).toBeInTheDocument()
+      expect(screen.getByText('$1,000')).toBeInTheDocument()
+      expect(screen.getByText('Last month')).toBeInTheDocument()
+      expect(screen.getByText('$800')).toBeInTheDocument()
+    })
+
+    it('renders hover details without title', async () => {
+      const user = userEvent.setup()
+
+      render(
+        <StatCard
+          title="Revenue"
+          value="$1,000"
+          hoverDetails={{
+            items: [
+              { label: 'Current', value: '$1,000' },
+            ]
+          }}
+        />
+      )
+
+      const card = screen.getByText('Revenue').closest('[role="button"]')
+      if (card) await user.click(card)
+
+      expect(screen.getByText('Current')).toBeInTheDocument()
+      expect(screen.getByText('$1,000')).toBeInTheDocument()
+    })
+  })
+
+  describe('Custom Value Formatting', () => {
+    it('formats value with custom formatter', () => {
+      const formatter = (val: string | number) => `€ ${val}`
+
+      render(
+        <StatCard
+          title="Revenue"
+          value={1000}
+          formatValue={formatter}
+        />
+      )
+
+      expect(screen.getByText('€ 1000')).toBeInTheDocument()
+    })
+
+    it('uses default value without formatter', () => {
+      render(<StatCard title="Revenue" value="$1,000" />)
+
+      expect(screen.getByText('$1,000')).toBeInTheDocument()
+    })
+
+    it('formats string values', () => {
+      const formatter = (val: string | number) => String(val).toUpperCase()
+
+      render(
+        <StatCard
+          title="Status"
+          value="active"
+          formatValue={formatter}
+        />
+      )
+
+      expect(screen.getByText('ACTIVE')).toBeInTheDocument()
+    })
+
+    it('formats numeric values with decimals', () => {
+      const formatter = (val: string | number) =>
+        typeof val === 'number' ? val.toFixed(2) : val
+
+      render(
+        <StatCard
+          title="Score"
+          value={95.678}
+          formatValue={formatter}
+        />
+      )
+
+      expect(screen.getByText('95.68')).toBeInTheDocument()
+    })
+  })
+
+  describe('Enhanced Features Integration', () => {
+    it('renders with sparkline, hover details, and custom formatting', async () => {
+      const user = userEvent.setup()
+      const formatter = (val: string | number) => `$${val}`
+
+      const { container } = render(
+        <StatCard
+          title="Revenue"
+          value={1000}
+          formatValue={formatter}
+          sparkline={[
+            { label: 'Jan', value: 800 },
+            { label: 'Feb', value: 900 },
+            { label: 'Mar', value: 1000 },
+          ]}
+          hoverDetails={{
+            title: 'Monthly Revenue',
+            items: [
+              { label: 'Average', value: '$900' },
+              { label: 'Peak', value: '$1,000' },
+            ]
+          }}
+          trend={{ value: 25, label: 'vs last quarter', direction: 'up' }}
+        />
+      )
+
+      // Check formatted value
+      expect(screen.getByText('$1000')).toBeInTheDocument()
+
+      // Check sparkline
+      const svg = container.querySelector('svg')
+      expect(svg).toBeInTheDocument()
+
+      // Check info icon
+      expect(screen.getByTestId('info-icon')).toBeInTheDocument()
+
+      // Check trend
+      expect(screen.getByText('+25%')).toBeInTheDocument()
+
+      // Open popover and check details
+      const card = screen.getByText('Revenue').closest('[role="button"]')
+      if (card) await user.click(card)
+
+      expect(screen.getByText('Monthly Revenue')).toBeInTheDocument()
+      expect(screen.getByText('Average')).toBeInTheDocument()
+      expect(screen.getByText('Peak')).toBeInTheDocument()
     })
   })
 })
