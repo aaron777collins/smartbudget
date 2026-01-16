@@ -2,8 +2,9 @@ import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { X, Filter } from 'lucide-react'
+import { X, Filter, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { ANIMATION } from '@/lib/design-tokens'
 
 export interface FilterConfig {
   id: string
@@ -123,6 +124,15 @@ export function FilterPanel({
               <X className="h-3 w-3 mr-1" />
               Clear
             </Button>
+          )}
+          {collapsible && (
+            <ChevronDown
+              className={cn(
+                'h-4 w-4 text-muted-foreground',
+                isCollapsed ? ANIMATION.iconRotation.collapsed : ANIMATION.iconRotation.expanded
+              )}
+              aria-hidden="true"
+            />
           )}
         </div>
       </CardHeader>

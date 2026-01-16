@@ -41,7 +41,22 @@ export default function RootLayout({
                 disableTransitionOnChange
               >
                 {children}
-                <Toaster position="top-right" richColors />
+                <Toaster
+                  position="top-right"
+                  richColors
+                  expand={false}
+                  duration={3000}
+                  closeButton
+                  toastOptions={{
+                    className: 'animate-in slide-in-from-top-5 duration-300',
+                    classNames: {
+                      success: 'bg-success text-success-foreground border-success',
+                      error: 'bg-destructive text-destructive-foreground border-destructive',
+                      warning: 'bg-warning text-warning-foreground border-warning',
+                      info: 'bg-info text-info-foreground border-info',
+                    }
+                  }}
+                />
               </ThemeProvider>
             </QueryProvider>
           </SessionProvider>

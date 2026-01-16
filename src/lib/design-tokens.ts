@@ -134,6 +134,13 @@ export const ANIMATION = {
     shimmer: 'animate-shimmer',                      // Loading shimmer effect
     spin: 'animate-spin',                            // Continuous rotation (loading)
   },
+
+  // Icon rotation states (for expand/collapse, dropdowns, etc.)
+  iconRotation: {
+    collapsed: 'rotate-0 transition-transform duration-200',         // Default state
+    expanded: 'rotate-180 transition-transform duration-200',        // Expanded state (chevron down → up)
+    expandedRight: 'rotate-90 transition-transform duration-200',    // Expanded state (chevron right → down)
+  },
 } as const;
 
 /**
