@@ -1,0 +1,19 @@
+
+[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
+[0;32m  RALPH - Autonomous AI Development Loop[0m
+[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
+  Plan:      [1;33msmartbudget-complete-remaining.md[0m
+  Mode:      [1;33mbuild[0m
+  Progress:  [1;33msmartbudget-complete-remaining_PROGRESS.md[0m
+  Max Iter:  [1;33m150[0m
+  Commit:    [0;32menabled[0m
+  Notify:    [0;32mCustom [0m
+[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
+
+[1;33mExit conditions:[0m
+  - RALPH_DONE in smartbudget-complete-remaining_PROGRESS.md signals all tasks complete (set by AI)
+  - Press Ctrl+C to stop manually
+
+
+[0;34m══════════════════ ITERATION 1 ══════════════════[0m
+

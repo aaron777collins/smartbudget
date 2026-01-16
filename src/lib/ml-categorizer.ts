@@ -93,6 +93,8 @@ interface TrainingExample {
   normalizedName: string;
   categoryId: string;
   categorySlug: string;
+  subcategoryId?: string | null;
+  subcategorySlug?: string | null;
   embedding?: number[];
 }
 
@@ -140,7 +142,29 @@ async function loadTrainingData(): Promise<TrainingExample[]> {
     select: { id: true, slug: true }
   });
 
+  // Load subcategories
+  const subcategories = await prisma.subcategory.findMany({
+    select: { id: true, slug: true, categoryId: true }
+  });
+
   const categoryMap = new Map(categories.map((c: { id: string; slug: string }) => [c.id, c.slug]));
+  const subcategoryMap = new Map(subcategories.map((s: { id: string; slug: string }) => [s.id, s.slug]));
+
+  // Fetch recent user-corrected transactions with subcategories for training
+  const recentTransactions = await prisma.transaction.findMany({
+    where: {
+      userCorrected: true,
+      categoryId: { not: null },
+      subcategoryId: { not: null }
+    },
+    select: {
+      merchantName: true,
+      categoryId: true,
+      subcategoryId: true
+    },
+    take: 1000, // Limit to most recent 1000 user-corrected transactions
+    orderBy: { updatedAt: 'desc' }
+  });
 
   trainingData = merchants
     .filter((m: { categoryId: string | null }) => m.categoryId)
@@ -148,8 +172,24 @@ async function loadTrainingData(): Promise<TrainingExample[]> {
       merchantName: m.merchantName,
       normalizedName: m.normalizedName,
       categoryId: m.categoryId!,
-      categorySlug: categoryMap.get(m.categoryId!) || 'general'
+      categorySlug: categoryMap.get(m.categoryId!) || 'general',
+      subcategoryId: null,
+      subcategorySlug: null
     }));
+
+  // Add user-corrected transactions with subcategories to training data
+  const transactionExamples = recentTransactions
+    .filter((t: { categoryId: string | null; subcategoryId: string | null }) => t.categoryId && t.subcategoryId)
+    .map((t: { merchantName: string; categoryId: string | null; subcategoryId: string | null }) => ({
+      merchantName: t.merchantName,
+      normalizedName: t.merchantName.toLowerCase().trim(),
+      categoryId: t.categoryId!,
+      categorySlug: categoryMap.get(t.categoryId!) || 'general',
+      subcategoryId: t.subcategoryId,
+      subcategorySlug: subcategoryMap.get(t.subcategoryId!) || null
+    }));
+
+  trainingData = [...trainingData, ...transactionExamples];
 
   trainingDataLastLoaded = now;
   console.log(`[ML] Loaded ${trainingData.length} training examples from database`);
@@ -317,11 +357,66 @@ export async function categorizeWithML(
       confidenceScore = confidenceScore * 0.7;
     }
 
+    // Predict subcategory based on similar examples with same category
+    let predictedSubcategoryId: string | null = null;
+    let predictedSubcategorySlug: string | null = null;
+
+    // Find examples with the same category that have subcategories
+    const examplesWithSubcategories = topExamples
+      .filter(({ example }) =>
+        example.categoryId === bestCategoryId &&
+        example.subcategoryId &&
+        example.subcategorySlug
+      );
+
+    if (examplesWithSubcategories.length > 0) {
+      // Vote on subcategory (weighted by similarity)
+      const subcategoryVotes = new Map<string, {
+        count: number;
+        totalSim: number;
+        subcategoryId: string;
+        subcategorySlug: string;
+      }>();
+
+      for (const { example, similarity } of examplesWithSubcategories) {
+        const key = example.subcategorySlug!;
+        const existing = subcategoryVotes.get(key) || {
+          count: 0,
+          totalSim: 0,
+          subcategoryId: example.subcategoryId!,
+          subcategorySlug: example.subcategorySlug!
+        };
+        subcategoryVotes.set(key, {
+          count: existing.count + 1,
+          totalSim: existing.totalSim + similarity,
+          subcategoryId: example.subcategoryId!,
+          subcategorySlug: example.subcategorySlug!
+        });
+      }
+
+      // Find subcategory with highest weighted vote
+      let bestSubcategoryScore = 0;
+      for (const [, { totalSim, subcategoryId, subcategorySlug }] of subcategoryVotes) {
+        const weightedScore = totalSim / examplesWithSubcategories.length;
+        if (weightedScore > bestSubcategoryScore) {
+          bestSubcategoryScore = weightedScore;
+          predictedSubcategoryId = subcategoryId;
+          predictedSubcategorySlug = subcategorySlug;
+        }
+      }
+
+      // Only use subcategory prediction if confidence is high enough (>0.65)
+      if (bestSubcategoryScore < 0.65) {
+        predictedSubcategoryId = null;
+        predictedSubcategorySlug = null;
+      }
+    }
+
     return {
       categoryId: bestCategoryId,
       categorySlug: bestCategory,
-      subcategoryId: null, // TODO: Implement subcategory prediction
-      subcategorySlug: null,
+      subcategoryId: predictedSubcategoryId,
+      subcategorySlug: predictedSubcategorySlug,
       confidenceScore,
       method: 'ml',
       matchedMerchant: topExamples[0]?.example.normalizedName,

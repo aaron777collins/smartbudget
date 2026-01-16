@@ -303,11 +303,15 @@ export async function processJob(jobId: string): Promise<void> {
         break;
 
       case JobType.TRANSACTION_CATEGORIZE_BATCH:
-        // TODO: Implement when needed
+        // Note: Not currently used in production. Will be implemented when bulk
+        // recategorization feature is needed (e.g., when user updates category rules
+        // and wants to reapply to existing transactions).
         throw new Error('TRANSACTION_CATEGORIZE_BATCH not yet implemented');
 
       case JobType.IMPORT_TRANSACTIONS:
-        // TODO: Implement when needed
+        // Note: Not currently used in production. Transaction imports are handled
+        // synchronously via the /api/transactions/import endpoint. This job type
+        // is reserved for future async import processing if needed for large files.
         throw new Error('IMPORT_TRANSACTIONS not yet implemented');
 
       default:
