@@ -102,7 +102,7 @@ export function GoalsClient() {
     }
   };
 
-  const handleCreateGoal = async (goalData: any) => {
+  const handleCreateGoal = async (goalData: Partial<Goal>) => {
     try {
       const response = await fetch('/api/goals', {
         method: 'POST',
@@ -122,7 +122,7 @@ export function GoalsClient() {
     }
   };
 
-  const handleUpdateGoal = async (goalId: string, updates: any) => {
+  const handleUpdateGoal = async (goalId: string, updates: Partial<Goal>) => {
     try {
       const response = await fetch(`/api/goals/${goalId}`, {
         method: 'PATCH',
@@ -474,7 +474,7 @@ function GoalFormModal({
 }: {
   goal: Goal | null;
   onClose: () => void;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: Partial<Goal>) => void;
 }) {
   const [formData, setFormData] = useState({
     name: goal?.name || '',

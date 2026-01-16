@@ -104,8 +104,28 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    // Define interface for category trend data
+    interface CategoryDataPoint {
+      month: string;
+      date: Date;
+      spent: number;
+      budgeted: number;
+      percentUsed: number;
+    }
+
+    interface CategoryTrendData {
+      categoryInfo: {
+        id: string;
+        name: string;
+        slug: string;
+        color: string;
+        icon: string;
+      };
+      data: CategoryDataPoint[];
+    }
+
     // Calculate category trends (spending patterns by category over time)
-    const categoryTrends: Record<string, any> = {};
+    const categoryTrends: Record<string, CategoryTrendData> = {};
     const allCategories = new Set<string>();
 
     // Collect all categories from all budgets
@@ -211,12 +231,55 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// Define interface for historical performance
+interface HistoricalPerformance {
+  month: string;
+  date: Date;
+  budgetId: string;
+  budgetName: string;
+  budgeted: number;
+  spent: number;
+  remaining: number;
+  variance: number;
+  percentUsed: number;
+  underBudget: boolean;
+  status: string;
+}
+
+// Define interface for category trend data
+interface CategoryDataPoint {
+  month: string;
+  date: Date;
+  spent: number;
+  budgeted: number;
+  percentUsed: number;
+}
+
+interface CategoryTrendData {
+  categoryInfo: {
+    id: string;
+    name: string;
+    slug: string;
+    color: string;
+    icon: string;
+  };
+  data: CategoryDataPoint[];
+}
+
+// Define interface for insight
+interface Insight {
+  type: 'warning' | 'success' | 'info';
+  title: string;
+  description: string;
+  priority: 'high' | 'medium' | 'low';
+}
+
 // Generate actionable insights from analytics data
 function generateInsights(
-  historicalPerformance: any[],
-  categoryTrends: Record<string, any>
-): any[] {
-  const insights = [];
+  historicalPerformance: HistoricalPerformance[],
+  categoryTrends: Record<string, CategoryTrendData>
+): Insight[] {
+  const insights: Insight[] = [];
 
   if (historicalPerformance.length === 0) {
     return [];
@@ -280,10 +343,9 @@ function generateInsights(
   // Insight 4: Consistently over-budget categories
   const problematicCategories = [];
   for (const [categoryId, trendData] of Object.entries(categoryTrends)) {
-    const data = (trendData as any).data;
-    const overBudgetCount = data.filter((d: any) => d.percentUsed > 100).length;
-    if (overBudgetCount >= data.length * 0.6) {
-      problematicCategories.push((trendData as any).categoryInfo.name);
+    const overBudgetCount = trendData.data.filter(d => d.percentUsed > 100).length;
+    if (overBudgetCount >= trendData.data.length * 0.6) {
+      problematicCategories.push(trendData.categoryInfo.name);
     }
   }
 

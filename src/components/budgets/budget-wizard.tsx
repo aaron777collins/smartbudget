@@ -215,10 +215,10 @@ export default function BudgetWizard() {
     setAllocations(allocations.filter(a => a.categoryId !== categoryId));
   }
 
-  function updateAllocation(categoryId: string, field: 'categoryId' | 'amount', value: any) {
+  function updateAllocation(categoryId: string, field: 'categoryId' | 'amount', value: string | number) {
     setAllocations(allocations.map(a => {
       if (a.categoryId === categoryId) {
-        if (field === 'categoryId') {
+        if (field === 'categoryId' && typeof value === 'string') {
           const category = categories.find(c => c.id === value);
           return {
             ...a,

@@ -135,9 +135,9 @@ export default function TagsClient() {
       toast.success('Tag created successfully');
       setCreateDialogOpen(false);
       fetchTags();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error creating tag:', error);
-      toast.error(error.message || 'Failed to create tag');
+      toast.error(error instanceof Error ? error.message : 'Failed to create tag');
     } finally {
       setSaving(false);
     }
@@ -170,9 +170,9 @@ export default function TagsClient() {
       setEditDialogOpen(false);
       setSelectedTag(null);
       fetchTags();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error updating tag:', error);
-      toast.error(error.message || 'Failed to update tag');
+      toast.error(error instanceof Error ? error.message : 'Failed to update tag');
     } finally {
       setSaving(false);
     }

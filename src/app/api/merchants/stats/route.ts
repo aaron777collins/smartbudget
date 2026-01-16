@@ -29,10 +29,10 @@ export async function GET(request: NextRequest) {
       success: true,
       stats,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Merchant stats error:', error);
     return NextResponse.json(
-      { error: 'Failed to get merchant statistics', details: error.message },
+      { error: 'Failed to get merchant statistics', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }

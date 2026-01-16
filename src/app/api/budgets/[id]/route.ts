@@ -3,6 +3,7 @@ import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { updateBudgetSchema } from '@/lib/validations';
 import { z } from 'zod';
+import { Prisma } from '@prisma/client';
 
 // GET /api/budgets/:id - Get budget details
 export async function GET(
@@ -88,7 +89,7 @@ export async function PATCH(
     const validatedData = updateBudgetSchema.parse(body);
 
     // Build update data
-    const updateData: any = {};
+    const updateData: Prisma.BudgetUpdateInput = {};
 
     if (validatedData.name !== undefined) updateData.name = validatedData.name;
     if (validatedData.type !== undefined) updateData.type = validatedData.type;
@@ -112,7 +113,7 @@ export async function PATCH(
     // Handle category updates if provided
     if (validatedData.categories && Array.isArray(validatedData.categories)) {
       // Verify all categories exist
-      const categoryIds = validatedData.categories.map((c: any) => c.categoryId);
+      const categoryIds = validatedData.categories.map((c: { categoryId: string; amount: number }) => c.categoryId);
       const categories = await prisma.category.findMany({
         where: { id: { in: categoryIds } },
       });
@@ -127,7 +128,7 @@ export async function PATCH(
       });
 
       updateData.categories = {
-        create: validatedData.categories.map((cat: any) => ({
+        create: validatedData.categories.map((cat: { categoryId: string; amount: number }) => ({
           categoryId: cat.categoryId,
           amount: cat.amount,
           spent: 0,

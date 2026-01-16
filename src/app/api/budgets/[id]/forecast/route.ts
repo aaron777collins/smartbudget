@@ -183,9 +183,22 @@ export async function GET(
   }
 }
 
+interface CategoryForecast {
+  categoryId: string;
+  category: { id: string; name: string; slug: string; color: string | null; icon: string | null };
+  budgeted: number;
+  spentSoFar: number;
+  dailyRate: number;
+  projectedTotal: number;
+  projectedOverUnder: number;
+  suggestedDailyRate: number;
+  onTrack: boolean;
+  status: string;
+}
+
 // Helper function to generate actionable recommendations
 function generateRecommendations(
-  categoryForecasts: any[],
+  categoryForecasts: CategoryForecast[],
   totalProjectedOverUnder: number,
   totalBudgeted: number
 ): string[] {

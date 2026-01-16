@@ -3,6 +3,7 @@ import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { updateTransactionSchema } from '@/lib/validations';
 import { z } from 'zod';
+import { Prisma } from '@prisma/client';
 
 interface RouteParams {
   params: Promise<{
@@ -142,7 +143,7 @@ export async function PATCH(
     }
 
     // Mark as user-corrected if category was changed
-    const updateData: any = { ...validatedData };
+    const updateData: Prisma.TransactionUpdateInput = { ...validatedData };
     if (validatedData.categoryId !== undefined && validatedData.categoryId !== existingTransaction.categoryId) {
       updateData.userCorrected = true;
     }

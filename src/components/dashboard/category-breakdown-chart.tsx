@@ -42,9 +42,16 @@ interface CategoryBreakdownData {
   };
 }
 
+interface TooltipPayload {
+  payload: CategoryData;
+  name: string;
+  value: number;
+  color: string;
+}
+
 interface CustomTooltipProps {
   active?: boolean;
-  payload?: any[];
+  payload?: TooltipPayload[];
 }
 
 const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
@@ -68,7 +75,16 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
   return null;
 };
 
-const CustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
+interface CustomLabelProps {
+  cx: number;
+  cy: number;
+  midAngle: number;
+  innerRadius: number;
+  outerRadius: number;
+  percent: number;
+}
+
+const CustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: CustomLabelProps) => {
   const RADIAN = Math.PI / 180;
   const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
   const x = cx + radius * Math.cos(-midAngle * RADIAN);
@@ -205,11 +221,11 @@ export function CategoryBreakdownChart({ timeframe }: CategoryBreakdownChartProp
               <ResponsiveContainer width="100%" height={400}>
                 <PieChart>
                   <Pie
-                    data={data.chartData as any[]}
+                    data={data.chartData as unknown as Array<Record<string, unknown>>}
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={CustomLabel}
+                    label={CustomLabel as never}
                     outerRadius={120}
                     fill="#8884d8"
                     dataKey="amount"

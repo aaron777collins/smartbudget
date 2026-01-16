@@ -3,6 +3,7 @@ import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { updateTagSchema } from '@/lib/validations';
 import { z } from 'zod';
+import { Prisma } from '@prisma/client';
 
 // GET /api/tags/:id - Get tag details
 export async function GET(
@@ -70,7 +71,7 @@ export async function PATCH(
     const validatedData = updateTagSchema.parse(body);
 
     // Build update data
-    const updateData: any = {};
+    const updateData: Prisma.TagUpdateInput = {};
 
     if (validatedData.name !== undefined) {
       // Check for duplicate tag name (case-insensitive, excluding current tag)

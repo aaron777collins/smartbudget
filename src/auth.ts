@@ -8,6 +8,7 @@ import {
   logAccountLocked,
 } from "@/lib/audit-logger"
 import { initializeSession, SESSION_CONFIG } from "@/lib/session-manager"
+import { Prisma } from "@prisma/client"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
@@ -80,7 +81,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           const maxAttempts = 5
           const lockDurationMinutes = 15
 
-          const updateData: any = {
+          const updateData: Prisma.UserUpdateInput = {
             failedLoginAttempts: newFailedAttempts,
             lastFailedLoginAt: new Date(),
           }

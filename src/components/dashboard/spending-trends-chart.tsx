@@ -24,8 +24,13 @@ interface CategoryMetadata {
   color: string;
 }
 
+interface ChartDataPoint {
+  month: string;
+  [categoryName: string]: string | number;
+}
+
 interface SpendingTrendsData {
-  chartData: any[];
+  chartData: ChartDataPoint[];
   categories: CategoryMetadata[];
   summary: {
     totalMonths: number;
@@ -35,9 +40,15 @@ interface SpendingTrendsData {
   };
 }
 
+interface TooltipPayload {
+  name: string;
+  value: number;
+  color: string;
+}
+
 interface CustomTooltipProps {
   active?: boolean;
-  payload?: any[];
+  payload?: TooltipPayload[];
   label?: string;
 }
 
@@ -185,18 +196,16 @@ export function SpendingTrendsChart({ timeframe }: SpendingTrendsChartProps) {
                   </linearGradient>
                 ))}
               </defs>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" animationDuration={500} />
+              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis
                 dataKey="month"
                 className="text-xs"
                 tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                animationDuration={500}
               />
               <YAxis
                 className="text-xs"
                 tick={{ fill: 'hsl(var(--muted-foreground))' }}
                 tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
-                animationDuration={500}
               />
               <Tooltip content={<CustomTooltip />} />
               <Legend

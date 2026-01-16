@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
-import { Frequency } from '@prisma/client';
+import { Frequency, Prisma } from '@prisma/client';
 import { updateRecurringRuleSchema } from '@/lib/validations';
 import { z } from 'zod';
 
@@ -62,7 +62,7 @@ export async function PATCH(
     const validatedData = updateRecurringRuleSchema.parse(body);
 
     // Build update data
-    const updateData: any = {};
+    const updateData: Prisma.RecurringRuleUpdateInput = {};
     if (validatedData.merchantName !== undefined) updateData.merchantName = validatedData.merchantName;
     if (validatedData.frequency !== undefined) updateData.frequency = validatedData.frequency;
     if (validatedData.amount !== undefined) updateData.amount = validatedData.amount;

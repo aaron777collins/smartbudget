@@ -331,9 +331,9 @@ export default function BudgetAnalyticsClient() {
               <FadeIn duration={0.5} delay={0.1}>
                 <ResponsiveContainer width="100%" height={400}>
                   <AreaChart data={performanceChartData}>
-                    <CartesianGrid strokeDasharray="3 3" animationDuration={500} />
-                    <XAxis dataKey="month" animationDuration={500} />
-                    <YAxis animationDuration={500} />
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
                     <Tooltip
                       formatter={(value: number | undefined) => value ? `$${value.toFixed(2)}` : '$0.00'}
                     />
@@ -431,9 +431,9 @@ export default function BudgetAnalyticsClient() {
               <FadeIn duration={0.5} delay={0.1}>
                 <ResponsiveContainer width="100%" height={400}>
                   <BarChart data={utilizationChartData}>
-                    <CartesianGrid strokeDasharray="3 3" animationDuration={500} />
-                    <XAxis dataKey="month" animationDuration={500} />
-                    <YAxis animationDuration={500} />
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
                     <Tooltip
                       formatter={(value: number | undefined) => value ? `${value.toFixed(1)}%` : '0.0%'}
                     />
@@ -478,9 +478,9 @@ export default function BudgetAnalyticsClient() {
                   <FadeIn duration={0.5} delay={0.1}>
                     <ResponsiveContainer width="100%" height={200}>
                       <LineChart data={trend.data}>
-                        <CartesianGrid strokeDasharray="3 3" animationDuration={500} />
-                        <XAxis dataKey="month" animationDuration={500} />
-                        <YAxis animationDuration={500} />
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="month" />
+                        <YAxis />
                         <Tooltip
                           formatter={(value: number | undefined) => value ? `$${value.toFixed(2)}` : '$0.00'}
                         />

@@ -10,14 +10,14 @@
  * This provides 90-95% accuracy as a fallback when rule-based categorization fails.
  */
 
-import { pipeline, env, cos_sim } from '@xenova/transformers';
+import { pipeline, env, cos_sim, type FeatureExtractionPipeline } from '@xenova/transformers';
 import { prisma } from './prisma';
 
 // Configure Transformers.js to use local cache
 env.cacheDir = './.transformers-cache';
 
 // Lazy-load the embedding model
-let embeddingModel: any = null;
+let embeddingModel: FeatureExtractionPipeline | null = null;
 
 /**
  * Initialize the sentence transformer model

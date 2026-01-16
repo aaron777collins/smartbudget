@@ -95,12 +95,12 @@ export function SplitTransactionEditor({
     setSplits(splits.filter((_, i) => i !== index));
   };
 
-  const updateSplit = (index: number, field: keyof Split, value: any) => {
+  const updateSplit = (index: number, field: keyof Split, value: string | number) => {
     const newSplits = [...splits];
     newSplits[index] = { ...newSplits[index], [field]: value };
 
     // Calculate percentage when amount changes
-    if (field === 'amount' && absTransactionAmount > 0) {
+    if (field === 'amount' && typeof value === 'number' && absTransactionAmount > 0) {
       newSplits[index].percentage = (value / absTransactionAmount) * 100;
     }
 

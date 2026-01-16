@@ -21,7 +21,7 @@ interface Insight {
   title: string;
   description: string;
   impact: 'high' | 'medium' | 'low';
-  data?: any;
+  data?: Record<string, unknown>;
 }
 
 interface Anomaly {
@@ -32,7 +32,7 @@ interface Anomaly {
   amount?: number;
   category?: string;
   merchant?: string;
-  data?: any;
+  data?: Record<string, unknown>;
 }
 
 interface SavingsOpportunity {
@@ -41,7 +41,7 @@ interface SavingsOpportunity {
   description: string;
   impact: 'high' | 'medium' | 'low';
   potentialSavings: number;
-  data?: any;
+  data?: Record<string, unknown>;
 }
 
 interface Subscription {

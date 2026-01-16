@@ -109,9 +109,17 @@ export async function GET(request: NextRequest) {
       });
     });
 
+    // Define type for chart data point
+    interface ChartDataPoint {
+      month: string;
+      monthDate: string;
+      total: number;
+      [categoryName: string]: string | number; // Allow dynamic category names
+    }
+
     // Format data for stacked area chart
     const chartData = monthlyData.map(month => {
-      const dataPoint: any = {
+      const dataPoint: ChartDataPoint = {
         month: month.month,
         monthDate: month.monthDate,
         total: month.total,

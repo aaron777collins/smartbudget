@@ -6,12 +6,19 @@ import { Upload, File, X, CheckCircle2, AlertCircle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
+export interface FilePreviewData {
+  transactionCount?: number;
+  fileName?: string;
+  fileSize?: number;
+  [key: string]: unknown;
+}
+
 export interface UploadedFile {
   file: File;
   id: string;
   status: "pending" | "processing" | "success" | "error";
   error?: string;
-  previewData?: any;
+  previewData?: FilePreviewData;
 }
 
 interface FileUploadProps {

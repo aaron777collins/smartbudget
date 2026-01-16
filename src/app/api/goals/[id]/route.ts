@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
-import { GoalType } from '@prisma/client';
+import { GoalType, Prisma } from '@prisma/client';
 import { updateGoalSchema } from '@/lib/validations';
 import { z } from 'zod';
 
@@ -88,7 +88,7 @@ export async function PATCH(
     const validatedData = updateGoalSchema.parse(body);
 
     // Build update data object (only include fields that are provided)
-    const updateData: any = {};
+    const updateData: Prisma.GoalUpdateInput = {};
     if (validatedData.name !== undefined) updateData.name = validatedData.name;
     if (validatedData.type !== undefined) updateData.type = validatedData.type;
     if (validatedData.targetAmount !== undefined) updateData.targetAmount = validatedData.targetAmount;

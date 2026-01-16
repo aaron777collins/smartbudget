@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
-import type { TransactionType } from '@prisma/client';
+import type { TransactionType, Prisma } from '@prisma/client';
 
 // GET /api/transactions/export - Export transactions to CSV or JSON
 export async function GET(request: NextRequest) {
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     const format = searchParams.get('format') || 'csv'; // csv or json
 
     // Build where clause (same logic as list endpoint)
-    const where: any = { userId };
+    const where: Prisma.TransactionWhereInput = { userId };
 
     if (accountId) {
       where.accountId = accountId;
@@ -152,8 +152,18 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// Define type for transaction with includes
+type TransactionWithIncludes = Prisma.TransactionGetPayload<{
+  include: {
+    account: { select: { name: true; institution: true } };
+    category: { select: { name: true } };
+    subcategory: { select: { name: true } };
+    tags: { select: { name: true; color: true } };
+  };
+}>;
+
 // Helper function to generate CSV from transactions
-function generateCSV(transactions: any[]): string {
+function generateCSV(transactions: TransactionWithIncludes[]): string {
   // CSV headers
   const headers = [
     'Date',
@@ -173,7 +183,7 @@ function generateCSV(transactions: any[]): string {
 
   // Build CSV rows
   const rows = transactions.map(t => {
-    const tags = t.tags.map((tag: any) => tag.name).join('; ');
+    const tags = t.tags.map(tag => tag.name).join('; ');
 
     return [
       new Date(t.date).toISOString().split('T')[0],

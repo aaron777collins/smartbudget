@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import type { TransactionType } from '@prisma/client';
 import { createTransactionSchema, transactionQuerySchema } from '@/lib/validations';
 import { z } from 'zod';
+import { Prisma } from '@prisma/client';
 
 // GET /api/transactions - List transactions with filtering
 export async function GET(request: NextRequest) {
@@ -64,7 +65,7 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get('offset') || '0');
 
     // Build where clause
-    const where: any = { userId };
+    const where: Prisma.TransactionWhereInput = { userId };
 
     if (accountId) {
       where.accountId = accountId;

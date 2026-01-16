@@ -14,6 +14,7 @@
  */
 
 import { SORTED_RULES, type CategorizationRule } from './categorization-rules';
+import type { PrismaClient } from '@prisma/client';
 
 export interface CategorizationResult {
   categorySlug: string | null;
@@ -113,7 +114,7 @@ export function batchCategorize(transactions: TransactionInput[]): Categorizatio
 export async function getCategoryAndSubcategoryIds(
   categorySlug: string,
   subcategorySlug: string,
-  prisma: any // PrismaClient
+  prisma: PrismaClient
 ): Promise<{ categoryId: string | null; subcategoryId: string | null }> {
   try {
     // Find category by slug

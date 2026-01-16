@@ -3,6 +3,7 @@ import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { createBudgetSchema } from '@/lib/validations';
 import { z } from 'zod';
+import { Prisma, BudgetType, BudgetPeriod } from '@prisma/client';
 
 // GET /api/budgets - List user's budgets
 export async function GET(request: NextRequest) {
@@ -23,24 +24,24 @@ export async function GET(request: NextRequest) {
     const sortOrder = searchParams.get('sortOrder') || 'desc';
 
     // Build where clause
-    const where: any = { userId };
+    const where: Prisma.BudgetWhereInput = { userId };
 
     if (active !== null) {
       where.isActive = active === 'true';
     }
 
     if (type) {
-      where.type = type;
+      where.type = type as BudgetType;
     }
 
     if (period) {
-      where.period = period;
+      where.period = period as BudgetPeriod;
     }
 
     // Build orderBy clause
-    const orderBy: any = {};
+    const orderBy: Prisma.BudgetOrderByWithRelationInput = {};
     if (sortBy === 'name' || sortBy === 'type' || sortBy === 'period' || sortBy === 'startDate' || sortBy === 'totalAmount' || sortBy === 'createdAt') {
-      orderBy[sortBy] = sortOrder;
+      orderBy[sortBy as keyof Prisma.BudgetOrderByWithRelationInput] = sortOrder as Prisma.SortOrder;
     } else {
       orderBy.createdAt = 'desc';
     }
@@ -95,7 +96,7 @@ export async function POST(request: NextRequest) {
 
     // Verify all categories exist
     if (validatedData.categories && validatedData.categories.length > 0) {
-      const categoryIds = validatedData.categories.map((c: any) => c.categoryId);
+      const categoryIds = validatedData.categories.map((c: { categoryId: string; amount: number }) => c.categoryId);
       const categories = await prisma.category.findMany({
         where: { id: { in: categoryIds } },
       });
@@ -126,7 +127,7 @@ export async function POST(request: NextRequest) {
         isActive: validatedData.isActive,
         rollover: validatedData.rollover,
         categories: validatedData.categories ? {
-          create: validatedData.categories.map((cat: any) => ({
+          create: validatedData.categories.map((cat: { categoryId: string; amount: number }) => ({
             categoryId: cat.categoryId,
             amount: cat.amount,
             spent: 0,

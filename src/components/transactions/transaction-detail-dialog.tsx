@@ -64,6 +64,21 @@ interface Transaction {
   userCorrected: boolean;
 }
 
+interface ResearchResult {
+  merchantName: string;
+  businessName?: string;
+  businessType?: string;
+  categorySlug?: string;
+  categoryName?: string;
+  subcategorySlug?: string;
+  subcategoryName?: string;
+  confidence?: number;
+  reasoning?: string;
+  website?: string;
+  location?: string;
+  sources?: string[];
+}
+
 interface TransactionDetailDialogProps {
   transactionId: string | null;
   open: boolean;
@@ -84,7 +99,7 @@ export function TransactionDetailDialog({
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState<Partial<Transaction>>({});
   const [researching, setResearching] = useState(false);
-  const [researchResult, setResearchResult] = useState<any>(null);
+  const [researchResult, setResearchResult] = useState<ResearchResult | null>(null);
   const [researchError, setResearchError] = useState<string | null>(null);
   const [showSplitEditor, setShowSplitEditor] = useState(false);
   const [updatingTags, setUpdatingTags] = useState(false);
@@ -156,12 +171,12 @@ export function TransactionDetailDialog({
         slug: prev.category?.slug || '',
         icon: prev.category?.icon || '',
         color: prev.category?.color || '',
-      } as any : undefined,
+      } : undefined,
       subcategory: subcategoryId ? {
         id: subcategoryId,
         name: prev.subcategory?.name || '',
         slug: prev.subcategory?.slug || '',
-      } as any : undefined,
+      } : undefined,
     }));
   };
 
@@ -253,7 +268,7 @@ export function TransactionDetailDialog({
         const categoriesResponse = await fetch('/api/categories');
         if (categoriesResponse.ok) {
           const categories = await categoriesResponse.json();
-          const category = categories.find((c: any) => c.slug === result.categorySlug);
+          const category = categories.find((c: { slug: string; id: string; name: string; icon: string; color: string }) => c.slug === result.categorySlug);
 
           if (category) {
             // Auto-populate the form with the suggested category

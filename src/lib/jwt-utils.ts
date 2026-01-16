@@ -125,7 +125,7 @@ export async function isJWTExpired(token: string): Promise<boolean> {
  * @param token JWT token string
  * @returns Decoded payload (unverified)
  */
-export function decodeJWT(token: string): any {
+export function decodeJWT(token: string): Record<string, unknown> {
   try {
     const parts = token.split('.');
     if (parts.length !== 3) {

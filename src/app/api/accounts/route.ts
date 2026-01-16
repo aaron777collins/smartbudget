@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { createAccountSchema, accountQuerySchema } from '@/lib/validations';
 import { z } from 'zod';
 import { logCreate, getAuditContext } from '@/lib/audit-logger';
+import { Prisma } from '@prisma/client';
 
 // GET /api/accounts - List user's accounts
 export async function GET(request: NextRequest) {
@@ -34,7 +35,7 @@ export async function GET(request: NextRequest) {
     const { active, search, sortBy, sortOrder } = queryValidation.data;
 
     // Build where clause
-    const where: any = { userId };
+    const where: Prisma.AccountWhereInput = { userId };
 
     if (active !== null) {
       where.isActive = active === 'true';
@@ -48,7 +49,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Build orderBy clause
-    const orderBy: any = {};
+    const orderBy: Prisma.AccountOrderByWithRelationInput = {};
     if (sortBy === 'name' || sortBy === 'institution' || sortBy === 'accountType' || sortBy === 'currentBalance') {
       orderBy[sortBy] = sortOrder;
     } else {
