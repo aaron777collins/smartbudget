@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useSession, signOut } from "next-auth/react"
 import { usePathname } from "next/navigation"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { MobileMenu } from "@/components/mobile-menu"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
@@ -23,13 +24,28 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
+        {/* Mobile hamburger menu - only visible on mobile when authenticated */}
+        {status === "authenticated" && (
+          <div className="mr-4 md:hidden">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-11 w-11"
+              aria-label="Open menu"
+            >
+              <MobileMenu />
+            </Button>
+          </div>
+        )}
+
         <div className="mr-4 flex">
           <Link href="/" className="mr-6 flex items-center space-x-2 group transition-all duration-200 hover:scale-105 active:scale-95" aria-label="SmartBudget home">
             <Wallet className="h-6 w-6 text-primary transition-transform duration-200 group-hover:rotate-12 group-hover:scale-110" aria-hidden="true" />
             <span className="font-bold text-xl">SmartBudget</span>
           </Link>
+          {/* Desktop navigation - hidden on mobile */}
           {status === "authenticated" && (
-            <nav className="flex items-center space-x-6 text-sm font-medium" aria-label="Primary navigation">
+            <nav className="hidden md:flex items-center space-x-6 text-sm font-medium" aria-label="Primary navigation">
               <Link
                 href="/dashboard"
                 className="relative transition-all duration-200 hover:text-foreground/80 text-foreground/60 hover:scale-105 active:scale-95 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all after:duration-200 hover:after:w-full"
@@ -61,12 +77,12 @@ export function Header() {
             </nav>
           )}
         </div>
-        <div className="flex flex-1 items-center justify-end space-x-4">
+        <div className="flex flex-1 items-center justify-end space-x-2 md:space-x-4">
           <ThemeToggle />
           {status === "authenticated" ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" aria-label="User menu">
+                <Button variant="ghost" size="icon" className="h-11 w-11" aria-label="User menu">
                   <Avatar>
                     <AvatarFallback>
                       {session?.user?.name?.charAt(0).toUpperCase() ||

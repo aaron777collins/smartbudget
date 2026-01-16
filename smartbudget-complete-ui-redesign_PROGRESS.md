@@ -130,7 +130,7 @@ IN_PROGRESS
   - Accessible via "More" button or hamburger icon
   - Smooth slide-in animation
 
-- [ ] **Task 2.3**: Make header responsive for mobile
+- [x] **Task 2.3**: Make header responsive for mobile
   - Collapse navigation links on mobile
   - Show only logo + hamburger + user menu on small screens
   - Ensure touch-friendly tap targets (44x44px minimum)
@@ -519,7 +519,44 @@ After completion:
 
 ## Completed This Iteration
 
-### Current Iteration: Task 2.2 - Mobile Menu for Secondary Navigation ✅
+### Current Iteration: Task 2.3 - Make Header Responsive for Mobile ✅
+
+**Summary:** Made the header component fully responsive for mobile devices by hiding navigation links on small screens and adding a hamburger menu. The header now shows only the essential elements (logo, hamburger menu, theme toggle, and user menu) on mobile, providing a clean, touch-friendly interface.
+
+**Files Modified:**
+- `src/components/header.tsx` - Added mobile responsiveness with hamburger menu integration
+
+**Implementation Details:**
+- **Hamburger menu on mobile**: Added `<MobileMenu />` component wrapped in a Button, visible only on mobile (`md:hidden`)
+- **Collapsed navigation**: Primary navigation links (Dashboard, Transactions, Budgets, Accounts) now hidden on mobile using `hidden md:flex` class
+- **Touch-friendly targets**: Hamburger menu button and user menu button sized at 44x44px (h-11 w-11) for optimal mobile tap targets
+- **Layout adjustments**: Reduced spacing between header elements on mobile (`space-x-2` on mobile, `md:space-x-4` on desktop)
+- **Conditional rendering**: Hamburger menu only appears when user is authenticated
+- **Proper accessibility**: Added aria-label="Open menu" to hamburger button
+
+**Responsive Breakpoints:**
+- **Mobile (<768px)**: Shows logo + hamburger menu + theme toggle + user menu
+- **Desktop (≥768px)**: Shows logo + full navigation links + theme toggle + user menu
+
+**Component Integration:**
+- Imports `MobileMenu` component created in Task 2.2
+- Hamburger menu triggers the sheet drawer with all secondary routes
+- Primary routes accessible via mobile bottom nav (Task 2.1)
+- Secondary routes accessible via hamburger menu drawer (Task 2.2)
+
+**Impact:**
+- Header no longer shows crowded navigation on mobile screens
+- Clean, professional mobile header layout matching modern app standards
+- Consistent with mobile-first design principles
+- All navigation remains accessible through mobile bottom nav and drawer menu
+- Completes the mobile navigation trilogy (bottom nav + drawer + responsive header)
+- 44x44px touch targets meet WCAG 2.1 AA accessibility guidelines
+
+**Next Step:** Task 2.4 - Update AppLayout for mobile navigation (verify proper integration and test all breakpoints)
+
+---
+
+### Previous Iteration: Task 2.2 - Mobile Menu for Secondary Navigation ✅
 
 **Summary:** Created a mobile menu drawer that provides access to the 7 secondary routes on mobile devices. The menu is accessible via the "More" button in the bottom navigation bar and provides a smooth slide-in experience.
 
