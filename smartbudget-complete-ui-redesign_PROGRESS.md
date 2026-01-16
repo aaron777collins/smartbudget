@@ -519,6 +519,35 @@ After completion:
 
 ## Completed This Iteration
 
+### Current Iteration: Task 1.5 - RBAC Implementation ✅
+
+**Summary:** Implemented comprehensive Role-Based Access Control (RBAC) system to replace email-based admin authorization. This provides a more scalable and maintainable permission system stored in the database.
+
+**Files Modified:**
+- `prisma/schema.prisma` - Added UserRole enum and role field
+- `prisma.config.ts` - Updated datasource configuration for migrations
+- `src/lib/api-middleware.ts` - Implemented database-backed role checking
+- `src/app/api/jobs/process/route.ts` - Migrated to use withAdmin middleware
+- `smartbudget-complete-ui-redesign_PROGRESS.md` - Updated progress tracking
+
+**Database Changes:**
+- Created UserRole enum (USER, ADMIN)
+- Added role column to User table with default USER
+- Created index on role field
+- Applied migration to production Supabase database
+
+**Impact:**
+- More flexible admin permission management
+- Easier to audit and track role changes
+- No server restart needed for role updates
+- Foundation for future permission expansion
+
+**Commit:** 35c8ff0 - Task 1.5: Implement RBAC (Role-Based Access Control)
+
+---
+
+### Previous Iterations
+
 **Task 1.1: Add authentication to `/api/jobs/process` endpoint** ✅
 - Added NextAuth session check requiring authenticated user
 - Implemented admin-only authorization using ADMIN_EMAILS environment variable
