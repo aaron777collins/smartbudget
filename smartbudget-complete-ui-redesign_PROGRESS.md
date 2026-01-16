@@ -296,11 +296,22 @@ IN_PROGRESS
     - `src/app/budgets/budgets-client.tsx` - "Delete budget"
   - All icon buttons now have proper accessibility labels for screen readers
 
-- [ ] **Task 6.4**: Improve dialog scrolling
-  - Replace max-h-[90vh] overflow pattern
-  - Use proper dialog body scrolling
-  - Ensure header/footer stay fixed
-  - Test on mobile viewports
+- [x] **Task 6.4**: Improve dialog scrolling
+  - ✅ Created DialogBody component in dialog.tsx with proper flex layout
+  - ✅ Updated DialogContent to use flexbox with max-h-[90vh] constraint
+  - ✅ Fixed transaction-detail-dialog.tsx to use DialogBody for scrollable content
+  - ✅ Fixed account-form-dialog.tsx to use DialogBody with proper form layout
+  - ✅ Fixed advanced-filters.tsx to use DialogBody for filter content
+  - ✅ Fixed onboarding-flow.tsx to use DialogBody with DialogFooter
+  - ✅ Fixed goals-client.tsx custom modal with separate header, scrollable body, and fixed footer
+  - ✅ All dialogs now have fixed headers and footers with only body content scrolling
+  - Files updated:
+    - `src/components/ui/dialog.tsx` - Added DialogBody component
+    - `src/components/transactions/transaction-detail-dialog.tsx` - Applied new pattern
+    - `src/components/accounts/account-form-dialog.tsx` - Applied new pattern
+    - `src/components/transactions/advanced-filters.tsx` - Applied new pattern
+    - `src/components/onboarding/onboarding-flow.tsx` - Applied new pattern
+    - `src/app/goals/goals-client.tsx` - Fixed custom modal layout
 
 - [ ] **Task 6.5**: Run accessibility audit
   - Test with axe DevTools

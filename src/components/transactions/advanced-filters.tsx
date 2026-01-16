@@ -6,6 +6,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogBody,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -150,7 +151,7 @@ export function AdvancedFilters({
           )}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Advanced Filters</DialogTitle>
           <DialogDescription>
@@ -158,7 +159,8 @@ export function AdvancedFilters({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-6 py-4">
+        <DialogBody>
+          <div className="grid gap-6 py-4">
           {/* Account Filter */}
           <div className="grid gap-2">
             <Label htmlFor="account">Account</Label>
@@ -348,7 +350,8 @@ export function AdvancedFilters({
               </SelectContent>
             </Select>
           </div>
-        </div>
+          </div>
+        </DialogBody>
 
         <DialogFooter className="flex gap-2">
           <Button variant="outline" onClick={handleClearAll}>

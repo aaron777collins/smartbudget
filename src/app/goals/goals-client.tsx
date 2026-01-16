@@ -638,8 +638,9 @@ function GoalDetailModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-start justify-between mb-4">
+      <div className="bg-white dark:bg-gray-950 rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] flex flex-col">
+        {/* Header - Fixed */}
+        <div className="flex items-start justify-between p-6 pb-4 border-b border-gray-200 dark:border-gray-800">
           <div>
             <h2 className="text-2xl font-bold text-gray-900">{goal.name}</h2>
             <span
@@ -654,14 +655,16 @@ function GoalDetailModal({
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-400"
           >
             ✕
           </button>
         </div>
 
-        {/* Progress Overview */}
-        <div className="bg-gray-50 rounded-lg p-4 mb-6">
+        {/* Body - Scrollable */}
+        <div className="flex-1 overflow-y-auto min-h-0 p-6">
+          {/* Progress Overview */}
+          <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 mb-6">
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
               <p className="text-sm text-gray-600">Current Amount</p>
@@ -772,40 +775,41 @@ function GoalDetailModal({
           </div>
         )}
 
-        {/* Add Progress */}
-        {!goal.isCompleted && (
-          <div className="bg-white border border-gray-200 rounded-lg p-4 mb-4">
-            <p className="text-sm font-medium text-gray-700 mb-2">
-              Update Progress
-            </p>
-            <div className="flex gap-2">
-              <input
-                type="number"
-                step="0.01"
-                value={addAmount}
-                onChange={(e) => setAddAmount(e.target.value)}
-                placeholder="Enter amount"
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <button
-                onClick={handleAddProgress}
-                disabled={!addAmount || parseFloat(addAmount) === 0}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
-              >
-                Add
-              </button>
+          {/* Add Progress */}
+          {!goal.isCompleted && (
+            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-4 mb-4">
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Update Progress
+              </p>
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  step="0.01"
+                  value={addAmount}
+                  onChange={(e) => setAddAmount(e.target.value)}
+                  placeholder="Enter amount"
+                  className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                  onClick={handleAddProgress}
+                  disabled={!addAmount || parseFloat(addAmount) === 0}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                >
+                  Add
+                </button>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Enter positive amount to add, negative to subtract
+              </p>
             </div>
-            <p className="text-xs text-gray-500 mt-1">
-              Enter positive amount to add, negative to subtract
-            </p>
-          </div>
-        )}
+          )}
+        </div>
 
-        {/* Actions */}
-        <div className="flex gap-2">
+        {/* Footer - Fixed */}
+        <div className="flex gap-2 p-6 pt-4 border-t border-gray-200 dark:border-gray-800">
           <button
             onClick={onEdit}
-            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+            className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-900"
           >
             Edit Goal
           </button>

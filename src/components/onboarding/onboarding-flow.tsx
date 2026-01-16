@@ -6,6 +6,8 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogBody,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
@@ -430,7 +432,7 @@ export default function OnboardingFlow({ open, onComplete, currentStep = 0 }: On
 
   return (
     <Dialog open={open} onOpenChange={() => {}}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="text-lg">
@@ -455,11 +457,11 @@ export default function OnboardingFlow({ open, onComplete, currentStep = 0 }: On
           />
         </DialogHeader>
 
-        <div className="mt-4">
+        <DialogBody>
           {renderStepContent()}
-        </div>
+        </DialogBody>
 
-        <div className="flex justify-between mt-6 pt-6 border-t">
+        <DialogFooter className="flex justify-between sm:justify-between">
           {step > 0 && step < ONBOARDING_STEPS.length - 1 ? (
             <Button
               variant="outline"
@@ -484,7 +486,7 @@ export default function OnboardingFlow({ open, onComplete, currentStep = 0 }: On
               Get Started
             </Button>
           )}
-        </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

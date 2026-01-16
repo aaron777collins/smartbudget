@@ -7,6 +7,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogBody,
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -305,7 +306,7 @@ export function TransactionDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Transaction Details</DialogTitle>
           <DialogDescription>
@@ -313,64 +314,66 @@ export function TransactionDetailDialog({
           </DialogDescription>
         </DialogHeader>
 
-        {loading ? (
-          <div className="py-8 text-center">
-            <p className="text-muted-foreground">Loading transaction...</p>
-          </div>
-        ) : transaction ? (
-          <div className="space-y-6">
-            {/* View Mode - Only show when not editing */}
-            {!editing && (
-              <TransactionViewMode
+        <DialogBody>
+          {loading ? (
+            <div className="py-8 text-center">
+              <p className="text-muted-foreground">Loading transaction...</p>
+            </div>
+          ) : transaction ? (
+            <div className="space-y-6">
+              {/* View Mode - Only show when not editing */}
+              {!editing && (
+                <TransactionViewMode
+                  transaction={transaction}
+                  formatAmount={formatAmount}
+                  formatDate={formatDate}
+                />
+              )}
+
+              {/* Edit Form - Only show when editing */}
+              {editing && (
+                <TransactionEditForm
+                  formData={formData}
+                  transactionId={transactionId || ''}
+                  onFormChange={setFormData}
+                  onCategoryChange={handleCategoryChange}
+                  showCategorySelector={!transaction.splits || transaction.splits.length === 0}
+                />
+              )}
+
+              {/* Merchant Research Panel - Show in both modes */}
+              <MerchantResearchPanel
+                researching={researching}
+                researchResult={researchResult}
+                researchError={researchError}
+                editing={editing}
+                onResearch={handleResearchMerchant}
+              />
+
+              {/* Split Transaction Manager - Show in both modes */}
+              <TransactionSplitsManager
                 transaction={transaction}
-                formatAmount={formatAmount}
-                formatDate={formatDate}
-              />
-            )}
-
-            {/* Edit Form - Only show when editing */}
-            {editing && (
-              <TransactionEditForm
-                formData={formData}
                 transactionId={transactionId || ''}
-                onFormChange={setFormData}
+                showSplitEditor={showSplitEditor}
+                editing={editing}
+                formData={formData}
+                onToggleSplitEditor={setShowSplitEditor}
+                onSplitsUpdate={async () => {
+                  await fetchTransaction();
+                  onUpdate?.();
+                }}
                 onCategoryChange={handleCategoryChange}
-                showCategorySelector={!transaction.splits || transaction.splits.length === 0}
               />
-            )}
 
-            {/* Merchant Research Panel - Show in both modes */}
-            <MerchantResearchPanel
-              researching={researching}
-              researchResult={researchResult}
-              researchError={researchError}
-              editing={editing}
-              onResearch={handleResearchMerchant}
-            />
-
-            {/* Split Transaction Manager - Show in both modes */}
-            <TransactionSplitsManager
-              transaction={transaction}
-              transactionId={transactionId || ''}
-              showSplitEditor={showSplitEditor}
-              editing={editing}
-              formData={formData}
-              onToggleSplitEditor={setShowSplitEditor}
-              onSplitsUpdate={async () => {
-                await fetchTransaction();
-                onUpdate?.();
-              }}
-              onCategoryChange={handleCategoryChange}
-            />
-
-            {/* Tags Manager - Always show */}
-            <TransactionTagsManager
-              selectedTags={formData.tags || []}
-              onTagsChange={handleTagsChange}
-              updatingTags={updatingTags}
-            />
-          </div>
-        ) : null}
+              {/* Tags Manager - Always show */}
+              <TransactionTagsManager
+                selectedTags={formData.tags || []}
+                onTagsChange={handleTagsChange}
+                updatingTags={updatingTags}
+              />
+            </div>
+          ) : null}
+        </DialogBody>
 
         <DialogFooter className="flex justify-between sm:justify-between">
           <Button

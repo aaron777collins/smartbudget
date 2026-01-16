@@ -5,6 +5,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogBody,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -156,7 +157,7 @@ export function AccountFormDialog({ open, onClose, account }: AccountFormDialogP
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>{isEditing ? 'Edit Account' : 'Add New Account'}</DialogTitle>
           <DialogDescription>
@@ -167,19 +168,23 @@ export function AccountFormDialog({ open, onClose, account }: AccountFormDialogP
         </DialogHeader>
 
         {showDeleteConfirm ? (
-          <AccountDeleteConfirmation
-            onConfirm={handleDelete}
-            onCancel={() => setShowDeleteConfirm(false)}
-            loading={loading}
-          />
-        ) : (
-          <form onSubmit={handleSubmit}>
-            <AccountForm
-              formData={formData}
-              onChange={setFormData}
-              isEditing={isEditing}
-              error={error}
+          <DialogBody>
+            <AccountDeleteConfirmation
+              onConfirm={handleDelete}
+              onCancel={() => setShowDeleteConfirm(false)}
+              loading={loading}
             />
+          </DialogBody>
+        ) : (
+          <form onSubmit={handleSubmit} className="flex flex-col min-h-0 flex-1">
+            <DialogBody>
+              <AccountForm
+                formData={formData}
+                onChange={setFormData}
+                isEditing={isEditing}
+                error={error}
+              />
+            </DialogBody>
 
             <DialogFooter>
               {isEditing && (
