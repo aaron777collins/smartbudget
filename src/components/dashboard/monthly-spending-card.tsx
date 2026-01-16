@@ -44,7 +44,7 @@ export function MonthlySpendingCard({
   };
 
   return (
-    <Card className={`transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 duration-500 delay-75 ${COLORS.gradient.orange}`}>
+    <Card className={`transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 duration-300 delay-100 ${COLORS.gradient.orange}`}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">Monthly Spending</CardTitle>
         <CreditCard className="h-4 w-4 text-muted-foreground transition-transform duration-300 group-hover:scale-110" />
@@ -54,7 +54,7 @@ export function MonthlySpendingCard({
 
         {budget !== null && budgetUsedPercentage !== null ? (
           <>
-            <div className="mt-3 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-150">
+            <div className="mt-3 animate-in fade-in slide-in-from-bottom-2 duration-300 delay-200">
               <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
                 <span>Budget Progress</span>
                 <span className={`${getStatusColor()} tabular-nums transition-colors duration-300`}>
@@ -63,13 +63,13 @@ export function MonthlySpendingCard({
               </div>
               <Progress
                 value={Math.min(animatedPercentage, 100)}
-                className={`h-2 ${getProgressBarColor()} transition-all duration-500`}
+                className={`h-2 ${getProgressBarColor()} transition-all duration-300`}
               />
               <div className="flex items-center justify-between text-xs text-muted-foreground mt-1 tabular-nums">
                 <span>{formatCurrency(animatedCurrent)} of {formatCurrency(animatedBudget)}</span>
               </div>
             </div>
-            <p className="text-xs text-muted-foreground mt-2 animate-in fade-in duration-500 delay-300">
+            <p className="text-xs text-muted-foreground mt-2 animate-in fade-in duration-300 delay-300">
               {daysRemaining} {daysRemaining === 1 ? 'day' : 'days'} remaining this month
             </p>
           </>

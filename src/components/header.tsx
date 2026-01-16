@@ -112,7 +112,7 @@ export function Header() {
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link href="/settings" className="flex items-center cursor-pointer group">
-                    <Settings className="mr-2 h-4 w-4 transition-transform duration-200 group-hover:rotate-90 group-hover:scale-110" />
+                    <Settings className="mr-2 h-4 w-4 transition-transform duration-200 group-hover:rotate-12 group-hover:scale-110" />
                     Settings
                   </Link>
                 </DropdownMenuItem>

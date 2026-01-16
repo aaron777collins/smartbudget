@@ -42,7 +42,7 @@ export function NetWorthCard({
   };
 
   return (
-    <Card className={`transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 duration-500 ${COLORS.gradient.blue}`}>
+    <Card className={`transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 duration-300 ${COLORS.gradient.blue}`}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">Net Worth</CardTitle>
         <svg

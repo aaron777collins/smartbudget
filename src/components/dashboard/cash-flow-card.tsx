@@ -59,10 +59,10 @@ export function CashFlowCard({
   };
 
   return (
-    <Card className={`transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 duration-500 delay-[225ms] ${COLORS.gradient.purple}`}>
+    <Card className={`transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 duration-300 delay-200 ${COLORS.gradient.purple}`}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">Cash Flow</CardTitle>
-        <div className="animate-in zoom-in duration-300 delay-300">
+        <div className="animate-in zoom-in duration-200 delay-300">
           {getTrendIcon()}
         </div>
       </CardHeader>
@@ -71,11 +71,11 @@ export function CashFlowCard({
           {formatCurrency(animatedCurrent)}
         </div>
 
-        <div className="flex items-center text-xs text-muted-foreground mt-1 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-200">
+        <div className="flex items-center text-xs text-muted-foreground mt-1 animate-in fade-in slide-in-from-bottom-2 duration-300 delay-100">
           <span className={`${getTrendColor()} transition-colors duration-300`}>{getTrendText()}</span>
         </div>
 
-        <div className="mt-4 pt-3 border-t animate-in fade-in slide-in-from-bottom-2 duration-500 delay-300">
+        <div className="mt-4 pt-3 border-t animate-in fade-in slide-in-from-bottom-2 duration-300 delay-200">
           <div className="flex items-center justify-between">
             <span className="text-xs text-muted-foreground">
               Projected (End of Month)
@@ -86,7 +86,7 @@ export function CashFlowCard({
           </div>
         </div>
 
-        <p className="text-xs text-muted-foreground mt-2 animate-in fade-in duration-500 delay-[400ms]">
+        <p className="text-xs text-muted-foreground mt-2 animate-in fade-in duration-300 delay-300">
           Income minus expenses for this month
         </p>
       </CardContent>

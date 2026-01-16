@@ -53,7 +53,7 @@ export function MonthlyIncomeCard({
   };
 
   return (
-    <Card className={`transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150 ${COLORS.gradient.green}`}>
+    <Card className={`transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 duration-300 delay-100 ${COLORS.gradient.green}`}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">Monthly Income</CardTitle>
         <DollarSign className="h-4 w-4 text-muted-foreground transition-transform duration-300 group-hover:scale-110" />
@@ -62,10 +62,10 @@ export function MonthlyIncomeCard({
         <div className="text-2xl font-bold tabular-nums">{formatCurrency(animatedCurrent)}</div>
 
         {average > 0 && (
-          <div className="flex items-center text-xs text-muted-foreground mt-1 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-200">
+          <div className="flex items-center text-xs text-muted-foreground mt-1 animate-in fade-in slide-in-from-bottom-2 duration-300 delay-200">
             {isAboveAverage && (
               <>
-                <TrendingUp className={`mr-1 h-4 w-4 ${COLORS.trend.up} animate-in zoom-in duration-300 delay-300`} />
+                <TrendingUp className={`mr-1 h-4 w-4 ${COLORS.trend.up} animate-in zoom-in duration-200 delay-300`} />
                 <span className={`${COLORS.trend.up} tabular-nums`}>
                   +{Math.abs(animatedPercentage).toFixed(1)}%
                 </span>

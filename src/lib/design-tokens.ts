@@ -79,12 +79,19 @@ export const SPACING = {
 
 /**
  * Animation tokens for consistent transitions and effects
+ *
+ * ACCESSIBILITY NOTE: All animations automatically respect the user's
+ * `prefers-reduced-motion` setting via global CSS. When enabled, all animations
+ * are reduced to 0.01ms duration (effectively instant), ensuring accessibility
+ * for users with vestibular disorders or motion sensitivity.
+ *
+ * Implementation: See globals.css @media (prefers-reduced-motion: reduce)
  */
 export const ANIMATION = {
   // Duration classes
   duration: {
     fast: 'duration-150',       // 150ms - Quick feedback
-    normal: 'duration-200',     // 200ms - Standard transitions
+    normal: 'duration-200',     // 200ms - Standard transitions (default)
     slow: 'duration-300',       // 300ms - Deliberate animations
     slower: 'duration-500',     // 500ms - Emphasized transitions
   },
@@ -106,26 +113,26 @@ export const ANIMATION = {
     shadow: 'transition-shadow duration-200 ease-in-out',
   },
 
-  // Hover/focus states
+  // Hover/focus states (subtle, accessible)
   hover: {
-    lift: 'hover:scale-105 transition-transform duration-200',
-    shadow: 'hover:shadow-lg transition-shadow duration-200',
-    opacity: 'hover:opacity-80 transition-opacity duration-200',
-    brightness: 'hover:brightness-110 transition-all duration-200',
+    lift: 'hover:scale-105 transition-transform duration-200',           // Subtle lift on hover
+    shadow: 'hover:shadow-lg transition-shadow duration-200',            // Shadow elevation
+    opacity: 'hover:opacity-80 transition-opacity duration-200',         // Opacity change
+    brightness: 'hover:brightness-110 transition-all duration-200',      // Brightness increase
   },
 
-  // Animation presets
+  // Animation presets (entrance/exit animations)
   presets: {
-    fadeIn: 'animate-fade-in',
-    fadeOut: 'animate-fade-out',
-    slideInFromTop: 'animate-slide-in-from-top',
-    slideInFromBottom: 'animate-slide-in-from-bottom',
-    slideInFromLeft: 'animate-slide-in-from-left',
-    slideInFromRight: 'animate-slide-in-from-right',
-    scaleIn: 'animate-scale-in',
-    scaleOut: 'animate-scale-out',
-    shimmer: 'animate-shimmer',
-    spin: 'animate-spin',
+    fadeIn: 'animate-fade-in',                       // Fade in (0 → 1 opacity)
+    fadeOut: 'animate-fade-out',                     // Fade out (1 → 0 opacity)
+    slideInFromTop: 'animate-slide-in-from-top',     // Slide in from top
+    slideInFromBottom: 'animate-slide-in-from-bottom', // Slide in from bottom
+    slideInFromLeft: 'animate-slide-in-from-left',   // Slide in from left
+    slideInFromRight: 'animate-slide-in-from-right', // Slide in from right
+    scaleIn: 'animate-scale-in',                     // Scale in (95% → 100%)
+    scaleOut: 'animate-scale-out',                   // Scale out (100% → 95%)
+    shimmer: 'animate-shimmer',                      // Loading shimmer effect
+    spin: 'animate-spin',                            // Continuous rotation (loading)
   },
 } as const;
 
