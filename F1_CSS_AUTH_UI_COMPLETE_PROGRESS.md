@@ -204,7 +204,7 @@ Block 6 (Testing - FINAL):
   - Add username validation (alphanumeric, length requirements)
   - Keep password validation (min 8 chars)
 
-- [ ] Task 3.3: Update sign-in form (`src/app/auth/signin/page.tsx`)
+- [x] Task 3.3: Update sign-in form (`src/app/auth/signin/page.tsx`)
   - Change input field from "Email" to "Username"
   - Update input type from "email" to "text"
   - Update placeholder text
@@ -418,6 +418,18 @@ Block 6 (Testing - FINAL):
 ---
 
 ## Completed This Iteration
+
+**Task 3.3: Update sign-in form (`src/app/auth/signin/page.tsx`)** ✓
+- Changed state variable from `email` to `username` (line 18)
+- Updated Label text from "Email" to "Username" (line 101)
+- Changed Input type from "email" to "text" (line 104)
+- Updated placeholder from "name@example.com" to "your_username" (line 105)
+- Updated value and onChange handler to use `username` and `setUsername` (lines 106-107)
+- Changed signIn credentials from `email` to `username` (line 30)
+- Updated error message from "Invalid email or password" to "Invalid username or password" (line 36)
+- Verified build passes without errors
+
+## Previously Completed This Iteration
 
 **Task 3.2: Update signup API route (`src/app/api/auth/signup/route.ts`)** ✓
 - Changed request destructuring from `{ email, password, name }` to `{ username, password, name }`
