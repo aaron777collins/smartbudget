@@ -1,0 +1,54 @@
+
+> smartbudget@1.0.0 build
+> next build
+
+▲ Next.js 16.1.2 (Turbopack)
+- Environments: .env
+- Experiments (use with caution):
+  · optimizePackageImports
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+Turbopack build encountered 1 warnings:
+./tailwind.config.ts:158:13
+Module not found: Can't resolve 'tailwindcss-animate'
+[0m [90m 156 |[39m     }[33m,[39m
+ [90m 157 |[39m   }[33m,[39m
+[31m[1m>[22m[39m[90m 158 |[39m   plugins[33m:[39m [require([32m"tailwindcss-animate"[39m)][33m,[39m
+ [90m     |[39m             [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 159 |[39m }[33m;[39m
+ [90m 160 |[39m
+ [90m 161 |[39m [36mexport[39m [36mdefault[39m config[33m;[39m[0m
+
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+> Build error occurred
+Error: Turbopack build failed with 1 errors:
+./src/app/globals.css
+Error evaluating Node.js code
+Error: Cannot find module 'tailwindcss'
+Require stack:
+- /home/ubuntu/repos/smartbudget/.next/build/chunks/[root-of-the-server]__6d51cb5d._.js
+- /home/ubuntu/repos/smartbudget/.next/build/chunks/[turbopack]_runtime.js
+- /home/ubuntu/repos/smartbudget/.next/build/postcss.js
+    [at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)]
+    [at Module._load (node:internal/modules/cjs/loader:1038:27)]
+    [at Module.require (node:internal/modules/cjs/loader:1289:19)]
+    [at require (node:internal/modules/helpers:182:18)]
+    at turbopack:///[turbopack-node]/transforms/postcss.ts:49:25 [/home/ubuntu/repos/smartbudget/.next/build/chunks/[root-of-the-server]__6d51cb5d._.js:160:33]
+    [at <anonymous>]
+    at Module.init (turbopack:///[turbopack-node]/transforms/postcss.ts:43:33) [/home/ubuntu/repos/smartbudget/.next/build/chunks/[root-of-the-server]__6d51cb5d._.js:155:35]
+    at run (turbopack:///[turbopack-node]/ipc/evaluate.ts:77:20) [/home/ubuntu/repos/smartbudget/.next/build/chunks/[root-of-the-server]__44695d76._.js:429:26]
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component]
+
+
+    at Module.init (turbopack:///[turbopack-node]/transforms/postcss.ts:43:33) [/home/ubuntu/repos/smartbudget/.next/build/chunks/[root-of-the-server]__6d51cb5d._.js:155:35])
+    at run (turbopack:///[turbopack-node]/ipc/evaluate.ts:77:20) [/home/ubuntu/repos/smartbudget/.next/build/chunks/[root-of-the-server]__44695d76._.js:429:26])
