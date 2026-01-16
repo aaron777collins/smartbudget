@@ -98,7 +98,7 @@ export function Sidebar() {
               key={route.href}
               href={route.href}
               className={cn(
-                "text-sm group flex p-3 w-full justify-start font-medium cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-lg transition",
+                "text-sm group flex p-3 w-full justify-start font-medium cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-lg transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]",
                 pathname === route.href
                   ? "bg-accent text-accent-foreground"
                   : "text-muted-foreground"
@@ -107,7 +107,13 @@ export function Sidebar() {
               role="listitem"
             >
               <div className="flex items-center flex-1">
-                <route.icon className={cn("h-5 w-5 mr-3", route.color)} aria-hidden="true" />
+                <route.icon
+                  className={cn(
+                    "h-5 w-5 mr-3 transition-all duration-200 group-hover:scale-110 group-hover:rotate-3",
+                    route.color
+                  )}
+                  aria-hidden="true"
+                />
                 {route.label}
               </div>
             </Link>

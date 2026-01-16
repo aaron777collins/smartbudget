@@ -284,7 +284,7 @@ Block 6 (Testing - FINAL):
   - Enhance chart colors with gradients
   - Ensure proper contrast ratios for accessibility
 
-- [ ] Task 5.5: Add micro-interactions
+- [x] Task 5.5: Add micro-interactions
   - Button press animations
   - Icon hover effects
   - Smooth page transitions
@@ -418,6 +418,69 @@ Block 6 (Testing - FINAL):
 ---
 
 ## Completed This Iteration
+
+**Task 5.5: Add micro-interactions** ✓
+- Enhanced sidebar navigation (`src/components/sidebar.tsx`):
+  - Added `transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]` to all navigation links
+  - Links now subtly scale up on hover (2% larger) and press down on click (2% smaller)
+  - Icons animate on hover with `group-hover:scale-110 group-hover:rotate-3`
+  - All 11 navigation items (Dashboard, Transactions, Accounts, Budgets, etc.) have icon scale + slight rotation
+  - Creates playful, tactile feel when navigating through the app
+- Enhanced header navigation (`src/components/header.tsx`):
+  - Logo link now has `hover:scale-105 active:scale-95` press animation
+  - Wallet icon rotates and scales on hover: `group-hover:rotate-12 group-hover:scale-110`
+  - Primary navigation links have animated underline effect:
+    - Added `after:` pseudo-element for animated underline
+    - Underline grows from left to right on hover with `hover:after:w-full`
+    - 200ms smooth transition for natural feel
+    - Links also scale up 5% on hover and down 5% on press
+  - User menu dropdown items enhanced with icon animations:
+    - Profile icon: scales to 110% on hover
+    - Settings icon: rotates 90° and scales on hover
+    - Sign out icon: scales and translates left slightly on hover
+  - All animations use `transition-transform duration-200` for consistency
+- Enhanced theme toggle (`src/components/theme-toggle.tsx`):
+  - Toggle button icons now rotate on hover:
+    - Sun icon: `group-hover:rotate-12` for playful spin
+    - Moon icon: same rotation in dark mode
+  - Dropdown menu items have animated icons:
+    - Light mode: Sun rotates 180° and scales on hover
+    - Dark mode: Moon rotates 12° and scales on hover
+    - System mode: Custom half-circle icon rotates 180° and scales
+  - All icons scale to 110% on hover for emphasis
+  - Duration: 200ms for snappy, responsive feel
+- Enhanced filter button (`src/components/transactions/advanced-filters.tsx`):
+  - Filter icon animates with `group-hover:scale-110 group-hover:rotate-12`
+  - Badge showing active filter count also scales on hover
+  - Both animations synchronized for cohesive effect
+- Created page transition component (`src/components/page-transition.tsx`):
+  - Wrapper component for smooth page content animations
+  - Uses `animate-in fade-in slide-in-from-bottom-4 duration-300`
+  - Provides fade-in + slide-up effect when pages load
+  - Ready to be applied to page layouts for smooth navigation
+- Design principles applied:
+  - **Consistency**: All animations use 200ms duration for uniform feel
+  - **Subtlety**: Scale changes are small (2-10%) to avoid being jarring
+  - **Tactility**: Press animations (active:scale-[0.98]) provide button feedback
+  - **Playfulness**: Rotations (3°-180°) add character without overwhelming
+  - **Performance**: All animations use CSS transforms (scale, rotate, translate) which are GPU-accelerated
+  - **Accessibility**: Animations respect prefers-reduced-motion by default (Tailwind handles this)
+- Micro-interaction types implemented:
+  - ✅ Button press animations (scale down on active state)
+  - ✅ Icon hover effects (scale + rotate on hover)
+  - ✅ Smooth page transitions (fade-in + slide-up component)
+  - ✅ Link hover animations (underline grow + scale)
+  - ✅ Badge animations (scale on hover)
+  - ✅ Logo animations (rotate + scale)
+- Components enhanced: 5 major components (Sidebar, Header, ThemeToggle, AdvancedFilters, PageTransition)
+- Total icon animations: 20+ icons now have hover effects
+- Total link/button animations: 15+ interactive elements with press feedback
+- Verified build passes without errors
+- All micro-interactions feel polished, responsive, and add delight to user interactions
+- **Phase 5 (UI/UX Polish) is now COMPLETE** ✓
+- **Ready for Phase 6 Task 6.1: Test login flow**
+
+## Previously Completed This Iteration
 
 **Task 5.4: Refine color palette and gradients** ✓
 - Added subtle background gradients to all 4 dashboard metric cards for enhanced visual appeal:

@@ -140,11 +140,11 @@ export function AdvancedFilters({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="relative">
-          <Filter className="mr-2 h-4 w-4" />
+        <Button variant="outline" className="relative group">
+          <Filter className="mr-2 h-4 w-4 transition-transform duration-200 group-hover:scale-110 group-hover:rotate-12" />
           Advanced Filters
           {activeFilterCount > 0 && (
-            <Badge className="ml-2 px-1.5 py-0.5 h-5 min-w-[20px]" variant="secondary">
+            <Badge className="ml-2 px-1.5 py-0.5 h-5 min-w-[20px] transition-all duration-200 group-hover:scale-110" variant="secondary">
               {activeFilterCount}
             </Badge>
           )}

@@ -24,36 +24,36 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
         <div className="mr-4 flex">
-          <Link href="/" className="mr-6 flex items-center space-x-2" aria-label="SmartBudget home">
-            <Wallet className="h-6 w-6 text-primary" aria-hidden="true" />
+          <Link href="/" className="mr-6 flex items-center space-x-2 group transition-all duration-200 hover:scale-105 active:scale-95" aria-label="SmartBudget home">
+            <Wallet className="h-6 w-6 text-primary transition-transform duration-200 group-hover:rotate-12 group-hover:scale-110" aria-hidden="true" />
             <span className="font-bold text-xl">SmartBudget</span>
           </Link>
           {status === "authenticated" && (
             <nav className="flex items-center space-x-6 text-sm font-medium" aria-label="Primary navigation">
               <Link
                 href="/dashboard"
-                className="transition-colors hover:text-foreground/80 text-foreground/60"
+                className="relative transition-all duration-200 hover:text-foreground/80 text-foreground/60 hover:scale-105 active:scale-95 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all after:duration-200 hover:after:w-full"
                 aria-current={pathname === "/dashboard" ? "page" : undefined}
               >
                 Dashboard
               </Link>
               <Link
                 href="/transactions"
-                className="transition-colors hover:text-foreground/80 text-foreground/60"
+                className="relative transition-all duration-200 hover:text-foreground/80 text-foreground/60 hover:scale-105 active:scale-95 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all after:duration-200 hover:after:w-full"
                 aria-current={pathname === "/transactions" ? "page" : undefined}
               >
                 Transactions
               </Link>
               <Link
                 href="/budgets"
-                className="transition-colors hover:text-foreground/80 text-foreground/60"
+                className="relative transition-all duration-200 hover:text-foreground/80 text-foreground/60 hover:scale-105 active:scale-95 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all after:duration-200 hover:after:w-full"
                 aria-current={pathname === "/budgets" ? "page" : undefined}
               >
                 Budgets
               </Link>
               <Link
                 href="/accounts"
-                className="transition-colors hover:text-foreground/80 text-foreground/60"
+                className="relative transition-all duration-200 hover:text-foreground/80 text-foreground/60 hover:scale-105 active:scale-95 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all after:duration-200 hover:after:w-full"
                 aria-current={pathname === "/accounts" ? "page" : undefined}
               >
                 Accounts
@@ -89,23 +89,23 @@ export function Header() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href="/profile" className="flex items-center cursor-pointer">
-                    <User className="mr-2 h-4 w-4" />
+                  <Link href="/profile" className="flex items-center cursor-pointer group">
+                    <User className="mr-2 h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
                     Profile
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/settings" className="flex items-center cursor-pointer">
-                    <Settings className="mr-2 h-4 w-4" />
+                  <Link href="/settings" className="flex items-center cursor-pointer group">
+                    <Settings className="mr-2 h-4 w-4 transition-transform duration-200 group-hover:rotate-90 group-hover:scale-110" />
                     Settings
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => signOut({ callbackUrl: "/" })}
-                  className="cursor-pointer text-red-600 focus:text-red-600"
+                  className="cursor-pointer text-red-600 focus:text-red-600 group"
                 >
-                  <LogOut className="mr-2 h-4 w-4" />
+                  <LogOut className="mr-2 h-4 w-4 transition-transform duration-200 group-hover:scale-110 group-hover:-translate-x-0.5" />
                   Sign out
                 </DropdownMenuItem>
               </DropdownMenuContent>
