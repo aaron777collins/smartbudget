@@ -231,12 +231,12 @@ IN_PROGRESS
   - Extract `TransactionTagsManager` component
   - Keep main dialog as orchestrator
 
-- [ ] **Task 5.2**: Split AccountFormDialog (435 lines → 4 components)
-  - Extract `AccountForm` component
-  - Extract `IconPicker` component (reusable)
-  - Extract `ColorPicker` component (reusable)
-  - Extract `AccountDeleteConfirmation` component
-  - Keep main dialog as orchestrator
+- [x] **Task 5.2**: Split AccountFormDialog (435 lines → 4 components)
+  - Extract `AccountForm` component (193 lines)
+  - Extract `IconPicker` component (53 lines, reusable)
+  - Extract `ColorPicker` component (48 lines, reusable)
+  - Extract `AccountDeleteConfirmation` component (45 lines)
+  - Main dialog reduced from 435 to 209 lines (52% reduction)
 
 - [ ] **Task 5.3**: Create reusable composite components
   - `StatCard` component (standardized metric display)
@@ -2119,7 +2119,73 @@ Before this task, ELEVATION tokens were defined but **never used anywhere in the
 
 ## Completed This Iteration
 
-### Current Iteration: Task 5.1 - Split TransactionDetailDialog ✅
+### Current Iteration: Task 5.2 - Split AccountFormDialog ✅
+
+**Summary:** Successfully refactored the monolithic 435-line AccountFormDialog component into 4 smaller, focused components plus a simplified orchestrator. This improves maintainability, testability, and reusability. The main dialog was reduced from 435 lines to 209 lines (52% reduction), with clear separation of concerns.
+
+**Files Created:**
+- `src/components/accounts/account-form.tsx` - Core form fields component (193 lines)
+- `src/components/accounts/icon-picker.tsx` - Reusable icon selector component (53 lines)
+- `src/components/accounts/color-picker.tsx` - Reusable color selector component (48 lines)
+- `src/components/accounts/account-delete-confirmation.tsx` - Delete confirmation component (45 lines)
+
+**Files Modified:**
+- `src/components/accounts/account-form-dialog.tsx` - Refactored to use extracted components (435 → 209 lines)
+- `smartbudget-complete-ui-redesign_PROGRESS.md` - Marked Task 5.2 as complete
+
+**Component Breakdown:**
+
+1. **AccountForm (193 lines)**:
+   - Core form fields with labels and inputs
+   - Account name, institution, account type, account number
+   - Currency selector, current balance, available balance
+   - Integrates IconPicker and ColorPicker components
+   - Active status checkbox (edit mode only)
+   - Error display with animation
+   - Props: formData, onChange, isEditing, error
+
+2. **IconPicker (53 lines)**:
+   - Reusable icon selection component
+   - Grid layout with 6 icon options
+   - Visual active state with border and background
+   - Icons: Wallet, CreditCard, Landmark, PiggyBank, TrendingUp, HelpCircle
+   - Exports iconOptions array for reuse
+   - Props: value, onChange, label
+
+3. **ColorPicker (48 lines)**:
+   - Reusable color selection component
+   - 8 predefined color options
+   - Visual active state with border and scale
+   - Accessible with aria-labels
+   - Exports colorOptions array for reuse
+   - Props: value, onChange, label
+
+4. **AccountDeleteConfirmation (45 lines)**:
+   - Focused delete confirmation UI
+   - Warning message with destructive styling
+   - Cancel and Delete buttons with loading states
+   - Props: onConfirm, onCancel, loading
+
+5. **AccountFormDialog (209 lines, was 435)**:
+   - Orchestrator component managing state and API calls
+   - Handles form submission and validation
+   - Manages delete flow
+   - Coordinates between sub-components
+   - Reduced by 52% while maintaining all functionality
+
+**Benefits:**
+- **Reusability**: IconPicker and ColorPicker can be used elsewhere in the app
+- **Testability**: Each component can be tested in isolation
+- **Maintainability**: Smaller files are easier to understand and modify
+- **Separation of Concerns**: Each component has a single, clear responsibility
+- **Type Safety**: Exported interfaces ensure type consistency
+- **No Breaking Changes**: External API remains identical
+
+**TypeScript Validation:** ✅ All components pass TypeScript type checking with no errors
+
+---
+
+### Previous Iteration: Task 5.1 - Split TransactionDetailDialog ✅
 
 **Summary:** Successfully refactored the monolithic 785-line TransactionDetailDialog component into 5 smaller, focused components plus a simplified orchestrator. This improves maintainability, testability, and reusability. The main dialog was reduced from 785 lines to 410 lines (48% reduction), with clear separation of concerns.
 

@@ -10,17 +10,9 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Wallet, CreditCard, Landmark, PiggyBank, TrendingUp, HelpCircle, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
+import { AccountForm, AccountFormData } from './account-form';
+import { AccountDeleteConfirmation } from './account-delete-confirmation';
 
 interface Account {
   id: string;
@@ -42,39 +34,10 @@ interface AccountFormDialogProps {
   account: Account | null;
 }
 
-const accountTypes = [
-  { value: 'CHECKING', label: 'Checking' },
-  { value: 'SAVINGS', label: 'Savings' },
-  { value: 'CREDIT_CARD', label: 'Credit Card' },
-  { value: 'INVESTMENT', label: 'Investment' },
-  { value: 'LOAN', label: 'Loan' },
-  { value: 'OTHER', label: 'Other' },
-];
-
-const iconOptions = [
-  { value: 'wallet', label: 'Wallet', icon: Wallet },
-  { value: 'credit-card', label: 'Credit Card', icon: CreditCard },
-  { value: 'landmark', label: 'Bank', icon: Landmark },
-  { value: 'piggy-bank', label: 'Piggy Bank', icon: PiggyBank },
-  { value: 'trending-up', label: 'Investment', icon: TrendingUp },
-  { value: 'help-circle', label: 'Other', icon: HelpCircle },
-];
-
-const colorOptions = [
-  { value: '#2563EB', label: 'Blue' },
-  { value: '#10B981', label: 'Green' },
-  { value: '#F59E0B', label: 'Amber' },
-  { value: '#EF4444', label: 'Red' },
-  { value: '#8B5CF6', label: 'Purple' },
-  { value: '#EC4899', label: 'Pink' },
-  { value: '#14B8A6', label: 'Teal' },
-  { value: '#6366F1', label: 'Indigo' },
-];
-
 export function AccountFormDialog({ open, onClose, account }: AccountFormDialogProps) {
   const isEditing = !!account;
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<AccountFormData>({
     name: '',
     institution: '',
     accountType: 'CHECKING',
@@ -204,208 +167,19 @@ export function AccountFormDialog({ open, onClose, account }: AccountFormDialogP
         </DialogHeader>
 
         {showDeleteConfirm ? (
-          <div className="space-y-4 py-4">
-            <div className="bg-destructive/10 border border-destructive rounded-md p-4">
-              <p className="font-semibold text-destructive mb-2">Are you sure?</p>
-              <p className="text-sm text-muted-foreground">
-                This action cannot be undone. This will permanently delete the account.
-              </p>
-            </div>
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setShowDeleteConfirm(false)}
-                disabled={loading}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="button"
-                variant="destructive"
-                onClick={handleDelete}
-                disabled={loading}
-              >
-                {loading ? 'Deleting...' : 'Delete Account'}
-              </Button>
-            </DialogFooter>
-          </div>
+          <AccountDeleteConfirmation
+            onConfirm={handleDelete}
+            onCancel={() => setShowDeleteConfirm(false)}
+            loading={loading}
+          />
         ) : (
           <form onSubmit={handleSubmit}>
-            <div className="space-y-4 py-4">
-              {error && (
-                <div className="animate-in fade-in slide-in-from-top-2 duration-300 bg-destructive/10 border border-destructive rounded-md p-3 text-sm text-destructive">
-                  <div className="flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 flex-shrink-0">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
-                    </svg>
-                    <span>{error}</span>
-                  </div>
-                </div>
-              )}
-
-              {/* Account Name */}
-              <div className="space-y-2">
-                <Label htmlFor="name">Account Name *</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="e.g., CIBC Checking"
-                  required
-                />
-              </div>
-
-              {/* Institution */}
-              <div className="space-y-2">
-                <Label htmlFor="institution">Institution *</Label>
-                <Input
-                  id="institution"
-                  value={formData.institution}
-                  onChange={(e) => setFormData({ ...formData, institution: e.target.value })}
-                  placeholder="e.g., CIBC"
-                  required
-                />
-              </div>
-
-              {/* Account Type */}
-              <div className="space-y-2">
-                <Label htmlFor="accountType">Account Type *</Label>
-                <Select
-                  value={formData.accountType}
-                  onValueChange={(value) => setFormData({ ...formData, accountType: value })}
-                >
-                  <SelectTrigger id="accountType">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {accountTypes.map((type) => (
-                      <SelectItem key={type.value} value={type.value}>
-                        {type.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Account Number */}
-              <div className="space-y-2">
-                <Label htmlFor="accountNumber">Account Number (Last 4 digits)</Label>
-                <Input
-                  id="accountNumber"
-                  value={formData.accountNumber}
-                  onChange={(e) => setFormData({ ...formData, accountNumber: e.target.value })}
-                  placeholder="1234"
-                  maxLength={4}
-                />
-              </div>
-
-              {/* Currency */}
-              <div className="space-y-2">
-                <Label htmlFor="currency">Currency</Label>
-                <Select
-                  value={formData.currency}
-                  onValueChange={(value) => setFormData({ ...formData, currency: value })}
-                >
-                  <SelectTrigger id="currency">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="CAD">CAD (Canadian Dollar)</SelectItem>
-                    <SelectItem value="USD">USD (US Dollar)</SelectItem>
-                    <SelectItem value="EUR">EUR (Euro)</SelectItem>
-                    <SelectItem value="GBP">GBP (British Pound)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Current Balance */}
-              <div className="space-y-2">
-                <Label htmlFor="currentBalance">Current Balance *</Label>
-                <Input
-                  id="currentBalance"
-                  type="number"
-                  step="0.01"
-                  value={formData.currentBalance}
-                  onChange={(e) => setFormData({ ...formData, currentBalance: e.target.value })}
-                  placeholder="0.00"
-                  required
-                />
-              </div>
-
-              {/* Available Balance */}
-              <div className="space-y-2">
-                <Label htmlFor="availableBalance">Available Balance</Label>
-                <Input
-                  id="availableBalance"
-                  type="number"
-                  step="0.01"
-                  value={formData.availableBalance}
-                  onChange={(e) => setFormData({ ...formData, availableBalance: e.target.value })}
-                  placeholder="0.00"
-                />
-              </div>
-
-              {/* Icon */}
-              <div className="space-y-2">
-                <Label>Icon</Label>
-                <div className="grid grid-cols-3 gap-2">
-                  {iconOptions.map((option) => {
-                    const IconComponent = option.icon;
-                    return (
-                      <button
-                        key={option.value}
-                        type="button"
-                        onClick={() => setFormData({ ...formData, icon: option.value })}
-                        className={`flex items-center gap-2 p-3 rounded-md border transition-colors ${
-                          formData.icon === option.value
-                            ? 'border-primary bg-primary/10'
-                            : 'border-border hover:bg-accent'
-                        }`}
-                      >
-                        <IconComponent className="h-4 w-4" />
-                        <span className="text-sm">{option.label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Color */}
-              <div className="space-y-2">
-                <Label>Color</Label>
-                <div className="flex flex-wrap gap-2">
-                  {colorOptions.map((option) => (
-                    <button
-                      key={option.value}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, color: option.value })}
-                      className={`w-10 h-10 rounded-full border-2 transition-all ${
-                        formData.color === option.value ? 'border-foreground scale-110' : 'border-border'
-                      }`}
-                      style={{ backgroundColor: option.value }}
-                      title={option.label}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {/* Active Status */}
-              {isEditing && (
-                <div className="flex items-center gap-2">
-                  <input
-                    id="isActive"
-                    type="checkbox"
-                    checked={formData.isActive}
-                    onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                    className="h-4 w-4"
-                  />
-                  <Label htmlFor="isActive" className="cursor-pointer">
-                    Account is active
-                  </Label>
-                </div>
-              )}
-            </div>
+            <AccountForm
+              formData={formData}
+              onChange={setFormData}
+              isEditing={isEditing}
+              error={error}
+            />
 
             <DialogFooter>
               {isEditing && (
