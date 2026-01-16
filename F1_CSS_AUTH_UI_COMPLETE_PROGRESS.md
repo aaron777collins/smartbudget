@@ -177,7 +177,7 @@ Block 6 (Testing - FINAL):
   - Ensure `passwordHash` remains optional (for OAuth users)
   - Add index on username field
 
-- [ ] Task 2.2: Run Prisma migration
+- [x] Task 2.2: Run Prisma migration
   - Generate migration: `npm run db:generate`
   - Apply migration: `npm run db:migrate`
   - Verify migration succeeds
@@ -418,6 +418,19 @@ Block 6 (Testing - FINAL):
 ---
 
 ## Completed This Iteration
+
+**Task 2.2: Run Prisma migration** ✓
+- Updated `prisma.config.ts` to include `directUrl` for migrations (Prisma 7 requirement)
+- Made username field nullable temporarily to avoid breaking existing user data
+- Pushed schema changes to Supabase database using `prisma db push --url="$DIRECT_URL"`
+- Created data migration script (`scripts/migrate-usernames.js`) to populate usernames from emails
+- Migrated 4 existing users with usernames derived from their email addresses
+- Made username field required again and pushed final schema update
+- Regenerated Prisma client with `npm run db:generate`
+- Database schema now has username as required field with unique constraint and index
+- Note: Type errors expected in auth code - will be fixed in Phase 3
+
+## Previously Completed This Iteration
 
 **Task 2.1: Update Prisma User model** ✓
 - Added `username` field (String, @unique, required) to User model
