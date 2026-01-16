@@ -240,7 +240,7 @@ Block 6 (Testing - FINAL):
   - Include request context (IP, user agent)
   - Handle errors gracefully
 
-- [ ] Task 4.4: Add audit logging to auth routes
+- [x] Task 4.4: Add audit logging to auth routes
   - Log login attempts (success and failure) in NextAuth config
   - Log user creation in signup route
   - Include IP address and user agent in logs
@@ -418,6 +418,28 @@ Block 6 (Testing - FINAL):
 ---
 
 ## Completed This Iteration
+
+**Task 4.4: Add audit logging to auth routes** ✓
+- Added audit logging to NextAuth credentials provider in `src/auth.ts`:
+  - Log successful login with `logLoginSuccess(userId, username)` after password verification
+  - Log failed login attempts with specific reasons:
+    - "Missing credentials" - when username or password not provided
+    - "User not found" - when username doesn't exist in database
+    - "No password hash" - when user exists but has no password (OAuth users)
+    - "Invalid password" - when password comparison fails
+  - All login events logged with username for audit trail
+- Added audit logging to signup route in `src/app/api/auth/signup/route.ts`:
+  - Log user creation with `logUserCreated(userId, username, req)` after successful registration
+  - Includes Request object for IP address and user agent capture
+- Limitations noted:
+  - Login audit logs don't include IP/user agent due to NextAuth v5 authorize callback limitations
+  - IP and user agent are set to null for login events (captured for signup events)
+  - Future enhancement: Create custom signin API route wrapper to capture Request object
+- Verified build passes without errors
+- All authentication events are now logged to AuditLog table with timestamps
+- Ready to implement rate limiting in Task 4.5
+
+## Previously Completed This Iteration
 
 **Task 4.3: Create audit logging utility** ✓
 - Created comprehensive audit logging utility at `src/lib/audit-log.ts` (180 lines)

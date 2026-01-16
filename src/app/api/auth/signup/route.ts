@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { hash } from "bcryptjs"
 import { prisma } from "@/lib/prisma"
+import { logUserCreated } from "@/lib/audit-log"
 
 export async function POST(req: Request) {
   try {
@@ -59,6 +60,9 @@ export async function POST(req: Request) {
         name: name || null,
       },
     })
+
+    // Log user creation in audit log
+    await logUserCreated(user.id, user.username, req)
 
     return NextResponse.json(
       {

@@ -4,6 +4,7 @@ import Credentials from "next-auth/providers/credentials"
 import GitHub from "next-auth/providers/github"
 import { compare } from "bcryptjs"
 import { prisma } from "@/lib/prisma"
+import { logLoginSuccess, logLoginFailure } from "@/lib/audit-log"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -28,6 +29,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.username || !credentials?.password) {
+          // Log failed login attempt - missing credentials
+          await logLoginFailure(
+            credentials?.username as string || "unknown",
+            "Missing credentials"
+          )
           return null
         }
 
@@ -38,6 +44,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         })
 
         if (!user || !user.passwordHash) {
+          // Log failed login attempt - user not found or no password hash
+          await logLoginFailure(
+            credentials.username as string,
+            user ? "No password hash" : "User not found"
+          )
           return null
         }
 
@@ -47,8 +58,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         )
 
         if (!isPasswordValid) {
+          // Log failed login attempt - invalid password
+          await logLoginFailure(
+            credentials.username as string,
+            "Invalid password"
+          )
           return null
         }
+
+        // Log successful login
+        await logLoginSuccess(user.id, user.username)
 
         return {
           id: user.id,
