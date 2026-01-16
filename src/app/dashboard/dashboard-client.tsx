@@ -5,13 +5,13 @@ import { NetWorthCard } from '@/components/dashboard/net-worth-card';
 import { MonthlySpendingCard } from '@/components/dashboard/monthly-spending-card';
 import { MonthlyIncomeCard } from '@/components/dashboard/monthly-income-card';
 import { CashFlowCard } from '@/components/dashboard/cash-flow-card';
-import { SpendingTrendsChart } from '@/components/dashboard/spending-trends-chart';
-import { CategoryBreakdownChart } from '@/components/dashboard/category-breakdown-chart';
 import { TimeframeSelector, type TimeframeValue } from '@/components/dashboard/timeframe-selector';
 import { UpcomingExpenses } from '@/components/dashboard/upcoming-expenses';
 import { Skeleton } from '@/components/ui/skeleton';
 
-// Lazy load D3-based visualization components for bundle optimization
+// Lazy load ALL chart components for bundle optimization
+const SpendingTrendsChart = lazy(() => import('@/components/dashboard/spending-trends-chart').then(m => ({ default: m.SpendingTrendsChart })));
+const CategoryBreakdownChart = lazy(() => import('@/components/dashboard/category-breakdown-chart').then(m => ({ default: m.CategoryBreakdownChart })));
 const CashFlowSankey = lazy(() => import('@/components/dashboard/cash-flow-sankey').then(m => ({ default: m.CashFlowSankey })));
 const CategoryHeatmap = lazy(() => import('@/components/dashboard/category-heatmap').then(m => ({ default: m.CategoryHeatmap })));
 const CategoryCorrelationMatrix = lazy(() => import('@/components/dashboard/category-correlation-matrix').then(m => ({ default: m.CategoryCorrelationMatrix })));
@@ -148,10 +148,14 @@ export function DashboardClient() {
         />
       </div>
 
-      {/* Recharts Visualizations Section */}
+      {/* Recharts Visualizations Section - Lazy loaded for performance */}
       <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
-        <SpendingTrendsChart timeframe={timeframe} />
-        <CategoryBreakdownChart timeframe={timeframe} />
+        <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
+          <SpendingTrendsChart timeframe={timeframe} />
+        </Suspense>
+        <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
+          <CategoryBreakdownChart timeframe={timeframe} />
+        </Suspense>
       </div>
 
       {/* D3.js Custom Visualizations Section - Lazy loaded for performance */}

@@ -79,6 +79,7 @@
     "zod": "^4.3.5"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^16.1.2",
     "@playwright/test": "^1.57.0",
     "@prisma/client": "^5.22.0",
     "@testing-library/jest-dom": "^6.9.1",
