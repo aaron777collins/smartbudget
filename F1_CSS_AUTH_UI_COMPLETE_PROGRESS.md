@@ -198,7 +198,7 @@ Block 6 (Testing - FINAL):
   - Keep email support for GitHub OAuth users
   - Update session callbacks if needed
 
-- [ ] Task 3.2: Update signup API route (`src/app/api/auth/signup/route.ts`)
+- [x] Task 3.2: Update signup API route (`src/app/api/auth/signup/route.ts`)
   - Change request validation to require username instead of email
   - Update user creation to use username field
   - Add username validation (alphanumeric, length requirements)
@@ -419,6 +419,22 @@ Block 6 (Testing - FINAL):
 
 ## Completed This Iteration
 
+**Task 3.2: Update signup API route (`src/app/api/auth/signup/route.ts`)** ✓
+- Changed request destructuring from `{ email, password, name }` to `{ username, password, name }`
+- Updated input validation to require `username` instead of `email`
+- Added username format validation:
+  - Length validation: 3-20 characters
+  - Character validation: alphanumeric and underscores only (regex: `/^[a-zA-Z0-9_]+$/`)
+- Updated user existence check to query by `username` instead of `email`
+- Updated user creation to use `username` field
+- Updated response to return `username` instead of `email`
+- Kept password validation (min 8 characters)
+- Fixed type error in `src/auth.ts` by providing default empty string for nullable email field
+- Fixed `prisma.config.ts` by removing invalid `directUrl` property from migrations config
+- Verified build passes without errors
+
+## Previously Completed This Iteration
+
 **Task 3.1: Update NextAuth config (`src/auth.ts`)** ✓
 - Modified Credentials provider to accept `username` instead of `email`
 - Updated user lookup query to use `prisma.user.findUnique({ where: { username } })`
@@ -427,8 +443,6 @@ Block 6 (Testing - FINAL):
 - Added `username` field to the returned user object in authorize callback
 - Email support for GitHub OAuth users is preserved (GitHub provider still uses email)
 - Session callbacks remain unchanged (already properly configured)
-
-## Previously Completed This Iteration
 
 **Task 2.3: Create seed script for default user** ✓
 - Updated `prisma/seed.js` to include bcryptjs import

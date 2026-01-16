@@ -4,12 +4,27 @@ import { prisma } from "@/lib/prisma"
 
 export async function POST(req: Request) {
   try {
-    const { email, password, name } = await req.json()
+    const { username, password, name } = await req.json()
 
     // Validate input
-    if (!email || !password) {
+    if (!username || !password) {
       return NextResponse.json(
-        { error: "Email and password are required" },
+        { error: "Username and password are required" },
+        { status: 400 }
+      )
+    }
+
+    // Validate username format (alphanumeric, 3-20 characters)
+    if (username.length < 3 || username.length > 20) {
+      return NextResponse.json(
+        { error: "Username must be between 3 and 20 characters" },
+        { status: 400 }
+      )
+    }
+
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+      return NextResponse.json(
+        { error: "Username can only contain letters, numbers, and underscores" },
         { status: 400 }
       )
     }
@@ -23,12 +38,12 @@ export async function POST(req: Request) {
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
-      where: { email },
+      where: { username },
     })
 
     if (existingUser) {
       return NextResponse.json(
-        { error: "User with this email already exists" },
+        { error: "User with this username already exists" },
         { status: 400 }
       )
     }
@@ -39,7 +54,7 @@ export async function POST(req: Request) {
     // Create user
     const user = await prisma.user.create({
       data: {
-        email,
+        username,
         passwordHash,
         name: name || null,
       },
@@ -49,7 +64,7 @@ export async function POST(req: Request) {
       {
         user: {
           id: user.id,
-          email: user.email,
+          username: user.username,
           name: user.name,
         },
       },
