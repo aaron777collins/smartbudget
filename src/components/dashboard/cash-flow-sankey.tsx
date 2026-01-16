@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { sankey, sankeyLinkHorizontal, SankeyNode, SankeyLink } from 'd3-sankey';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { formatCurrency } from '@/lib/utils';
 import type { TimeframeValue } from './timeframe-selector';
 import { getMonthsFromTimeframe } from '@/lib/timeframe';
@@ -191,9 +192,7 @@ export function CashFlowSankey({ timeframe }: CashFlowSankeyProps) {
           <CardDescription>Income sources flowing to expenses</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center h-[500px]">
-            <div className="text-muted-foreground">Loading cash flow data...</div>
-          </div>
+          <Skeleton className="h-[500px] w-full" />
         </CardContent>
       </Card>
     );

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import type { TimeframeValue } from './timeframe-selector';
 import { getMonthsFromTimeframe } from '@/lib/timeframe';
 
@@ -281,9 +282,7 @@ export function CategoryCorrelationMatrix({ timeframe }: CategoryCorrelationMatr
           <CardDescription>Categories that tend to occur together</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center h-[500px]">
-            <div className="text-muted-foreground">Loading correlation data...</div>
-          </div>
+          <Skeleton className="h-[500px] w-full" />
         </CardContent>
       </Card>
     );

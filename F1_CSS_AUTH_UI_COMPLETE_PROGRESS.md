@@ -272,7 +272,7 @@ Block 6 (Testing - FINAL):
   - Add success state animations
   - Improve disabled state styling
 
-- [ ] Task 5.3: Improve loading states
+- [x] Task 5.3: Improve loading states
   - Add skeleton components with shimmer effect
   - Add smooth transitions between loading and loaded
   - Add loading spinners where appropriate
@@ -418,6 +418,62 @@ Block 6 (Testing - FINAL):
 ---
 
 ## Completed This Iteration
+
+**Task 5.3: Improve loading states** ✓
+- Enhanced skeleton component with shimmer effect (`src/components/ui/skeleton.tsx`):
+  - Added shimmer animation using gradient overlay with `before:` pseudo-element
+  - Shimmer moves across skeleton from left to right with `animate-shimmer` (2s infinite)
+  - Uses gradient from transparent → white/10 → transparent for subtle shine effect
+  - All existing skeleton uses now have shimmer effect automatically
+- Created specialized skeleton components for common use cases:
+  - **SkeletonCard**: Pre-configured card layout with title and content lines
+  - **SkeletonTable**: Configurable table skeleton with header and rows (default: 5 rows, 4 columns)
+  - **SkeletonChart**: Chart skeleton with title, chart area, and legend placeholders
+  - **SkeletonList**: List skeleton with avatar circles and two-line text items
+- Added skeletons to D3 visualization components that were missing them:
+  - **CategoryHeatmap** (`src/components/dashboard/category-heatmap.tsx`):
+    - Replaced text-only loading with proper Skeleton component (400px height)
+    - Added shimmer effect during data loading
+  - **CashFlowSankey** (`src/components/dashboard/cash-flow-sankey.tsx`):
+    - Replaced text-only loading with Skeleton component (500px height)
+    - Matches height of actual rendered chart
+  - **CategoryCorrelationMatrix** (`src/components/dashboard/category-correlation-matrix.tsx`):
+    - Replaced text-only loading with Skeleton component (500px height)
+    - Consistent with other chart loading states
+- Added comprehensive skeleton loading to Accounts page (`src/app/accounts/page.tsx`):
+  - Full page skeleton when loading from scratch includes:
+    - Header skeleton with title and button placeholder
+    - Three summary card skeletons with metrics layout
+    - Search bar skeleton
+    - Table skeleton with 5 rows and 8 columns using SkeletonTable component
+  - Added SkeletonTable to inline table loading state (when searching/filtering)
+  - Added fade-in animation to loaded content with `animate-in fade-in duration-300`
+- Enhanced Suspense fallbacks on dashboard (`src/app/dashboard/dashboard-client.tsx`):
+  - Upgraded bare Skeleton fallbacks to full Card wrappers with:
+    - CardHeader with skeleton title and description
+    - CardContent with appropriate height skeleton (400px or 500px)
+    - Fade-in animation on skeleton appearance
+  - Applied to all three lazy-loaded D3 components (Sankey, Heatmap, Correlation Matrix)
+- Smooth transitions between loading and loaded states:
+  - All skeleton components fade in smoothly with 300ms animations
+  - Content fades in when loaded using `animate-in fade-in duration-300`
+  - Accounts page: Both skeleton and loaded states have matching fade-in animations
+  - Dashboard: Consistent 300ms fade timing across all sections
+- Loading state improvements:
+  - All chart components now have visual loading indicators (no more text-only)
+  - Table-heavy pages use specialized SkeletonTable for accurate representation
+  - Suspense boundaries show contextual skeletons (with card wrappers)
+  - Shimmer effect provides visual feedback that content is actively loading
+- Design consistency:
+  - All skeletons use muted background color for proper light/dark mode support
+  - Shimmer animation timing is consistent at 2s for smooth, non-distracting effect
+  - Skeleton heights match actual content for minimal layout shift
+  - Fade-in animations use consistent 300ms duration across the app
+- Verified build passes without errors
+- All loading states now feel polished, professional, and provide clear visual feedback
+- **Ready for Phase 5 Task 5.4: Refine color palette and gradients**
+
+## Previously Completed This Iteration
 
 **Task 5.2: Polish form interactions** ✓
 - Enhanced base UI components with smooth animations and transitions:

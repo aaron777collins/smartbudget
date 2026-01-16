@@ -10,6 +10,7 @@ import { CategoryBreakdownChart } from '@/components/dashboard/category-breakdow
 import { TimeframeSelector, type TimeframeValue } from '@/components/dashboard/timeframe-selector';
 import { UpcomingExpenses } from '@/components/dashboard/upcoming-expenses';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 
 // Lazy load D3-based visualization components for bundle optimization
 const CashFlowSankey = lazy(() => import('@/components/dashboard/cash-flow-sankey').then(m => ({ default: m.CashFlowSankey })));
@@ -156,19 +157,49 @@ export function DashboardClient() {
 
       {/* D3.js Custom Visualizations Section - Lazy loaded for performance */}
       <div className="grid gap-4 md:grid-cols-1">
-        <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
+        <Suspense fallback={
+          <Card className="animate-in fade-in duration-300">
+            <CardHeader>
+              <Skeleton className="h-6 w-40 mb-2" />
+              <Skeleton className="h-4 w-64" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-[500px] w-full" />
+            </CardContent>
+          </Card>
+        }>
           <CashFlowSankey timeframe={timeframe} />
         </Suspense>
       </div>
 
       <div className="grid gap-4 md:grid-cols-1">
-        <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
+        <Suspense fallback={
+          <Card className="animate-in fade-in duration-300">
+            <CardHeader>
+              <Skeleton className="h-6 w-40 mb-2" />
+              <Skeleton className="h-4 w-64" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-[400px] w-full" />
+            </CardContent>
+          </Card>
+        }>
           <CategoryHeatmap timeframe={timeframe} />
         </Suspense>
       </div>
 
       <div className="grid gap-4 md:grid-cols-1">
-        <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
+        <Suspense fallback={
+          <Card className="animate-in fade-in duration-300">
+            <CardHeader>
+              <Skeleton className="h-6 w-40 mb-2" />
+              <Skeleton className="h-4 w-64" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-[500px] w-full" />
+            </CardContent>
+          </Card>
+        }>
           <CategoryCorrelationMatrix timeframe={timeframe} />
         </Suspense>
       </div>

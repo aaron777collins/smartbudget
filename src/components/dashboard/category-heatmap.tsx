@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { formatCurrency } from '@/lib/utils';
 import type { TimeframeValue } from './timeframe-selector';
 import { getMonthsFromTimeframe } from '@/lib/timeframe';
@@ -253,9 +254,7 @@ export function CategoryHeatmap({ timeframe }: CategoryHeatmapProps) {
           <CardDescription>Spending intensity by category over time</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center h-[400px]">
-            <div className="text-muted-foreground">Loading heatmap data...</div>
-          </div>
+          <Skeleton className="h-[400px] w-full" />
         </CardContent>
       </Card>
     );
