@@ -1,6 +1,8 @@
 'use client';
 
-import { useEffect, useState, lazy, Suspense } from 'react';
+import { useState, lazy, Suspense } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { apiClient } from '@/lib/api-client';
 import { NetWorthCard } from '@/components/dashboard/net-worth-card';
 import { MonthlySpendingCard } from '@/components/dashboard/monthly-spending-card';
 import { MonthlyIncomeCard } from '@/components/dashboard/monthly-income-card';
@@ -52,39 +54,23 @@ interface DashboardData {
 }
 
 export function DashboardClient() {
-  const [data, setData] = useState<DashboardData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [timeframe, setTimeframe] = useState<TimeframeValue>({
     period: 'this-month'
   });
 
-  useEffect(() => {
-    async function fetchDashboardData() {
-      try {
-        setLoading(true);
-        setError(null);
+  // Use React Query for data fetching with automatic caching and background refetching
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['dashboard', 'overview'],
+    queryFn: async () => {
+      return apiClient.get<DashboardData>('/api/dashboard/overview');
+    },
+    // Dashboard data changes frequently, use shorter stale time
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    // Keep data in cache for 10 minutes
+    gcTime: 10 * 60 * 1000,
+  });
 
-        const response = await fetch('/api/dashboard/overview');
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch dashboard data');
-        }
-
-        const dashboardData = await response.json();
-        setData(dashboardData);
-      } catch (err) {
-        console.error('Error fetching dashboard data:', err);
-        setError(err instanceof Error ? err.message : 'An error occurred');
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchDashboardData();
-  }, []);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className={`flex-1 ${SPACING.section.default} ${SPACING.page.containerResponsive}`}>
         <div className="flex items-center justify-between space-y-2">
@@ -108,7 +94,7 @@ export function DashboardClient() {
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            Error loading dashboard: {error}
+            Error loading dashboard: {error instanceof Error ? error.message : 'An error occurred'}
           </AlertDescription>
         </Alert>
       </div>
