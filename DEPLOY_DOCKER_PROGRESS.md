@@ -15,7 +15,7 @@ IN_PROGRESS
 
 ### Block 2: Build Updated Docker Image
 - [x] Task 2.1: Stop current container gracefully
-- [ ] Task 2.2: Build new Docker image
+- [x] Task 2.2: Build new Docker image
 - [ ] Task 2.3: Verify database migrations ready
 
 ### Block 3: Deploy New Container
@@ -58,6 +58,19 @@ IN_PROGRESS
   - Container smartbudget-app stopped, removed successfully
   - No errors during shutdown
   - Previous container was healthy, running for 24 hours
+
+### Iteration 5
+- Task 2.2: Built new Docker image successfully
+  - Command: `docker compose build --no-cache`
+  - Image: smartbudget-smartbudget-app:latest (ID: 8442adec3fcc)
+  - Size: 448MB
+  - Build time: ~90 seconds
+  - Prisma client generated successfully with username field
+  - Next.js build completed: 58 routes compiled
+  - TypeScript compilation passed
+  - No build errors
+  - Dependencies installed: 1076 packages
+  - Note: 7 npm vulnerabilities (non-critical, standard Next.js project)
 
 ## Notes
 - All required environment variables are present in .env file
