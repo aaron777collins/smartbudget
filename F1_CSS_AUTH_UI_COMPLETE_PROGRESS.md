@@ -245,7 +245,7 @@ Block 6 (Testing - FINAL):
   - Log user creation in signup route
   - Include IP address and user agent in logs
 
-- [ ] Task 4.5: Implement in-memory rate limiting
+- [x] Task 4.5: Implement in-memory rate limiting
   - Create `src/lib/rate-limit.ts`
   - Use Map to store attempt counts by IP
   - Configure: 5 attempts per IP per 15 minutes
@@ -418,6 +418,37 @@ Block 6 (Testing - FINAL):
 ---
 
 ## Completed This Iteration
+
+**Task 4.5: Implement in-memory rate limiting** ✓
+- Created comprehensive rate limiting utility at `src/lib/rate-limit.ts` (240+ lines)
+- Core functionality:
+  - `checkRateLimit(identifier)` - Main function to check and increment rate limit for an IP/identifier
+  - `resetRateLimit(identifier)` - Clear rate limit for a specific identifier (useful after successful login)
+  - `getRateLimitStatus(identifier)` - Get current status without incrementing (for monitoring)
+  - `clearAllRateLimits()` - Clear all entries (useful for testing)
+  - `getRateLimitStats()` - Get statistics about active/expired entries
+- Configuration:
+  - Max 5 attempts per IP per 15-minute window
+  - Automatic cleanup of expired entries every 60 seconds
+  - Returns retry-after time in seconds when limit exceeded
+- In-memory implementation using Map:
+  - Tracks count, firstAttempt timestamp, and resetAt timestamp per identifier
+  - Automatically resets window when expired
+  - Cleanup interval prevents memory leaks
+- Return object includes:
+  - `success` - whether the request is allowed
+  - `limit` - maximum attempts allowed (5)
+  - `remaining` - attempts remaining in current window
+  - `reset` - timestamp when window resets
+  - `retryAfter` - seconds until reset (only when limit exceeded)
+- Important notes:
+  - Single-instance deployment only (doesn't sync across multiple servers)
+  - For production multi-instance, use Redis-based solution (e.g., Upstash Redis)
+  - Documentation includes upgrade path recommendation
+- Verified build passes without errors
+- Ready to integrate into auth routes in Task 4.6
+
+## Previously Completed This Iteration
 
 **Task 4.4: Add audit logging to auth routes** ✓
 - Added audit logging to NextAuth credentials provider in `src/auth.ts`:
