@@ -216,7 +216,7 @@ Block 6 (Testing - FINAL):
   - Add username validation hints
   - Update form submission to send username
 
-- [ ] Task 3.5: Test authentication flow end-to-end
+- [x] Task 3.5: Test authentication flow end-to-end
   - Attempt login with aaron7c / KingOfKings12345!
   - Verify successful authentication
   - Check session is created correctly
@@ -418,6 +418,27 @@ Block 6 (Testing - FINAL):
 ---
 
 ## Completed This Iteration
+
+**Task 3.5: Test authentication flow end-to-end** ✓
+- Restarted Next.js dev server (previous instance was hung)
+- Created comprehensive Playwright test script (`/tmp/test_auth_flow_improved.py`)
+- Successfully tested login with credentials: aaron7c / KingOfKings12345!
+- Verified authentication works correctly:
+  - Login form renders and accepts input
+  - Credentials are validated correctly
+  - Successful redirect to dashboard (/dashboard)
+  - Session is created and persists
+  - Protected routes are accessible after authentication
+  - User can navigate to dashboard without being redirected to signin
+- Captured screenshots at each step for verification:
+  - test_02_signin_page.png - Sign-in form
+  - test_03_form_filled.png - Filled credentials
+  - test_04_after_login.png - Redirected to dashboard
+  - test_05_dashboard_verified.png - Dashboard with user session
+- **Phase 3 (Update Authentication System) is now COMPLETE** ✓
+- All authentication changes from Tasks 3.1-3.5 are working end-to-end
+
+## Previously Completed This Iteration
 
 **Task 3.4: Update sign-up form (`src/app/auth/signup/page.tsx`)** ✓
 - Changed state variable from `email` to `username` (line 16)
