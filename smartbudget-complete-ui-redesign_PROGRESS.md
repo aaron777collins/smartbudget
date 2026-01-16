@@ -187,7 +187,7 @@ IN_PROGRESS
   - Wrap app with QueryClientProvider
   - Configure stale times, cache times, retry logic
 
-- [ ] **Task 4.2**: Create centralized API client
+- [x] **Task 4.2**: Create centralized API client
   - New file: `src/lib/api-client.ts`
   - Type-safe API wrapper functions
   - Automatic authentication header injection
@@ -522,7 +522,155 @@ After completion:
 
 ## Completed This Iteration
 
-### Current Iteration: Task 4.1 - Install and Configure React Query ✅
+### Current Iteration: Task 4.2 - Create Centralized API Client ✅
+
+**Summary:** Created a comprehensive, type-safe API client that provides centralized HTTP request handling with automatic error parsing, timeout management, and request configuration. This establishes a consistent pattern for all API calls across the application and prepares the foundation for React Query integration.
+
+**Files Created:**
+- `src/lib/api-client.ts` - Complete API client with GET/POST/PUT/PATCH/DELETE methods
+
+**Files Modified:**
+- `smartbudget-complete-ui-redesign_PROGRESS.md` - Marked Task 4.2 as complete
+
+**Implementation Details:**
+
+1. **API Client Methods**:
+   - `get<T>(endpoint, config)` - Type-safe GET requests
+   - `post<T>(endpoint, body, config)` - POST requests with JSON body
+   - `put<T>(endpoint, body, config)` - PUT requests for full updates
+   - `patch<T>(endpoint, body, config)` - PATCH requests for partial updates
+   - `delete<T>(endpoint, config)` - DELETE requests (exported as 'delete' is reserved keyword)
+
+2. **Features Implemented**:
+   - **Type Safety**: Full TypeScript generics for request/response types
+   - **Query Parameters**: Automatic URL building with `params` option
+   - **Timeout Handling**: Configurable timeouts (default 30s) with Promise.race
+   - **Error Parsing**: Standardized error responses with ApiClientError class
+   - **Authentication**: Automatic cookie credentials with `credentials: 'include'`
+   - **Content Type**: Automatic JSON headers for all requests
+   - **Empty Response Handling**: Properly handles 204 No Content responses
+   - **Custom Headers**: Support for additional headers via config
+   - **Error Skipping**: Optional `skipErrorHandling` flag for custom error handling
+
+3. **Type Definitions**:
+   - `ApiRequestConfig` - Request configuration interface
+   - `ApiError` - Standard API error response structure
+   - `ApiClientError` - Custom error class with statusCode and details
+   - All methods use generics for type-safe responses
+
+4. **Helper Functions**:
+   - `buildUrl()` - Constructs URLs with query parameters, filters undefined values
+   - `parseError()` - Extracts error messages from responses, handles non-JSON responses
+   - `createTimeoutPromise()` - Creates timeout rejection promises for request timeouts
+
+5. **Error Handling**:
+   - Automatic JSON error parsing with fallback to statusText
+   - Custom ApiClientError class with statusCode, code, and details
+   - Timeout errors return 408 status code
+   - Network errors properly propagated
+
+6. **Design Patterns**:
+   - Promise.race for timeout implementation
+   - Consistent response handling across all methods
+   - Null/undefined parameter filtering in query strings
+   - Graceful degradation for non-JSON error responses
+
+**Usage Examples:**
+
+```typescript
+// Simple GET request
+const transactions = await apiClient.get('/api/transactions')
+
+// GET with query parameters
+const filtered = await apiClient.get('/api/transactions', {
+  params: { timeframe: 'THIS_MONTH', accountId: '123' }
+})
+
+// POST request with body
+const newTransaction = await apiClient.post('/api/transactions', {
+  amount: 100,
+  description: 'Groceries'
+})
+
+// PUT request for full update
+await apiClient.put('/api/accounts/123', {
+  name: 'Updated Account Name'
+})
+
+// PATCH request for partial update
+await apiClient.patch('/api/budgets/456', {
+  amount: 500
+})
+
+// DELETE request
+await apiClient.delete('/api/transactions/789')
+
+// Custom timeout and headers
+const data = await apiClient.get('/api/dashboard', {
+  timeout: 60000,
+  headers: { 'X-Custom-Header': 'value' }
+})
+
+// Type-safe response
+interface Transaction {
+  id: string
+  amount: number
+  description: string
+}
+const txn = await apiClient.get<Transaction>('/api/transactions/123')
+```
+
+**Error Handling Example:**
+
+```typescript
+import { apiClient, ApiClientError } from '@/lib/api-client'
+
+try {
+  const data = await apiClient.get('/api/transactions')
+} catch (error) {
+  if (error instanceof ApiClientError) {
+    console.error(`API Error ${error.statusCode}: ${error.message}`)
+    console.error('Details:', error.details)
+    console.error('Code:', error.code)
+  } else {
+    console.error('Network error:', error)
+  }
+}
+```
+
+**Build Verification:**
+- TypeScript compilation: ✅ Successful (`npx tsc --noEmit src/lib/api-client.ts` passes)
+- All types properly defined with no errors
+- Full type safety with generics
+- Zero TypeScript warnings
+
+**Impact:**
+- **Consistency**: Single pattern for all API calls across the application
+- **Type Safety**: Full TypeScript support with generic response types
+- **Error Handling**: Centralized error parsing and standardized error format
+- **Developer Experience**: Clean, intuitive API with minimal boilerplate
+- **Maintainability**: Easy to add interceptors or modify behavior in one place
+- **Timeout Protection**: Prevents hanging requests with configurable timeouts
+- **Authentication**: Automatic session cookie handling via credentials: 'include'
+- **Foundation Ready**: Perfect base for React Query hooks (Task 4.3)
+
+**Alignment with Plan (Section 5.2):**
+- ✅ Type-safe API wrapper functions
+- ✅ Automatic authentication header injection (via credentials: 'include')
+- ✅ Centralized error handling (ApiClientError class)
+- ✅ Request/response interceptors (timeout handling, error parsing)
+- ✅ All CRUD operations supported (GET/POST/PUT/PATCH/DELETE)
+- ✅ Query parameter support
+- ✅ Custom headers support
+
+**Next Steps:**
+- Task 4.3: Create custom data fetching hooks (useTransactions, useBudgets, useAccounts, useDashboard)
+- Task 4.4: Migrate components to use React Query
+- Task 4.5: Implement optimistic updates
+
+---
+
+### Previous Iteration: Task 4.1 - Install and Configure React Query ✅
 
 **Summary:** Successfully installed and configured TanStack Query (React Query) for modern data fetching and state management. This establishes the foundation for Phase 4 and enables efficient client-side caching, background refetching, optimistic updates, and automatic request deduplication across the application.
 
