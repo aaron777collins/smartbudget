@@ -20,12 +20,30 @@ export const SPACING = {
     large: 'p-8',       // 2rem - 32px
   },
 
-  // Page containers
+  // Page containers (standardized responsive padding)
+  // Note: AppLayout already provides p-8 on main tag
+  // Pages should use container with consistent padding
   page: {
-    mobile: 'px-4 py-6',     // Horizontal and vertical padding for mobile
-    tablet: 'px-6 py-8',     // Horizontal and vertical padding for tablet
-    desktop: 'px-8 py-10',   // Horizontal and vertical padding for desktop
+    // Standard container pattern - use this for most pages
+    container: 'container mx-auto p-6',
+
+    // Responsive container (adjusts padding for mobile/desktop)
+    containerResponsive: 'container mx-auto p-4 md:p-8',
+
+    // Legacy patterns (deprecated, migrate to container)
+    mobile: 'px-4 py-6',
+    tablet: 'px-6 py-8',
+    desktop: 'px-8 py-10',
   },
+
+  // Alert/notification padding
+  alert: {
+    default: 'p-4',              // Standard alert padding
+    compact: 'p-3',              // Compact alerts
+  },
+
+  // Empty state padding
+  empty: 'py-12',                // Vertical padding for empty states
 
   // Section spacing (vertical spacing between sections)
   section: {

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -26,6 +26,7 @@ import { AdvancedFilters, TransactionFilters } from '@/components/transactions/a
 import { ExportDialog } from '@/components/transactions/export-dialog';
 import { Search, Filter, Download, Plus, Pencil, Trash2, Repeat, X } from 'lucide-react';
 import { Badge as FilterBadge } from '@/components/ui/badge';
+import { SPACING } from '@/lib/design-tokens';
 
 interface Transaction {
   id: string;
@@ -246,7 +247,7 @@ export default function TransactionsPage() {
   }
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className={`${SPACING.page.container} ${SPACING.section.relaxed}`}>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -262,7 +263,8 @@ export default function TransactionsPage() {
       </div>
 
       {/* Filters and Search */}
-      <Card className="p-4">
+      <Card>
+        <CardContent className="pt-6">
         <div className="flex flex-col gap-4">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
@@ -412,6 +414,7 @@ export default function TransactionsPage() {
             </div>
           )}
         </div>
+        </CardContent>
       </Card>
 
       {/* Transactions Table */}

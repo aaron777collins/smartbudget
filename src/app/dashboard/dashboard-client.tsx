@@ -11,6 +11,9 @@ import { TimeframeSelector, type TimeframeValue } from '@/components/dashboard/t
 import { UpcomingExpenses } from '@/components/dashboard/upcoming-expenses';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
+import { SPACING } from '@/lib/design-tokens';
 
 // Lazy load D3-based visualization components for bundle optimization
 const CashFlowSankey = lazy(() => import('@/components/dashboard/cash-flow-sankey').then(m => ({ default: m.CashFlowSankey })));
@@ -83,7 +86,7 @@ export function DashboardClient() {
 
   if (loading) {
     return (
-      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+      <div className={`flex-1 ${SPACING.section.default} ${SPACING.page.containerResponsive}`}>
         <div className="flex items-center justify-between space-y-2">
           <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
         </div>
@@ -98,15 +101,16 @@ export function DashboardClient() {
 
   if (error) {
     return (
-      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+      <div className={`flex-1 ${SPACING.section.default} ${SPACING.page.containerResponsive}`}>
         <div className="flex items-center justify-between space-y-2">
           <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
         </div>
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
-          <p className="text-sm text-red-800">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
             Error loading dashboard: {error}
-          </p>
-        </div>
+          </AlertDescription>
+        </Alert>
       </div>
     );
   }
@@ -116,7 +120,7 @@ export function DashboardClient() {
   }
 
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+    <div className={`flex-1 ${SPACING.section.default} ${SPACING.page.containerResponsive}`}>
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
         <TimeframeSelector value={timeframe} onChange={setTimeframe} />
