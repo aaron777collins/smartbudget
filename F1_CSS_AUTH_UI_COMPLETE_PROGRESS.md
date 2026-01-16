@@ -234,7 +234,7 @@ Block 6 (Testing - FINAL):
   - Apply migration
   - Verify table created
 
-- [ ] Task 4.3: Create audit logging utility
+- [x] Task 4.3: Create audit logging utility
   - Create `src/lib/audit-log.ts`
   - Function to log events to database
   - Include request context (IP, user agent)
@@ -418,6 +418,28 @@ Block 6 (Testing - FINAL):
 ---
 
 ## Completed This Iteration
+
+**Task 4.3: Create audit logging utility** ✓
+- Created comprehensive audit logging utility at `src/lib/audit-log.ts` (180 lines)
+- Core functionality:
+  - `logAuditEvent()` - Main function to log any audit event to database
+  - `getIpFromRequest()` - Extracts IP from multiple proxy headers (x-forwarded-for, x-real-ip, cf-connecting-ip)
+  - `getUserAgentFromRequest()` - Extracts user agent from request headers
+- Convenience functions for common audit events:
+  - `logLoginSuccess()` - Log successful login with userId and username
+  - `logLoginFailure()` - Log failed login with username and failure reason
+  - `logLogout()` - Log user logout
+  - `logUserCreated()` - Log new user creation
+  - `logPasswordChange()` - Log password change
+  - `logSessionCreated()` - Log session creation
+  - `logSessionExpired()` - Log session expiration
+- Error handling: Logs errors to console but never throws (audit logging should never break main flow)
+- TypeScript types: Full type safety with AuditLogEvent interface
+- Request parameter: Optional Request object for automatic IP/user agent extraction
+- Verified build passes without errors
+- Ready to integrate into auth routes in Task 4.4
+
+## Previously Completed This Iteration
 
 **Task 4.2: Run migration for audit logs** ✓
 - Successfully pushed schema changes to Supabase database using direct URL (port 5432)
