@@ -7,10 +7,13 @@ Complete API reference for SmartBudget's REST API. This documentation is intende
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Authentication](#authentication)
-3. [API Conventions](#api-conventions)
-4. [Rate Limiting](#rate-limiting)
-5. [Endpoints](#endpoints)
+2. [Version 2.0 API Changes](#version-20-api-changes)
+3. [Authentication](#authentication)
+4. [Authorization](#authorization)
+5. [API Conventions](#api-conventions)
+6. [Rate Limiting](#rate-limiting)
+7. [Input Validation](#input-validation)
+8. [Endpoints](#endpoints)
    - [Authentication](#authentication-endpoints)
    - [Accounts](#accounts-endpoints)
    - [Transactions](#transactions-endpoints)
@@ -19,9 +22,10 @@ Complete API reference for SmartBudget's REST API. This documentation is intende
    - [Goals](#goals-endpoints)
    - [Insights](#insights-endpoints)
    - [Dashboard](#dashboard-endpoints)
-6. [Webhooks](#webhooks)
-7. [Error Handling](#error-handling)
-8. [Code Examples](#code-examples)
+   - [Jobs](#jobs-endpoints)
+9. [Webhooks](#webhooks)
+10. [Error Handling](#error-handling)
+11. [Code Examples](#code-examples)
 
 ---
 
@@ -36,7 +40,7 @@ Development: http://localhost:3000/api
 
 ### API Version
 
-Current version: **v1**
+Current version: **v2**
 
 All API endpoints are prefixed with `/api`.
 
@@ -48,6 +52,98 @@ All requests and responses use JSON:
 Content-Type: application/json
 Accept: application/json
 ```
+
+---
+
+## Version 2.0 API Changes
+
+SmartBudget Version 2.0 introduces significant security, performance, and validation improvements. This section summarizes all breaking and non-breaking changes from v1 to v2.
+
+### Breaking Changes
+
+1. **Jobs API Security** (`/api/jobs/process`)
+   - **BREAKING**: Now requires authentication (previously unauthenticated)
+   - **BREAKING**: Requires ADMIN role (see [Authorization](#authorization))
+   - **Migration**: Only admin users can process jobs. Update any automation to include authentication.
+
+2. **Rate Limiting Enforcement**
+   - **BREAKING**: Stricter rate limits now enforced on all endpoints
+   - **BREAKING**: Authentication endpoints limited to 5 requests per 15 minutes
+   - **BREAKING**: ML/AI operations limited to 10 requests per hour
+   - **Migration**: Implement retry logic with exponential backoff. Monitor `X-RateLimit-*` headers.
+
+3. **Input Validation**
+   - **BREAKING**: All endpoints now validate input with Zod schemas
+   - **BREAKING**: Invalid data types/formats return 400 with detailed error messages
+   - **BREAKING**: More restrictive field length and range requirements
+   - **Migration**: Validate input on client-side before sending to API. Handle validation errors properly.
+
+### Non-Breaking Changes
+
+1. **Role-Based Access Control (RBAC)**
+   - Added `role` field to User model (USER or ADMIN)
+   - Admin endpoints return 403 for non-admin users
+   - No impact on existing USER role operations
+
+2. **Dashboard Caching**
+   - Dashboard endpoints now cached for 5 minutes via Redis
+   - Automatic cache invalidation on transaction changes
+   - Improves response time from ~100ms to ~10-20ms for cached requests
+   - No client-side changes required
+
+3. **Enhanced Error Responses**
+   - Validation errors now include field-level details
+   - Authorization errors distinguish between 401 (unauthenticated) and 403 (unauthorized)
+   - Rate limit errors include `Retry-After` header
+
+### Migration Guide
+
+**For API Consumers:**
+
+1. Update authentication for `/api/jobs/process`:
+   ```javascript
+   // Before (v1)
+   fetch('/api/jobs/process', { method: 'POST' })
+
+   // After (v2)
+   fetch('/api/jobs/process', {
+     method: 'POST',
+     credentials: 'include', // Required for admin auth
+   })
+   ```
+
+2. Handle new validation error format:
+   ```javascript
+   // v2 validation error format
+   {
+     "error": {
+       "message": "Validation failed",
+       "details": {
+         "amount": ["Amount must be a positive number"],
+         "date": ["Invalid date format"]
+       }
+     }
+   }
+   ```
+
+3. Respect rate limit headers:
+   ```javascript
+   const response = await fetch('/api/endpoint')
+   const remaining = response.headers.get('X-RateLimit-Remaining')
+   const reset = response.headers.get('X-RateLimit-Reset')
+
+   if (response.status === 429) {
+     const retryAfter = response.headers.get('Retry-After')
+     // Wait retryAfter seconds before retrying
+   }
+   ```
+
+### Performance Improvements
+
+- **Dashboard Load Time**: 80-90% reduction for cached requests (5-minute TTL)
+- **Database Queries**: Optimized aggregations reduce query complexity by 92%
+- **Code Splitting**: Chart libraries lazy-loaded, reducing initial bundle by ~150KB
+- **ML Categorization**: Embeddings cached permanently in Redis
 
 ---
 
@@ -94,6 +190,63 @@ fetch('https://api.smartbudget.app/api/transactions', {
 If not authenticated:
 ```json
 {}
+```
+
+---
+
+## Authorization
+
+SmartBudget v2 implements **Role-Based Access Control (RBAC)** for fine-grained permissions.
+
+### User Roles
+
+All users have one of the following roles:
+
+| Role | Description | Capabilities |
+|------|-------------|--------------|
+| `USER` | Standard user (default) | Full access to own data, standard CRUD operations |
+| `ADMIN` | Administrator | All USER capabilities + admin operations (job processing, system configuration) |
+
+### Admin-Only Endpoints
+
+The following endpoints require the `ADMIN` role:
+
+- `POST /api/jobs/process` - Process background jobs
+- Future admin endpoints (user management, system settings, etc.)
+
+### Authorization Errors
+
+**Unauthenticated (401)**:
+```json
+{
+  "error": "Authentication required"
+}
+```
+
+**Unauthorized (403)**:
+```json
+{
+  "error": "Admin access required"
+}
+```
+
+### Checking User Role
+
+To determine if the current user has admin access:
+
+**Endpoint**: `GET /api/auth/session`
+
+**Response**:
+```json
+{
+  "user": {
+    "id": "usr_1234567890",
+    "email": "admin@example.com",
+    "name": "Admin User",
+    "role": "ADMIN"
+  },
+  "expires": "2026-02-14T12:00:00.000Z"
+}
 ```
 
 ---
@@ -201,33 +354,202 @@ GET /api/transactions?accountId=acc_123&categoryId=cat_456&startDate=2026-01-01&
 
 ## Rate Limiting
 
-API requests are rate-limited to prevent abuse.
+SmartBudget v2 implements a comprehensive 4-tier rate limiting system using Redis (with in-memory fallback) to protect against abuse and ensure fair resource usage.
 
-### Limits
+### Rate Limit Tiers
 
-- **Authenticated users**: 1,000 requests per hour
-- **Unauthenticated**: 100 requests per hour per IP
+Different endpoints have different rate limits based on their resource intensity:
+
+| Tier | Limit | Window | Use Case | Endpoints |
+|------|-------|--------|----------|-----------|
+| **STRICT** | 5 requests | 15 minutes | Authentication, sensitive operations | `/api/auth/signup`, `/api/auth/signin` |
+| **EXPENSIVE** | 10 requests | 1 hour | ML/AI operations, data processing | `/api/ml/train`, `/api/ml/categorize`, `/api/transactions/import`, `/api/transactions/export`, `/api/merchants/research`, `/api/jobs/process` |
+| **MODERATE** | 100 requests | 15 minutes | Standard CRUD operations | `/api/accounts/*`, `/api/transactions/*`, `/api/budgets/*`, `/api/goals/*`, `/api/categories/*` |
+| **LENIENT** | 300 requests | 15 minutes | Read-only operations | `/api/dashboard/*`, `/api/insights/*` |
+
+### Implementation Details
+
+- **Backend**: Redis-based distributed rate limiting via Upstash
+- **Fallback**: Automatic in-memory rate limiting if Redis unavailable
+- **Algorithm**: Sliding window for accurate burst protection
+- **Scope**: Rate limits apply per authenticated user ID or IP address (for unauthenticated requests)
 
 ### Rate Limit Headers
 
-Response includes rate limit information:
+All API responses include rate limit information:
 
 ```
-X-RateLimit-Limit: 1000
-X-RateLimit-Remaining: 842
-X-RateLimit-Reset: 1736859600
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 87
+X-RateLimit-Reset: 2026-01-16T12:15:00.000Z
 ```
+
+| Header | Description |
+|--------|-------------|
+| `X-RateLimit-Limit` | Maximum number of requests allowed in the current window |
+| `X-RateLimit-Remaining` | Number of requests remaining in the current window |
+| `X-RateLimit-Reset` | ISO 8601 timestamp when the rate limit window resets |
 
 ### Exceeding Rate Limits
+
+When rate limit is exceeded, the API returns HTTP 429:
 
 **Response** (HTTP 429):
 ```json
 {
-  "error": {
-    "code": "RATE_LIMIT_EXCEEDED",
-    "message": "Too many requests. Please try again later.",
-    "retryAfter": 3600
+  "error": "Rate limit exceeded. Please try again later.",
+  "retryAfter": 3600
+}
+```
+
+**Headers**:
+```
+Retry-After: 3600
+X-RateLimit-Limit: 10
+X-RateLimit-Remaining: 0
+X-RateLimit-Reset: 2026-01-16T13:00:00.000Z
+```
+
+### Best Practices
+
+1. **Monitor Headers**: Always check `X-RateLimit-Remaining` to avoid hitting limits
+2. **Implement Backoff**: Use exponential backoff when rate limited
+3. **Respect Retry-After**: Wait the specified seconds before retrying
+4. **Cache Responses**: Cache dashboard and read-only data client-side
+5. **Batch Operations**: Use bulk endpoints where available (e.g., `/api/transactions/bulk-categorize`)
+
+**Example with Retry Logic**:
+```javascript
+async function fetchWithRetry(url, options = {}, maxRetries = 3) {
+  for (let i = 0; i < maxRetries; i++) {
+    const response = await fetch(url, options);
+
+    // Check rate limit headers
+    const remaining = parseInt(response.headers.get('X-RateLimit-Remaining') || '0');
+    if (remaining < 5) {
+      console.warn('Approaching rate limit:', remaining, 'requests remaining');
+    }
+
+    if (response.status !== 429) {
+      return response;
+    }
+
+    // Rate limited - wait and retry
+    const retryAfter = parseInt(response.headers.get('Retry-After') || '60');
+    console.log(`Rate limited. Retrying after ${retryAfter}s`);
+    await new Promise(resolve => setTimeout(resolve, retryAfter * 1000));
   }
+
+  throw new Error('Max retries exceeded');
+}
+```
+
+---
+
+## Input Validation
+
+SmartBudget v2 uses **Zod** validation schemas on all API endpoints to ensure data integrity and security.
+
+### Validation Scope
+
+All endpoints validate:
+- **Request Body**: POST/PATCH request payloads
+- **Query Parameters**: GET request query strings
+- **Path Parameters**: Dynamic route segments (IDs, slugs)
+
+### Validation Rules
+
+Common validation rules enforced:
+
+| Field Type | Validation Rules | Example |
+|------------|------------------|---------|
+| IDs | Must be valid UUIDs | `"usr_1234567890"` |
+| Emails | Valid email format | `"user@example.com"` |
+| Amounts | Positive numbers (where applicable) | `125.50` |
+| Dates | ISO 8601 format | `"2026-01-16T12:00:00.000Z"` |
+| Enums | Must match allowed values | `"CHECKING"`, `"SAVINGS"` |
+| Strings | Min/max length constraints | `name: 1-100 chars` |
+| Arrays | Min/max item counts | `categories: 1-50 items` |
+
+### Validation Error Response
+
+When validation fails, the API returns HTTP 400 with detailed field-level errors:
+
+**Request** (Invalid):
+```json
+{
+  "name": "",
+  "amount": -50,
+  "date": "invalid-date",
+  "type": "INVALID_TYPE"
+}
+```
+
+**Response** (HTTP 400):
+```json
+{
+  "error": {
+    "message": "Validation failed",
+    "details": {
+      "name": ["String must contain at least 1 character(s)"],
+      "amount": ["Amount must be a positive number"],
+      "date": ["Invalid date format. Use ISO 8601 (YYYY-MM-DDTHH:mm:ss.sssZ)"],
+      "type": ["Invalid enum value. Expected 'DEBIT' | 'CREDIT' | 'TRANSFER', received 'INVALID_TYPE'"]
+    }
+  }
+}
+```
+
+### Field-Level Error Format
+
+Each field in `details` contains an array of error messages:
+
+```typescript
+interface ValidationError {
+  error: {
+    message: string;
+    details: Record<string, string[]>; // fieldName -> error messages
+  }
+}
+```
+
+### Common Validation Errors
+
+| Scenario | Field | Error Message |
+|----------|-------|---------------|
+| Missing required field | `accountId` | `"Required"` |
+| Invalid UUID format | `id` | `"Invalid UUID format"` |
+| Out of range | `amount` | `"Number must be greater than 0"` |
+| Invalid enum | `accountType` | `"Invalid enum value. Expected 'CHECKING' \| 'SAVINGS' \| 'CREDIT_CARD'"` |
+| String too long | `description` | `"String must contain at most 500 character(s)"` |
+| Invalid date | `startDate` | `"Invalid date format"` |
+
+### Handling Validation Errors
+
+**Client-Side Example**:
+```typescript
+try {
+  const response = await fetch('/api/transactions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(transactionData),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+
+    if (response.status === 400) {
+      // Validation error - show field-level errors
+      const { details } = errorData.error;
+      Object.entries(details).forEach(([field, messages]) => {
+        console.error(`${field}: ${messages.join(', ')}`);
+        // Display errors in UI next to respective fields
+      });
+    }
+  }
+} catch (error) {
+  console.error('Network error:', error);
 }
 ```
 
@@ -242,6 +564,8 @@ X-RateLimit-Reset: 1736859600
 Create a new user account.
 
 **Endpoint**: `POST /api/auth/signup`
+
+**Rate Limit**: STRICT (5 requests / 15 minutes)
 
 **Request**:
 ```json
@@ -277,6 +601,8 @@ Create a new user account.
 Authenticate with email and password.
 
 **Endpoint**: `POST /api/auth/signin`
+
+**Rate Limit**: STRICT (5 requests / 15 minutes)
 
 **Request**:
 ```json
@@ -333,6 +659,10 @@ Retrieve all accounts for the authenticated user.
 
 **Endpoint**: `GET /api/accounts`
 
+**Authentication**: Required
+
+**Rate Limit**: MODERATE (100 requests / 15 minutes)
+
 **Query Parameters**:
 - `isActive`: Filter by active status (`true` or `false`)
 - `accountType`: Filter by type (e.g., `CHECKING`, `SAVINGS`, `CREDIT_CARD`)
@@ -368,6 +698,19 @@ Retrieve all accounts for the authenticated user.
 Create a new account.
 
 **Endpoint**: `POST /api/accounts`
+
+**Authentication**: Required
+
+**Rate Limit**: MODERATE (100 requests / 15 minutes)
+
+**Validation**:
+- `name`: Required, 1-100 characters
+- `institution`: Optional, max 100 characters
+- `accountType`: Required, must be valid enum (CHECKING, SAVINGS, CREDIT_CARD, INVESTMENT, LOAN, OTHER)
+- `currency`: Required, 3-letter currency code (e.g., CAD, USD)
+- `currentBalance`: Required, number
+- `color`: Optional, hex color code
+- `icon`: Optional, icon identifier
 
 **Request**:
 ```json
@@ -654,6 +997,10 @@ Import transactions from CSV or OFX files.
 
 **Endpoint**: `POST /api/transactions/import`
 
+**Authentication**: Required
+
+**Rate Limit**: EXPENSIVE (10 requests / hour)
+
 **Request** (multipart/form-data):
 ```
 Content-Type: multipart/form-data
@@ -870,6 +1217,10 @@ Use AI to research an unknown merchant.
 
 **Endpoint**: `POST /api/transactions/:id/research-merchant`
 
+**Authentication**: Required
+
+**Rate Limit**: EXPENSIVE (10 requests / hour)
+
 **Request**:
 ```json
 {
@@ -913,6 +1264,10 @@ Use AI to research an unknown merchant.
 Export transactions to CSV, Excel, or PDF.
 
 **Endpoint**: `POST /api/transactions/export`
+
+**Authentication**: Required
+
+**Rate Limit**: EXPENSIVE (10 requests / hour)
 
 **Request**:
 ```json
@@ -1420,11 +1775,21 @@ Identify potential ways to save money.
 
 ### Dashboard Endpoints
 
+All dashboard endpoints are cached for **5 minutes** using Redis to improve performance. Cache is automatically invalidated when transactions are created, updated, or deleted.
+
+**Performance**:
+- First request (cache miss): ~50-100ms
+- Subsequent requests (cache hit): ~10-20ms
+- Cache TTL: 5 minutes
+- Automatic invalidation: On transaction changes
+
 #### Get Dashboard Overview
 
 Retrieve dashboard summary data.
 
 **Endpoint**: `GET /api/dashboard/overview`
+
+**Rate Limit**: LENIENT (300 requests / 15 minutes)
 
 **Query Parameters**:
 - `timeframe`: `today`, `this-week`, `this-month`, `this-year`, `all-time`
@@ -1461,6 +1826,8 @@ Retrieve dashboard summary data.
 }
 ```
 
+**Caching**: Results cached for 5 minutes per user and timeframe combination.
+
 ---
 
 #### Get Spending Trends
@@ -1468,6 +1835,8 @@ Retrieve dashboard summary data.
 Retrieve spending trends over time.
 
 **Endpoint**: `GET /api/dashboard/spending-trends`
+
+**Rate Limit**: LENIENT (300 requests / 15 minutes)
 
 **Query Parameters**:
 - `timeframe`: Timeframe for data
@@ -1492,6 +1861,8 @@ Retrieve spending trends over time.
 }
 ```
 
+**Caching**: Results cached for 5 minutes per user and query parameters.
+
 ---
 
 #### Get Category Breakdown
@@ -1499,6 +1870,8 @@ Retrieve spending trends over time.
 Retrieve spending breakdown by category.
 
 **Endpoint**: `GET /api/dashboard/category-breakdown`
+
+**Rate Limit**: LENIENT (300 requests / 15 minutes)
 
 **Query Parameters**:
 - `timeframe`: Timeframe for data
@@ -1530,31 +1903,151 @@ Retrieve spending breakdown by category.
 }
 ```
 
+**Caching**: Results cached for 5 minutes per user and timeframe.
+
+---
+
+### Jobs Endpoints
+
+Background job processing endpoints for administrative tasks.
+
+#### Process Jobs
+
+Process pending background jobs from the queue.
+
+**Endpoint**: `POST /api/jobs/process`
+
+**Authentication**: Required
+
+**Authorization**: ADMIN role required
+
+**Rate Limit**: EXPENSIVE (10 requests / hour)
+
+**Request**:
+```json
+{
+  "limit": 10
+}
+```
+
+**Parameters**:
+- `limit` (optional): Number of jobs to process (1-100, default: 5)
+
+**Response** (200 OK):
+```json
+{
+  "success": true,
+  "message": "Processing up to 10 pending jobs",
+  "processedBy": "admin@example.com"
+}
+```
+
+**Errors**:
+- `401`: Unauthenticated (no session)
+  ```json
+  {
+    "error": "Authentication required"
+  }
+  ```
+
+- `403`: Unauthorized (not admin)
+  ```json
+  {
+    "error": "Admin access required"
+  }
+  ```
+
+- `400`: Invalid parameters
+  ```json
+  {
+    "error": "Invalid request parameters",
+    "details": [
+      {
+        "code": "too_small",
+        "minimum": 1,
+        "path": ["limit"],
+        "message": "Number must be greater than or equal to 1"
+      }
+    ]
+  }
+  ```
+
+**Usage Notes**:
+- Typically called by cron job every minute
+- Can be manually triggered by admin users
+- Processes jobs in FIFO order
+- Rate limited to prevent resource exhaustion
+
+**Example**:
+```javascript
+// Process up to 20 jobs
+const response = await fetch('/api/jobs/process', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  credentials: 'include', // Required for auth
+  body: JSON.stringify({ limit: 20 }),
+});
+
+if (response.status === 403) {
+  console.error('Admin access required');
+} else if (response.ok) {
+  const data = await response.json();
+  console.log(data.message);
+}
+```
+
 ---
 
 ## Error Handling
 
 ### Error Response Format
 
-All errors follow a consistent format:
+SmartBudget v2 uses standardized error responses with different formats based on error type.
+
+#### Standard Error Format
+
+```json
+{
+  "error": "Human-readable error message"
+}
+```
+
+Used for: 401, 403, 404, 500 errors
+
+#### Validation Error Format
 
 ```json
 {
   "error": {
-    "code": "ERROR_CODE",
-    "message": "Human-readable error message",
-    "details": [] // Optional additional details
+    "message": "Validation failed",
+    "details": {
+      "fieldName": ["Error message 1", "Error message 2"],
+      "anotherField": ["Error message"]
+    }
   }
 }
 ```
+
+Used for: 400 Bad Request with validation failures
+
+#### Rate Limit Error Format
+
+```json
+{
+  "error": "Rate limit exceeded. Please try again later.",
+  "retryAfter": 3600
+}
+```
+
+Used for: 429 Too Many Requests
 
 ### HTTP Status Codes
 
 - **200 OK**: Request succeeded
 - **201 Created**: Resource created successfully
-- **400 Bad Request**: Invalid request parameters
-- **401 Unauthorized**: Authentication required
-- **403 Forbidden**: Insufficient permissions
+- **400 Bad Request**: Invalid request parameters (validation failure)
+- **401 Unauthorized**: Authentication required (no session)
+- **403 Forbidden**: Insufficient permissions (valid session, wrong role)
 - **404 Not Found**: Resource not found
 - **409 Conflict**: Resource conflict (e.g., duplicate)
 - **413 Payload Too Large**: Request body or file too large
@@ -1562,54 +2055,272 @@ All errors follow a consistent format:
 - **500 Internal Server Error**: Server error
 - **503 Service Unavailable**: Temporary outage
 
-### Common Error Codes
+### Common Error Scenarios
 
-| Code | Description |
-|------|-------------|
-| `UNAUTHENTICATED` | User not logged in |
-| `UNAUTHORIZED` | Insufficient permissions |
-| `VALIDATION_ERROR` | Invalid request parameters |
-| `NOT_FOUND` | Resource not found |
-| `DUPLICATE` | Resource already exists |
-| `RATE_LIMIT_EXCEEDED` | Too many requests |
-| `FILE_TOO_LARGE` | Upload file exceeds size limit |
-| `INVALID_FILE_FORMAT` | Unsupported file format |
-| `DATABASE_ERROR` | Internal database error |
-| `EXTERNAL_SERVICE_ERROR` | Third-party service error |
+#### 1. Authentication Required (401)
+
+**Scenario**: Request to authenticated endpoint without session
+
+**Response**:
+```json
+{
+  "error": "Authentication required"
+}
+```
+
+**Solution**: Ensure user is logged in and cookies are included in request
+
+---
+
+#### 2. Admin Access Required (403)
+
+**Scenario**: Non-admin user accessing admin endpoint
+
+**Response**:
+```json
+{
+  "error": "Admin access required"
+}
+```
+
+**Solution**: Endpoint requires ADMIN role. Regular users cannot access.
+
+---
+
+#### 3. Validation Failure (400)
+
+**Scenario**: Invalid input data
+
+**Request**:
+```json
+{
+  "amount": -50,
+  "date": "invalid",
+  "accountId": "not-a-uuid"
+}
+```
+
+**Response**:
+```json
+{
+  "error": {
+    "message": "Validation failed",
+    "details": {
+      "amount": ["Number must be greater than 0"],
+      "date": ["Invalid date format. Use ISO 8601"],
+      "accountId": ["Invalid UUID format"]
+    }
+  }
+}
+```
+
+**Solution**: Fix invalid fields based on error details
+
+---
+
+#### 4. Rate Limit Exceeded (429)
+
+**Scenario**: Too many requests in time window
+
+**Response**:
+```json
+{
+  "error": "Rate limit exceeded. Please try again later.",
+  "retryAfter": 3600
+}
+```
+
+**Headers**:
+```
+Retry-After: 3600
+X-RateLimit-Limit: 10
+X-RateLimit-Remaining: 0
+X-RateLimit-Reset: 2026-01-16T13:00:00.000Z
+```
+
+**Solution**: Wait `retryAfter` seconds before retrying. Implement exponential backoff.
+
+---
+
+#### 5. Resource Not Found (404)
+
+**Scenario**: Accessing non-existent or unauthorized resource
+
+**Response**:
+```json
+{
+  "error": "Transaction not found"
+}
+```
+
+**Solution**: Verify resource ID exists and user has access
+
+---
+
+#### 6. Resource Conflict (409)
+
+**Scenario**: Attempting to create duplicate resource
+
+**Response**:
+```json
+{
+  "error": "Account with this name already exists"
+}
+```
+
+**Solution**: Choose a different unique identifier
+
+---
 
 ### Error Handling Examples
 
 ```javascript
+async function apiRequest(url, options = {}) {
+  try {
+    const response = await fetch(url, {
+      ...options,
+      credentials: 'include', // Always include for auth
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+    });
+
+    // Check rate limit headers
+    const remaining = response.headers.get('X-RateLimit-Remaining');
+    if (remaining && parseInt(remaining) < 10) {
+      console.warn(`Rate limit warning: ${remaining} requests remaining`);
+    }
+
+    if (!response.ok) {
+      const errorData = await response.json();
+
+      switch (response.status) {
+        case 400:
+          // Validation error - show field-level errors
+          if (errorData.error.details) {
+            Object.entries(errorData.error.details).forEach(([field, messages]) => {
+              console.error(`${field}: ${messages.join(', ')}`);
+              // Display in UI: showFieldError(field, messages)
+            });
+          } else {
+            console.error('Validation error:', errorData.error);
+          }
+          throw new ValidationError(errorData.error);
+
+        case 401:
+          // Authentication required - redirect to login
+          console.error('Not authenticated:', errorData.error);
+          window.location.href = '/auth/signin';
+          throw new AuthenticationError(errorData.error);
+
+        case 403:
+          // Forbidden - user lacks required role
+          console.error('Access denied:', errorData.error);
+          throw new AuthorizationError(errorData.error);
+
+        case 404:
+          // Resource not found
+          console.error('Not found:', errorData.error);
+          throw new NotFoundError(errorData.error);
+
+        case 429:
+          // Rate limited - wait and retry
+          const retryAfter = errorData.retryAfter || 60;
+          console.error(`Rate limited. Retry after ${retryAfter}s`);
+          throw new RateLimitError(errorData.error, retryAfter);
+
+        default:
+          // Generic error
+          console.error('API error:', errorData.error);
+          throw new APIError(errorData.error);
+      }
+    }
+
+    return await response.json();
+  } catch (error) {
+    if (error instanceof APIError) {
+      throw error;
+    }
+    // Network error
+    console.error('Network error:', error);
+    throw new NetworkError(error.message);
+  }
+}
+
+// Custom error classes
+class APIError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'APIError';
+  }
+}
+
+class ValidationError extends APIError {
+  constructor(error) {
+    super(error.message);
+    this.name = 'ValidationError';
+    this.details = error.details;
+  }
+}
+
+class AuthenticationError extends APIError {
+  constructor(message) {
+    super(message);
+    this.name = 'AuthenticationError';
+  }
+}
+
+class AuthorizationError extends APIError {
+  constructor(message) {
+    super(message);
+    this.name = 'AuthorizationError';
+  }
+}
+
+class RateLimitError extends APIError {
+  constructor(message, retryAfter) {
+    super(message);
+    this.name = 'RateLimitError';
+    this.retryAfter = retryAfter;
+  }
+}
+
+class NotFoundError extends APIError {
+  constructor(message) {
+    super(message);
+    this.name = 'NotFoundError';
+  }
+}
+
+class NetworkError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'NetworkError';
+  }
+}
+
+// Usage example
 try {
-  const response = await fetch('/api/transactions', {
+  const transaction = await apiRequest('/api/transactions', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
     body: JSON.stringify(transactionData),
   });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-
-    switch (response.status) {
-      case 401:
-        // Redirect to login
-        window.location.href = '/auth/signin';
-        break;
-      case 400:
-        // Show validation errors
-        console.error('Validation errors:', errorData.error.details);
-        break;
-      default:
-        // Generic error handling
-        console.error('Error:', errorData.error.message);
-    }
-  } else {
-    const data = await response.json();
-    console.log('Success:', data);
-  }
+  console.log('Transaction created:', transaction);
 } catch (error) {
-  console.error('Network error:', error);
+  if (error instanceof ValidationError) {
+    // Show validation errors in form
+    displayValidationErrors(error.details);
+  } else if (error instanceof RateLimitError) {
+    // Show rate limit message
+    showRateLimitMessage(error.retryAfter);
+  } else if (error instanceof AuthorizationError) {
+    // Show access denied message
+    showAccessDenied();
+  } else {
+    // Generic error handling
+    showErrorMessage(error.message);
+  }
 }
 ```
 
@@ -1822,4 +2533,23 @@ Official SDKs:
 
 ---
 
-*API Version 1.0 | Last Updated: January 2026*
+## API Versioning
+
+SmartBudget follows semantic versioning for the API. Major version changes (v1 → v2) indicate breaking changes that may require client updates.
+
+### Version History
+
+| Version | Release Date | Status | Notes |
+|---------|--------------|--------|-------|
+| **v2.0** | January 2026 | Current | Added RBAC, comprehensive rate limiting, Zod validation, dashboard caching |
+| v1.0 | 2025 | Deprecated | Initial release |
+
+### Deprecation Policy
+
+- Previous major versions supported for 6 months after new version release
+- Deprecation warnings provided in response headers
+- Migration guides provided for breaking changes
+
+---
+
+*API Version 2.0 | Last Updated: January 2026*
