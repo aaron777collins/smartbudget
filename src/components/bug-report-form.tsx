@@ -112,8 +112,8 @@ export function BugReportForm({ onSuccess }: BugReportFormProps) {
       </div>
 
       {submitStatus === "success" && (
-        <Alert className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
-          <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
+        <Alert className="animate-in fade-in slide-in-from-top-2 duration-300 bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
+          <Check className="h-4 w-4 text-green-600 dark:text-green-400 animate-in zoom-in duration-300" />
           <AlertDescription className="text-green-800 dark:text-green-200">
             Thank you! Your feedback has been submitted successfully.
           </AlertDescription>
@@ -121,7 +121,7 @@ export function BugReportForm({ onSuccess }: BugReportFormProps) {
       )}
 
       {submitStatus === "error" && (
-        <Alert variant="destructive">
+        <Alert variant="destructive" className="animate-in fade-in slide-in-from-top-2 duration-300">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>{errorMessage}</AlertDescription>
         </Alert>
