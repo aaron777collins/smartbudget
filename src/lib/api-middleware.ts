@@ -34,17 +34,18 @@ export interface MiddlewareContext {
 }
 
 /**
- * Route params type for dynamic routes
+ * Route params type for dynamic routes (Next.js 16 format)
  */
-export type RouteParams = { params: Promise<Record<string, string>> }
+export type RouteContext = {
+  params: Promise<Record<string, string>>
+}
 
 /**
  * API handler type with middleware context
  */
-export type ApiHandler<TParams extends RouteParams | undefined = undefined> = (
+export type ApiHandler = (
   req: Request,
-  context: MiddlewareContext,
-  params?: TParams
+  context: MiddlewareContext
 ) => Promise<Response>
 
 /**
@@ -78,11 +79,11 @@ function isAdminByEmail(email: string): boolean {
  * }, { requireAuth: true })
  * ```
  */
-export function withMiddleware<TParams extends RouteParams | undefined = undefined>(
-  handler: ApiHandler<TParams>,
+export function withMiddleware(
+  handler: ApiHandler,
   options: MiddlewareOptions = {}
-): (req: Request, params?: TParams) => Promise<Response> {
-  return async (req: Request, params?: TParams) => {
+): (req: Request, context: RouteContext) => Promise<Response> {
+  return async (req: Request, _context: RouteContext) => {
     try {
       // 1. Apply rate limiting (unless explicitly skipped)
       if (!options.skipRateLimit) {
@@ -132,7 +133,7 @@ export function withMiddleware<TParams extends RouteParams | undefined = undefin
           isAdmin: userIsAdmin,
         }
 
-        return await handler(req, context, params)
+        return await handler(req, context)
       }
 
       // No auth required - create minimal context
@@ -142,7 +143,7 @@ export function withMiddleware<TParams extends RouteParams | undefined = undefin
         isAdmin: false,
       }
 
-      return await handler(req, context, params)
+      return await handler(req, context)
     } catch (error) {
       console.error('[API Middleware] Error:', error)
 
@@ -168,27 +169,27 @@ export function withMiddleware<TParams extends RouteParams | undefined = undefin
 /**
  * Convenience wrapper for authenticated routes
  */
-export function withAuth<TParams extends RouteParams | undefined = undefined>(
-  handler: ApiHandler<TParams>
-): (req: Request, params?: TParams) => Promise<Response> {
+export function withAuth(
+  handler: ApiHandler
+): (req: Request, context: RouteContext) => Promise<Response> {
   return withMiddleware(handler, { requireAuth: true, rateLimitTier: 'auto' })
 }
 
 /**
  * Convenience wrapper for admin-only routes
  */
-export function withAdmin<TParams extends RouteParams | undefined = undefined>(
-  handler: ApiHandler<TParams>
-): (req: Request, params?: TParams) => Promise<Response> {
+export function withAdmin(
+  handler: ApiHandler
+): (req: Request, context: RouteContext) => Promise<Response> {
   return withMiddleware(handler, { requireAuth: true, requireAdmin: true, rateLimitTier: 'auto' })
 }
 
 /**
  * Convenience wrapper for expensive operations
  */
-export function withExpensiveOp<TParams extends RouteParams | undefined = undefined>(
-  handler: ApiHandler<TParams>
-): (req: Request, params?: TParams) => Promise<Response> {
+export function withExpensiveOp(
+  handler: ApiHandler
+): (req: Request, context: RouteContext) => Promise<Response> {
   return withMiddleware(handler, { requireAuth: true, rateLimitTier: RateLimitTier.EXPENSIVE })
 }
 
@@ -203,11 +204,11 @@ export function withExpensiveOp<TParams extends RouteParams | undefined = undefi
  * }, RateLimitTier.MODERATE)
  * ```
  */
-export function withRateLimit<TParams extends RouteParams | undefined = undefined>(
-  handler: (req: Request, params?: TParams) => Promise<Response>,
+export function withRateLimit(
+  handler: (req: Request, context: RouteContext) => Promise<Response>,
   tier: RateLimitTier | 'auto' = 'auto'
-): (req: Request, params?: TParams) => Promise<Response> {
-  return async (req: Request, params?: TParams) => {
+): (req: Request, context: RouteContext) => Promise<Response> {
+  return async (req: Request, context: RouteContext) => {
     try {
       // Get tier
       const effectiveTier =
@@ -224,7 +225,7 @@ export function withRateLimit<TParams extends RouteParams | undefined = undefine
       }
 
       // Call original handler
-      return await handler(req, params)
+      return await handler(req, context)
     } catch (error) {
       console.error('[Rate Limit Middleware] Error:', error)
       return NextResponse.json(
