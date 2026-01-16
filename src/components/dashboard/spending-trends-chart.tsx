@@ -177,8 +177,9 @@ export function SpendingTrendsChart({ timeframe }: SpendingTrendsChartProps) {
                   x2="0"
                   y2="1"
                 >
-                  <stop offset="5%" stopColor={category.color} stopOpacity={0.8} />
-                  <stop offset="95%" stopColor={category.color} stopOpacity={0.1} />
+                  <stop offset="0%" stopColor={category.color} stopOpacity={0.9} />
+                  <stop offset="50%" stopColor={category.color} stopOpacity={0.5} />
+                  <stop offset="100%" stopColor={category.color} stopOpacity={0.05} />
                 </linearGradient>
               ))}
             </defs>

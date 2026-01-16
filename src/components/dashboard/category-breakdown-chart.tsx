@@ -226,11 +226,11 @@ export function CategoryBreakdownChart({ timeframe }: CategoryBreakdownChartProp
             {data.topCategories.map((category, index) => (
               <div
                 key={category.id}
-                className="flex items-center justify-between p-2 rounded-lg bg-muted/50"
+                className="flex items-center justify-between p-2 rounded-lg bg-gradient-to-r from-muted/50 to-transparent border border-border/50 transition-all duration-200 hover:border-border hover:shadow-sm"
               >
                 <div className="flex items-center gap-2 flex-1 min-w-0">
                   <div
-                    className="h-3 w-3 rounded-full flex-shrink-0"
+                    className="h-3 w-3 rounded-full flex-shrink-0 shadow-sm"
                     style={{ backgroundColor: category.color }}
                   />
                   <span className="text-sm font-medium truncate">{category.name}</span>

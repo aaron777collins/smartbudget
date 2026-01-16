@@ -52,7 +52,7 @@ export function MonthlyIncomeCard({
   };
 
   return (
-    <Card className="transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150">
+    <Card className="transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150 bg-gradient-to-br from-card via-card to-green-50/50 dark:to-green-950/20">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">Monthly Income</CardTitle>
         <DollarSign className="h-4 w-4 text-muted-foreground transition-transform duration-300 group-hover:scale-110" />

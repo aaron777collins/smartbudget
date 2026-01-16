@@ -58,7 +58,7 @@ export function CashFlowCard({
   };
 
   return (
-    <Card className="transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 duration-500 delay-[225ms]">
+    <Card className="transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 duration-500 delay-[225ms] bg-gradient-to-br from-card via-card to-purple-50/50 dark:to-purple-950/20">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">Cash Flow</CardTitle>
         <div className="animate-in zoom-in duration-300 delay-300">

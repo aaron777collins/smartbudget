@@ -43,7 +43,7 @@ export function MonthlySpendingCard({
   };
 
   return (
-    <Card className="transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 duration-500 delay-75">
+    <Card className="transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 duration-500 delay-75 bg-gradient-to-br from-card via-card to-orange-50/50 dark:to-orange-950/20">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">Monthly Spending</CardTitle>
         <CreditCard className="h-4 w-4 text-muted-foreground transition-transform duration-300 group-hover:scale-110" />

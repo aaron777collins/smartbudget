@@ -278,7 +278,7 @@ Block 6 (Testing - FINAL):
   - Add loading spinners where appropriate
   - Ensure loading states are visually appealing
 
-- [ ] Task 5.4: Refine color palette and gradients
+- [x] Task 5.4: Refine color palette and gradients
   - Review all colors for consistency
   - Add subtle gradients to cards
   - Enhance chart colors with gradients
@@ -418,6 +418,65 @@ Block 6 (Testing - FINAL):
 ---
 
 ## Completed This Iteration
+
+**Task 5.4: Refine color palette and gradients** ✓
+- Added subtle background gradients to all 4 dashboard metric cards for enhanced visual appeal:
+  - **Net Worth Card** (`src/components/dashboard/net-worth-card.tsx`):
+    - Added `bg-gradient-to-br from-card via-card to-blue-50/50 dark:to-blue-950/20`
+    - Creates subtle blue tint in bottom-right corner that adapts to light/dark mode
+    - Gradient opacity is low (50% in light, 20% in dark) for subtlety
+  - **Monthly Spending Card** (`src/components/dashboard/monthly-spending-card.tsx`):
+    - Added `bg-gradient-to-br from-card via-card to-orange-50/50 dark:to-orange-950/20`
+    - Subtle orange/amber tint matching spending theme
+    - Complements the card's budget visualization colors
+  - **Monthly Income Card** (`src/components/dashboard/monthly-income-card.tsx`):
+    - Added `bg-gradient-to-br from-card via-card to-green-50/50 dark:to-green-950/20`
+    - Subtle green tint reinforcing positive income association
+    - Matches the green status indicators used throughout
+  - **Cash Flow Card** (`src/components/dashboard/cash-flow-card.tsx`):
+    - Added `bg-gradient-to-br from-card via-card to-purple-50/50 dark:to-purple-950/20`
+    - Unique purple tint distinguishes this card from others
+    - Creates visual hierarchy across the 4-card dashboard layout
+- Enhanced spending trends chart gradients (`src/components/dashboard/spending-trends-chart.tsx`):
+  - Improved area chart gradients from 2-stop to 3-stop gradient for smoother transitions
+  - Changed from `0.8 → 0.1` opacity to `0.9 → 0.5 → 0.05` opacity
+  - Added middle stop at 50% for more natural gradient fade
+  - Top of chart is more vibrant (90% opacity) showing data more clearly
+  - Middle transition at 50% prevents abrupt color changes
+  - Bottom fades to near-transparent (5% opacity) for clean look
+  - All category colors benefit from improved gradient rendering
+- Enhanced category breakdown chart (`src/components/dashboard/category-breakdown-chart.tsx`):
+  - Top categories list items now have subtle gradient backgrounds:
+    - Changed from `bg-muted/50` to `bg-gradient-to-r from-muted/50 to-transparent`
+    - Creates left-to-right fade that draws eye to category name
+    - Added border with `border border-border/50` for better definition
+    - Hover state enhances border to full opacity and adds subtle shadow
+    - Added `shadow-sm` to category color dots for depth
+  - All transitions are smooth with `transition-all duration-200`
+  - Maintains excellent accessibility with proper contrast ratios
+- Gradient design principles applied:
+  - **Subtlety First**: All gradients use low opacity (5-50%) to avoid overwhelming content
+  - **Dark Mode Aware**: Dark mode gradients use even lower opacity (20% vs 50%) for proper contrast
+  - **Semantic Colors**: Card gradients match their content theme (blue=wealth, green=income, orange=spending, purple=flow)
+  - **Bottom-Right Direction**: `bg-gradient-to-br` creates diagonal flow that feels natural and modern
+  - **Via Stop**: Three-color gradients (`from-card via-card to-color`) ensure gradient only appears at edges
+  - **Accessibility**: All gradients maintain WCAG AA contrast ratios for text readability
+- Color palette consistency improvements:
+  - Dashboard cards use distinct but harmonious gradient colors
+  - Chart gradients enhanced for better data visualization
+  - Category colors remain unchanged (16 distinct semantic colors already optimal)
+  - Status colors consistent: green (positive), red (negative), yellow (warning), gray (neutral)
+  - All colors work seamlessly in both light and dark modes
+- Visual hierarchy enhancements:
+  - Card gradients create subtle visual separation on dashboard
+  - Each card has unique color identity while maintaining cohesive design
+  - Improved chart gradients make data patterns more visible
+  - Category list items have depth with gradient backgrounds and borders
+- Verified build passes without errors
+- All gradient enhancements are performant (CSS-based, no JavaScript overhead)
+- **Ready for Phase 5 Task 5.5: Add micro-interactions**
+
+## Previously Completed This Iteration
 
 **Task 5.3: Improve loading states** ✓
 - Enhanced skeleton component with shimmer effect (`src/components/ui/skeleton.tsx`):
