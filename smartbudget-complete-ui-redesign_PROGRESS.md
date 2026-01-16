@@ -194,7 +194,7 @@ IN_PROGRESS
   - Centralized error handling
   - Request/response interceptors
 
-- [ ] **Task 4.3**: Create custom data fetching hooks
+- [x] **Task 4.3**: Create custom data fetching hooks
   - `src/hooks/useTransactions.ts`
   - `src/hooks/useBudgets.ts`
   - `src/hooks/useAccounts.ts`
@@ -522,7 +522,181 @@ After completion:
 
 ## Completed This Iteration
 
-### Current Iteration: Task 4.2 - Create Centralized API Client ✅
+### Current Iteration: Task 4.3 - Create Custom Data Fetching Hooks ✅
+
+**Summary:** Created comprehensive, type-safe React Query hooks for all major resources (Transactions, Budgets, Accounts, Dashboard). These hooks provide a clean, declarative API for data fetching and mutations with automatic caching, background refetching, and query invalidation. This completes the React Query integration foundation and prepares the codebase for component migration in Task 4.4.
+
+**Files Created:**
+- `src/hooks/useTransactions.ts` - Transaction query and mutation hooks with full CRUD support
+- `src/hooks/useBudgets.ts` - Budget query and mutation hooks including analytics
+- `src/hooks/useAccounts.ts` - Account query and mutation hooks with balance tracking
+- `src/hooks/useDashboard.ts` - Dashboard overview, stats, and visualization data hooks
+
+**Files Modified:**
+- `smartbudget-complete-ui-redesign_PROGRESS.md` - Marked Task 4.3 as complete
+
+**Implementation Details:**
+
+1. **useTransactions Hook (350+ lines)**:
+   - **Query Hooks**:
+     - `useTransactions(filters)` - Paginated transaction list with complex filtering
+     - `useTransaction(id)` - Single transaction detail with relations
+   - **Mutation Hooks**:
+     - `useCreateTransaction()` - Create new transaction
+     - `useUpdateTransaction()` - Update existing transaction
+     - `useDeleteTransaction()` - Delete transaction
+     - `useCategorizeTransaction()` - Categorize transaction (manual or AI)
+     - `useImportTransactions()` - Bulk import from CSV/OFX
+   - **Types**: TransactionWithRelations, TransactionFilters, TransactionInput
+   - **Features**: Automatic query invalidation on mutations, dashboard refresh on changes
+
+2. **useBudgets Hook (300+ lines)**:
+   - **Query Hooks**:
+     - `useBudgets(filters)` - Budget list with category details
+     - `useBudget(id)` - Single budget with categories
+     - `useBudgetAnalytics(id)` - Budget spending analytics and performance
+   - **Mutation Hooks**:
+     - `useCreateBudget()` - Create new budget with categories
+     - `useUpdateBudget()` - Update budget details
+     - `useDeleteBudget()` - Delete budget
+     - `useUpdateBudgetCategory()` - Update category allocation
+   - **Types**: BudgetWithRelations, BudgetFilters, BudgetInput, BudgetAnalytics
+   - **Features**: Shorter stale time (2 min) for analytics, automatic invalidation
+
+3. **useAccounts Hook (280+ lines)**:
+   - **Query Hooks**:
+     - `useAccounts(filters)` - Account list with balances
+     - `useAccount(id)` - Single account with transaction count
+     - `useAccountBalance(id, date)` - Current and historical balance
+   - **Mutation Hooks**:
+     - `useCreateAccount()` - Create new account
+     - `useUpdateAccount()` - Update account details
+     - `useDeleteAccount()` - Delete account (invalidates transactions)
+     - `useSyncAccountBalance()` - Sync balance with institution
+   - **Types**: AccountWithRelations, AccountFilters, AccountInput, AccountBalance
+   - **Features**: Balance tracking, cross-resource invalidation
+
+4. **useDashboard Hook (350+ lines)**:
+   - **Query Hooks**:
+     - `useDashboardOverview(timeframe)` - Comprehensive dashboard data
+     - `useDashboardStats(timeframe)` - Statistical summaries
+     - `useSpendingByCategory(timeframe)` - Category breakdown
+     - `useCashFlowOverTime(timeframe)` - Cash flow trends
+     - `useNetWorthOverTime(timeframe)` - Net worth history
+     - `useBudgetPerformance(timeframe)` - Budget vs actual spending
+   - **Types**: DashboardOverview, DashboardStats, SpendingByCategory, CashFlowData, BudgetPerformanceData
+   - **Features**: Shorter stale times (2-5 min) for frequently changing data
+
+**Type Safety Improvements:**
+- All filter interfaces extend `Record<string, unknown>` for type-safe query params
+- Full TypeScript generics on all query/mutation hooks
+- Comprehensive JSDoc documentation with usage examples
+- Type inference for response data (UseQueryResult, UseMutationResult)
+- Proper error typing with Error class
+
+**Query Key Integration:**
+- Uses centralized `queryKeys` from query-client.ts for consistency
+- Hierarchical key structure enables targeted invalidation
+- Example: `queryKeys.transactions.list(filters)` generates unique cache key
+
+**Automatic Query Invalidation:**
+- Mutations automatically invalidate related queries
+- Cross-resource invalidation (e.g., deleting account invalidates transactions)
+- Dashboard queries invalidated when data changes
+- Balance queries updated after account mutations
+
+**Caching Strategy:**
+- Default: 5-minute stale time for most queries
+- Analytics: 2-minute stale time (more frequent updates)
+- Net worth: 5-minute stale time (changes less frequently)
+- Automatic background refetching when data becomes stale
+
+**Developer Experience:**
+- Clean, declarative API: `const { data, isLoading } = useTransactions()`
+- Automatic loading/error states from React Query
+- Mutation hooks return `mutate` function with onSuccess/onError callbacks
+- Comprehensive examples in JSDoc for each hook
+- 60+ examples across all hook files
+
+**Hook Catalog:**
+
+| Resource | Query Hooks | Mutation Hooks | Total Lines |
+|---|---|---|---|
+| Transactions | 2 | 5 | 350+ |
+| Budgets | 3 | 4 | 300+ |
+| Accounts | 3 | 4 | 280+ |
+| Dashboard | 6 | 0 | 350+ |
+| **Total** | **14** | **13** | **1,280+** |
+
+**Build Verification:**
+- TypeScript compilation: ✅ Successful (`npm run type-check` passes)
+- All types properly defined with no errors
+- Full type safety with generics
+- Only pre-existing Tailwind CSS error remains (unrelated to hooks)
+- Zero TypeScript warnings in new hook files
+
+**Impact:**
+- **Consistency**: Single pattern for all data fetching across application
+- **Type Safety**: Full TypeScript support with automatic type inference
+- **Performance**: Intelligent caching reduces redundant API calls
+- **Developer Experience**: Clean, intuitive API with minimal boilerplate
+- **Maintainability**: Easy to add new hooks following established patterns
+- **Foundation Ready**: All components can now migrate to React Query (Task 4.4)
+- **Automatic Optimization**: React Query handles request deduplication, retries, background refetching
+
+**Alignment with Plan (Section 5.3):**
+- ✅ Created useTransactions hook with full CRUD operations
+- ✅ Created useBudgets hook with analytics support
+- ✅ Created useAccounts hook with balance tracking
+- ✅ Created useDashboard hook with all visualization queries
+- ✅ Wrapped React Query with app-specific logic
+- ✅ Implemented automatic query invalidation
+- ✅ Type-safe interfaces for all resources
+- ✅ Comprehensive error handling
+
+**Usage Example:**
+```typescript
+// In a component
+import { useTransactions, useCreateTransaction } from '@/hooks/useTransactions'
+
+function TransactionList() {
+  const { data: transactions, isLoading, error } = useTransactions({
+    accountId: '123',
+    startDate: '2024-01-01',
+    type: 'EXPENSE',
+  })
+
+  const createMutation = useCreateTransaction()
+
+  const handleCreate = () => {
+    createMutation.mutate({
+      accountId: '123',
+      amount: -50.00,
+      type: 'EXPENSE',
+      description: 'Groceries',
+    })
+  }
+
+  if (isLoading) return <div>Loading...</div>
+  if (error) return <div>Error: {error.message}</div>
+
+  return (
+    <div>
+      {transactions?.map(txn => <div key={txn.id}>{txn.description}</div>)}
+      <button onClick={handleCreate}>Add Transaction</button>
+    </div>
+  )
+}
+```
+
+**Next Steps:**
+- Task 4.4: Migrate components to use React Query (Dashboard first, then Transactions)
+- Task 4.5: Implement optimistic updates for instant UI feedback
+- Components can now replace `fetch + useState` with clean hook calls
+
+---
+
+### Previous Iteration: Task 4.2 - Create Centralized API Client ✅
 
 **Summary:** Created a comprehensive, type-safe API client that provides centralized HTTP request handling with automatic error parsing, timeout management, and request configuration. This establishes a consistent pattern for all API calls across the application and prepares the foundation for React Query integration.
 
