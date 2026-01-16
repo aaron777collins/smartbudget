@@ -6,10 +6,24 @@ import { Upload, File, X, CheckCircle2, AlertCircle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
+export interface AccountInfo {
+  accountName?: string;
+  bankName?: string;
+  accountType?: string;
+  accountNumber?: string;
+  currency?: string;
+}
+
 export interface FilePreviewData {
   transactionCount?: number;
   fileName?: string;
   fileSize?: number;
+  format?: string;
+  transactions?: unknown[];
+  validRows?: number;
+  totalRows?: number;
+  accountInfo?: AccountInfo;
+  balance?: number;
   [key: string]: unknown;
 }
 

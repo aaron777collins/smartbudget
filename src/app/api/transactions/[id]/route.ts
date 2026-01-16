@@ -143,7 +143,10 @@ export async function PATCH(
     }
 
     // Mark as user-corrected if category was changed
-    const updateData: Prisma.TransactionUpdateInput = { ...validatedData };
+    const updateData: Prisma.TransactionUpdateInput = {
+      ...validatedData,
+      rawData: validatedData.rawData === null ? Prisma.JsonNull : (validatedData.rawData as Prisma.InputJsonValue | undefined)
+    };
     if (validatedData.categoryId !== undefined && validatedData.categoryId !== existingTransaction.categoryId) {
       updateData.userCorrected = true;
     }

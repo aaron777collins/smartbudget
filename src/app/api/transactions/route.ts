@@ -241,7 +241,7 @@ export async function POST(request: NextRequest) {
         isRecurring: validatedData.isRecurring,
         fitid: validatedData.fitid,
         recurringRuleId: validatedData.recurringRuleId,
-        rawData: validatedData.rawData,
+        rawData: validatedData.rawData === null ? Prisma.JsonNull : (validatedData.rawData as Prisma.InputJsonValue | undefined),
       },
       include: {
         account: {

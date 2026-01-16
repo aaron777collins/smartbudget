@@ -45,41 +45,41 @@ export const colorSchema = z
 
 export const accountTypeSchema = z.enum(
   ["CHECKING", "SAVINGS", "CREDIT_CARD", "INVESTMENT", "LOAN", "OTHER"],
-  { required_error: "Account type is required" }
+  { message: "Account type is required" }
 );
 
 export const transactionTypeSchema = z.enum(["DEBIT", "CREDIT", "TRANSFER"], {
-  required_error: "Transaction type is required",
+  message: "Transaction type is required",
 });
 
 export const budgetTypeSchema = z.enum(
   ["ENVELOPE", "PERCENTAGE", "FIXED_AMOUNT", "GOAL_BASED"],
-  { required_error: "Budget type is required" }
+  { message: "Budget type is required" }
 );
 
 export const budgetPeriodSchema = z.enum(
   ["WEEKLY", "BI_WEEKLY", "MONTHLY", "QUARTERLY", "YEARLY"],
-  { required_error: "Budget period is required" }
+  { message: "Budget period is required" }
 );
 
 export const goalTypeSchema = z.enum(
   ["SAVINGS", "DEBT_PAYOFF", "NET_WORTH", "INVESTMENT"],
-  { required_error: "Goal type is required" }
+  { message: "Goal type is required" }
 );
 
 export const frequencySchema = z.enum(
   ["WEEKLY", "BI_WEEKLY", "MONTHLY", "QUARTERLY", "YEARLY"],
-  { required_error: "Frequency is required" }
+  { message: "Frequency is required" }
 );
 
 export const feedbackTypeSchema = z.enum(
   ["bug", "feature", "improvement", "other"],
-  { required_error: "Feedback type is required" }
+  { message: "Feedback type is required" }
 );
 
 export const feedbackPrioritySchema = z.enum(
   ["low", "medium", "high", "critical"],
-  { required_error: "Priority is required" }
+  { message: "Priority is required" }
 );
 
 // ==================== Account Schemas ====================
@@ -137,7 +137,7 @@ export const createTransactionSchema = z.object({
   isReconciled: z.boolean().default(false),
   isRecurring: z.boolean().default(false),
   recurringRuleId: uuidSchema.optional().nullable(),
-  rawData: z.any().optional().nullable(),
+  rawData: z.unknown().optional().nullable(),
 });
 
 export const updateTransactionSchema = createTransactionSchema.partial().omit({
@@ -177,29 +177,30 @@ export const splitTransactionSchema = z.object({
 
 // ==================== Budget Schemas ====================
 
-export const createBudgetSchema = z
-  .object({
-    name: z
-      .string()
-      .min(1, "Budget name is required")
-      .max(100, "Budget name must be less than 100 characters")
-      .trim(),
-    type: budgetTypeSchema,
-    period: budgetPeriodSchema,
-    startDate: dateSchema,
-    endDate: dateSchema.optional().nullable(),
-    totalAmount: positiveDecimalSchema,
-    isActive: z.boolean().default(true),
-    rollover: z.boolean().default(false),
-    categories: z
-      .array(
-        z.object({
-          categoryId: uuidSchema,
-          amount: positiveDecimalSchema,
-        })
-      )
-      .optional(),
-  })
+const baseBudgetSchema = z.object({
+  name: z
+    .string()
+    .min(1, "Budget name is required")
+    .max(100, "Budget name must be less than 100 characters")
+    .trim(),
+  type: budgetTypeSchema,
+  period: budgetPeriodSchema,
+  startDate: dateSchema,
+  endDate: dateSchema.optional().nullable(),
+  totalAmount: positiveDecimalSchema,
+  isActive: z.boolean().default(true),
+  rollover: z.boolean().default(false),
+  categories: z
+    .array(
+      z.object({
+        categoryId: uuidSchema,
+        amount: positiveDecimalSchema,
+      })
+    )
+    .optional(),
+});
+
+export const createBudgetSchema = baseBudgetSchema
   .refine(
     (data) => {
       // If endDate is provided, it must be after startDate
@@ -214,25 +215,26 @@ export const createBudgetSchema = z
     }
   );
 
-export const updateBudgetSchema = createBudgetSchema.partial();
+export const updateBudgetSchema = baseBudgetSchema.partial();
 
 // ==================== Goal Schemas ====================
 
-export const createGoalSchema = z
-  .object({
-    name: z
-      .string()
-      .min(1, "Goal name is required")
-      .max(100, "Goal name must be less than 100 characters")
-      .trim(),
-    type: goalTypeSchema,
-    targetAmount: positiveDecimalSchema,
-    currentAmount: nonNegativeDecimalSchema.default(0),
-    targetDate: dateSchema.optional().nullable(),
-    isCompleted: z.boolean().default(false),
-    icon: z.string().max(50).optional().nullable(),
-    color: colorSchema.optional().nullable(),
-  })
+const baseGoalSchema = z.object({
+  name: z
+    .string()
+    .min(1, "Goal name is required")
+    .max(100, "Goal name must be less than 100 characters")
+    .trim(),
+  type: goalTypeSchema,
+  targetAmount: positiveDecimalSchema,
+  currentAmount: nonNegativeDecimalSchema.default(0),
+  targetDate: dateSchema.optional().nullable(),
+  isCompleted: z.boolean().default(false),
+  icon: z.string().max(50).optional().nullable(),
+  color: colorSchema.optional().nullable(),
+});
+
+export const createGoalSchema = baseGoalSchema
   .refine(
     (data) => {
       // currentAmount should not exceed targetAmount
@@ -244,7 +246,7 @@ export const createGoalSchema = z
     }
   );
 
-export const updateGoalSchema = createGoalSchema.partial();
+export const updateGoalSchema = baseGoalSchema.partial();
 
 // ==================== Tag Schemas ====================
 
@@ -283,7 +285,7 @@ export const createFilterPresetSchema = z.object({
     .min(1, "Preset name is required")
     .max(100, "Preset name must be less than 100 characters")
     .trim(),
-  filters: z.record(z.any()), // JSON object containing filter configuration
+  filters: z.record(z.string(), z.unknown()), // JSON object containing filter configuration
 });
 
 export const updateFilterPresetSchema = createFilterPresetSchema.partial();
