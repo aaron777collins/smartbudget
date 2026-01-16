@@ -184,6 +184,7 @@ Optimized for **Canadian banks** (especially CIBC), SmartBudget supports CSV and
 - **AI-Powered Auto-Categorization**
   - 90%+ accuracy using hybrid ML + rule-based system
   - Plaid PFCv2 taxonomy (16 primary, 100+ subcategories)
+  - Intelligent subcategory prediction based on user corrections
   - Merchant normalization pipeline
   - Confidence scoring and user feedback loop
 
@@ -711,6 +712,11 @@ Ensure all required environment variables are set:
 - `ANTHROPIC_API_KEY` - Claude AI for merchant research
 - `SENTRY_DSN` - Sentry error tracking
 - `NEXT_PUBLIC_SENTRY_DSN` - Client-side Sentry
+
+#### Optional for Team Notifications
+- `SLACK_FEEDBACK_WEBHOOK_URL` - Slack webhook for user feedback notifications
+- `TEAM_EMAIL_WEBHOOK_URL` - Webhook endpoint for high/critical priority feedback emails
+- `TEAM_EMAIL_ADDRESS` - Email address for critical feedback notifications
 
 **Note**: Redis is optional but highly recommended for production. The application will fall back to in-memory caching if Redis is unavailable, but you'll lose the 50-100x performance boost and rate limiting will be less effective.
 
