@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
+import { TYPOGRAPHY } from '@/lib/design-tokens';
 
 // Types
 type GoalType = 'SAVINGS' | 'DEBT_PAYOFF' | 'NET_WORTH' | 'INVESTMENT';
@@ -244,7 +245,7 @@ export function GoalsClient() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Financial Goals</h1>
+          <h1 className={TYPOGRAPHY.pageTitle}>Financial Goals</h1>
           <p className="text-gray-600 mt-1">
             Track your progress toward your financial objectives
           </p>

@@ -13,7 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
-import { SPACING } from '@/lib/design-tokens';
+import { SPACING, TYPOGRAPHY } from '@/lib/design-tokens';
 
 // Lazy load Recharts components for bundle optimization (~60-70KB gzipped)
 const SpendingTrendsChart = lazy(() => import('@/components/dashboard/spending-trends-chart').then(m => ({ default: m.SpendingTrendsChart })));
@@ -76,7 +76,7 @@ export function DashboardClient() {
     return (
       <div className={`flex-1 ${SPACING.section.default} ${SPACING.page.containerResponsive}`}>
         <div className="flex items-center justify-between space-y-2">
-          <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+          <h1 className={TYPOGRAPHY.pageTitle}>Dashboard</h1>
         </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {[...Array(4)].map((_, i) => (
@@ -91,7 +91,7 @@ export function DashboardClient() {
     return (
       <div className={`flex-1 ${SPACING.section.default} ${SPACING.page.containerResponsive}`}>
         <div className="flex items-center justify-between space-y-2">
-          <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+          <h1 className={TYPOGRAPHY.pageTitle}>Dashboard</h1>
         </div>
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />

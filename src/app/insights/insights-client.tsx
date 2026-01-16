@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { SPACING } from '@/lib/design-tokens';
+import { SPACING, TYPOGRAPHY } from '@/lib/design-tokens';
 import {
   TrendingUp,
   TrendingDown,
@@ -140,7 +140,7 @@ export function InsightsClient() {
     return (
       <div className={`flex-1 ${SPACING.section.default} ${SPACING.page.containerResponsive}`}>
         <div className="flex items-center justify-between space-y-2">
-          <h2 className="text-3xl font-bold tracking-tight">Financial Insights</h2>
+          <h1 className={TYPOGRAPHY.pageTitle}>Financial Insights</h1>
         </div>
         <div className="grid gap-4">
           {[...Array(5)].map((_, i) => (
@@ -155,7 +155,7 @@ export function InsightsClient() {
     return (
       <div className={`flex-1 ${SPACING.section.default} ${SPACING.page.containerResponsive}`}>
         <div className="flex items-center justify-between space-y-2">
-          <h2 className="text-3xl font-bold tracking-tight">Financial Insights</h2>
+          <h1 className={TYPOGRAPHY.pageTitle}>Financial Insights</h1>
         </div>
         <div className="rounded-lg border border-red-200 bg-red-50 p-4">
           <p className="text-sm text-red-800">

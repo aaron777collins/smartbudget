@@ -28,6 +28,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { TYPOGRAPHY } from '@/lib/design-tokens';
 
 interface RecurringRule {
   id: string;
@@ -142,11 +143,11 @@ export default function RecurringClient() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
+          <h1 className={`${TYPOGRAPHY.pageTitle} flex items-center gap-2`}>
             <Repeat className="h-8 w-8" />
             Recurring Transactions
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className={`${TYPOGRAPHY.muted} mt-1`}>
             Manage your recurring bills, subscriptions, and expenses
           </p>
         </div>

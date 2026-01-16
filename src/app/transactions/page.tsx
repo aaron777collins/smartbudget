@@ -27,7 +27,7 @@ import { AdvancedFilters, TransactionFilters } from '@/components/transactions/a
 import { ExportDialog } from '@/components/transactions/export-dialog';
 import { Search, Filter, Download, Plus, Pencil, Trash2, Repeat, X } from 'lucide-react';
 import { Badge as FilterBadge } from '@/components/ui/badge';
-import { SPACING } from '@/lib/design-tokens';
+import { SPACING, TYPOGRAPHY } from '@/lib/design-tokens';
 
 interface Transaction {
   id: string;
@@ -290,8 +290,8 @@ export default function TransactionsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Transactions</h1>
-          <p className="text-muted-foreground">
+          <h1 className={TYPOGRAPHY.pageTitle}>Transactions</h1>
+          <p className={TYPOGRAPHY.muted}>
             View and manage all your transactions
           </p>
         </div>

@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, RefreshCw, CheckCircle2, XCircle, Clock, AlertCircle } from 'lucide-react';
+import { TYPOGRAPHY } from '@/lib/design-tokens';
 
 interface Job {
   id: string;
@@ -118,7 +119,7 @@ export default function JobsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Background Jobs</h1>
+          <h1 className={TYPOGRAPHY.pageTitle}>Background Jobs</h1>
           <p className="text-muted-foreground mt-2">
             Monitor and manage your background processing jobs
           </p>

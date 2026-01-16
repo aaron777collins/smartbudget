@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { TYPOGRAPHY } from '@/lib/design-tokens';
 
 interface BudgetCategory {
   id: string;
@@ -272,7 +273,7 @@ export default function BudgetDetailClient({ budgetId }: { budgetId: string }) {
             </Button>
           </Link>
           <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold">{budget.name}</h1>
+            <h1 className={TYPOGRAPHY.pageTitle}>{budget.name}</h1>
             {budget.isActive && <Badge variant="default">Active</Badge>}
           </div>
           <p className="text-muted-foreground mt-1">

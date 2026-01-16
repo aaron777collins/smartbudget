@@ -472,11 +472,21 @@ IN_PROGRESS
 
 ### PHASE 9: UI/UX POLISH (Priority: LOW)
 
-- [ ] **Task 9.1**: Refine typography
-  - Implement clear heading hierarchy (H1-H6)
-  - Set consistent font weights
-  - Add proper line heights
-  - Implement text truncation patterns
+- [x] **Task 9.1**: Refine typography
+  - ✅ Enhanced TYPOGRAPHY tokens with responsive variants (mobile-first scaling)
+  - ✅ Added pageTitle token for main page headings (text-2xl sm:text-3xl)
+  - ✅ Added section and card heading tokens for component hierarchy
+  - ✅ Implemented responsive scaling for all heading levels (h1-h6)
+  - ✅ Added leading variants (none, tight, snug, normal, relaxed, loose)
+  - ✅ Migrated 13 main pages to use TYPOGRAPHY tokens:
+    - dashboard-client.tsx, transactions/page.tsx, budgets-client.tsx
+    - accounts/page.tsx, tags-client.tsx, recurring-client.tsx
+    - goals-client.tsx, insights-client.tsx, settings/page.tsx
+    - jobs/page.tsx, import/page.tsx, budget-detail-client.tsx
+    - budget-analytics-client.tsx
+  - ✅ Standardized page headings from h2 to semantic h1 elements
+  - ✅ Added muted text token for descriptions and helper text
+  - ✅ All page headings now responsive (smaller on mobile, larger on desktop)
 
 - [ ] **Task 9.2**: Enhance stat cards
   - Add trend indicators (up/down arrows)
@@ -3334,7 +3344,56 @@ All tests follow Playwright best practices with defensive checks, proper waits, 
 - ✅ Phase 8: Testing Implementation (5/5 tasks) - MEDIUM
 
 **Remaining Phases:**
-- ⏳ Phase 9: UI/UX Polish (0/5 tasks) - LOW
+- ⏳ Phase 9: UI/UX Polish (1/5 tasks) - LOW
 - ⏳ Phase 10: Final QA & Deployment (0/5 tasks) - LOW
 
-**Next Task:** Task 9.1 - Refine typography (LOW priority)
+**Next Task:** Task 9.2 - Enhance stat cards (LOW priority)
+
+---
+
+## Completed This Iteration
+
+**Task 9.1: Refine Typography** ✅
+
+### What Was Done:
+1. **Enhanced Typography Tokens** (src/lib/design-tokens.ts):
+   - Added responsive variants for all typography sizes
+   - Created `pageTitle` token for consistent main page headings (text-2xl sm:text-3xl)
+   - Added `section.title` and `section.subtitle` for section headings
+   - Added `card.title`, `card.subtitle`, `card.caption` for card components
+   - Enhanced body text with responsive scaling
+   - Added `muted` token for descriptions and helper text
+   - Added `align` tokens (left, center, right, justify)
+   - Added `leading.snug` for better line height control
+   - All headings now mobile-first with responsive breakpoints
+
+2. **Migrated 13 Main Pages** to use TYPOGRAPHY tokens:
+   - `src/app/dashboard/dashboard-client.tsx`
+   - `src/app/transactions/page.tsx`
+   - `src/app/budgets/budgets-client.tsx`
+   - `src/app/accounts/page.tsx`
+   - `src/app/tags/tags-client.tsx`
+   - `src/app/recurring/recurring-client.tsx`
+   - `src/app/goals/goals-client.tsx`
+   - `src/app/insights/insights-client.tsx`
+   - `src/app/settings/page.tsx`
+   - `src/app/jobs/page.tsx`
+   - `src/app/import/page.tsx`
+   - `src/app/budgets/[id]/budget-detail-client.tsx`
+   - `src/app/budgets/analytics/budget-analytics-client.tsx`
+
+3. **Improved Semantic HTML**:
+   - Changed page headings from `<h2>` to semantic `<h1>` elements
+   - Standardized page title hierarchy across all pages
+   - Improved accessibility with proper heading structure
+
+### Impact:
+- **Consistency**: All main page headings now use standardized TYPOGRAPHY tokens
+- **Responsive**: Headings scale appropriately on mobile (smaller) and desktop (larger)
+- **Maintainability**: Typography changes can now be made in one central location
+- **Accessibility**: Proper semantic HTML heading hierarchy improves screen reader navigation
+- **Design System**: Typography is now part of the comprehensive design token system
+
+### Files Modified:
+- `src/lib/design-tokens.ts` - Enhanced typography tokens (67 lines added/modified)
+- 13 page/client component files - Migrated to use TYPOGRAPHY tokens

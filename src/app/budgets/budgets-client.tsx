@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PlusCircle, Calendar, DollarSign, Target, Trash2, BarChart3 } from 'lucide-react';
 import Link from 'next/link';
+import { TYPOGRAPHY } from '@/lib/design-tokens';
 
 interface BudgetCategory {
   id: string;
@@ -138,7 +139,7 @@ export default function BudgetsClient() {
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Budgets</h1>
+          <h1 className={TYPOGRAPHY.pageTitle}>Budgets</h1>
           <p className="text-muted-foreground mt-1">
             Create and manage your budgets to track spending
           </p>

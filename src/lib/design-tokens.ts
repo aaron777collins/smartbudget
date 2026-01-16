@@ -166,35 +166,58 @@ export const RADIUS = {
 
 /**
  * Typography tokens for text hierarchy
+ *
+ * Responsive, mobile-first typography with consistent scaling across breakpoints.
+ * All heading sizes are optimized for readability on mobile and scale up on larger screens.
  */
 export const TYPOGRAPHY = {
   // Display text (hero sections, large headings)
+  // Responsive: smaller on mobile, larger on desktop
   display: {
-    large: 'text-5xl font-bold tracking-tight',      // 48px
-    default: 'text-4xl font-bold tracking-tight',    // 36px
-    small: 'text-3xl font-bold tracking-tight',      // 30px
+    large: 'text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-tight',      // 30-48px
+    default: 'text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight leading-tight',    // 24-36px
+    small: 'text-xl sm:text-2xl md:text-3xl font-bold tracking-tight leading-tight',       // 20-30px
   },
 
-  // Headings
-  h1: 'text-3xl font-bold tracking-tight',           // 30px
-  h2: 'text-2xl font-semibold tracking-tight',       // 24px
-  h3: 'text-xl font-semibold',                       // 20px
-  h4: 'text-lg font-semibold',                       // 18px
-  h5: 'text-base font-semibold',                     // 16px
-  h6: 'text-sm font-semibold',                       // 14px
+  // Page headings (primary page titles)
+  // Mobile-optimized with responsive scaling
+  pageTitle: 'text-2xl sm:text-3xl font-bold tracking-tight',  // 24-30px (use for main page h1)
+
+  // Headings (semantic hierarchy)
+  // h1: Page-level heading (use pageTitle for main page heading, this for section headings)
+  h1: 'text-2xl sm:text-3xl font-bold tracking-tight leading-tight',        // 24-30px
+  h2: 'text-xl sm:text-2xl font-semibold tracking-tight leading-tight',     // 20-24px
+  h3: 'text-lg sm:text-xl font-semibold leading-snug',                       // 18-20px
+  h4: 'text-base sm:text-lg font-semibold leading-snug',                     // 16-18px
+  h5: 'text-sm sm:text-base font-semibold leading-normal',                   // 14-16px
+  h6: 'text-sm font-semibold leading-normal',                                // 14px
+
+  // Section headings (commonly used patterns)
+  section: {
+    title: 'text-xl sm:text-2xl font-semibold tracking-tight',     // Section titles
+    subtitle: 'text-base sm:text-lg font-medium text-muted-foreground', // Section subtitles
+  },
+
+  // Card headings (for card titles)
+  card: {
+    title: 'text-base sm:text-lg font-semibold',                   // Card titles
+    subtitle: 'text-sm text-muted-foreground',                     // Card subtitles
+    caption: 'text-xs text-muted-foreground',                      // Card captions
+  },
 
   // Body text
   body: {
-    large: 'text-lg leading-relaxed',                // 18px
-    default: 'text-base leading-normal',             // 16px
-    small: 'text-sm leading-normal',                 // 14px
+    large: 'text-base sm:text-lg leading-relaxed',                 // 16-18px
+    default: 'text-sm sm:text-base leading-normal',                // 14-16px
+    small: 'text-xs sm:text-sm leading-normal',                    // 12-14px
   },
 
   // Utility text
-  caption: 'text-xs text-muted-foreground',          // 12px
-  label: 'text-sm font-medium',                      // 14px
-  overline: 'text-xs font-semibold uppercase tracking-wider', // 12px
-  code: 'font-mono text-sm',                         // Monospace 14px
+  caption: 'text-xs text-muted-foreground leading-tight',          // 12px
+  label: 'text-sm font-medium leading-none',                       // 14px
+  overline: 'text-xs font-semibold uppercase tracking-wider',      // 12px
+  code: 'font-mono text-xs sm:text-sm',                            // Monospace 12-14px
+  muted: 'text-sm text-muted-foreground',                          // Muted text (descriptions, hints)
 
   // Text weights
   weight: {
@@ -205,9 +228,11 @@ export const TYPOGRAPHY = {
     bold: 'font-bold',           // 700
   },
 
-  // Line heights
+  // Line heights (for fine-tuning text blocks)
   leading: {
+    none: 'leading-none',        // 1
     tight: 'leading-tight',      // 1.25
+    snug: 'leading-snug',        // 1.375
     normal: 'leading-normal',    // 1.5
     relaxed: 'leading-relaxed',  // 1.625
     loose: 'leading-loose',      // 2
@@ -218,6 +243,15 @@ export const TYPOGRAPHY = {
     single: 'truncate',                                    // Single line with ellipsis
     multiline: 'line-clamp-2',                             // 2 lines with ellipsis
     triple: 'line-clamp-3',                                // 3 lines with ellipsis
+    quad: 'line-clamp-4',                                  // 4 lines with ellipsis
+  },
+
+  // Text alignment
+  align: {
+    left: 'text-left',
+    center: 'text-center',
+    right: 'text-right',
+    justify: 'text-justify',
   },
 } as const;
 

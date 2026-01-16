@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { AccountFormDialog } from '@/components/accounts/account-form-dialog';
 import { useRouter } from 'next/navigation';
+import { TYPOGRAPHY } from '@/lib/design-tokens';
 
 interface Account {
   id: string;
@@ -187,7 +188,7 @@ export default function AccountsPage() {
     <div className="space-y-6 animate-in fade-in duration-300">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Accounts</h1>
+          <h1 className={TYPOGRAPHY.pageTitle}>Accounts</h1>
           <p className="text-muted-foreground">
             Manage your bank accounts, credit cards, and investments
           </p>

@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { TYPOGRAPHY } from '@/lib/design-tokens';
 
 interface HistoricalPerformance {
   month: string;
@@ -185,7 +186,7 @@ export default function BudgetAnalyticsClient() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Budget Analytics</h1>
+            <h1 className={TYPOGRAPHY.pageTitle}>Budget Analytics</h1>
             <p className="text-muted-foreground">Historical performance and spending trends</p>
           </div>
         </div>
@@ -237,7 +238,7 @@ export default function BudgetAnalyticsClient() {
             </Link>
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">Budget Analytics</h1>
+            <h1 className={TYPOGRAPHY.pageTitle}>Budget Analytics</h1>
             <p className="text-muted-foreground">Historical performance and spending trends</p>
           </div>
         </div>

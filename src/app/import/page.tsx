@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Info, Upload, FileText, Database, CheckCircle } from "lucide-react";
+import { TYPOGRAPHY } from "@/lib/design-tokens";
 
 export default function ImportPage() {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
@@ -244,7 +245,7 @@ export default function ImportPage() {
     <div className="space-y-6">
       {/* Page Header */}
       <div>
-        <h1 className="text-3xl font-bold mb-2">Import Transactions</h1>
+        <h1 className={`${TYPOGRAPHY.pageTitle} mb-2`}>Import Transactions</h1>
         <p className="text-gray-600 dark:text-gray-400">
           Upload your bank statements to automatically import and categorize transactions
         </p>
