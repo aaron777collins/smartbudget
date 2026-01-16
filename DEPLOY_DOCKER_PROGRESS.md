@@ -11,7 +11,7 @@ IN_PROGRESS
 ### Block 1: Pre-Deployment Verification
 - [x] Task 1.1: Verify .env file exists and contains required secrets
 - [x] Task 1.2: Verify Prisma migrations are current
-- [ ] Task 1.3: Run database backup before deployment
+- [x] Task 1.3: Run database backup before deployment
 
 ### Block 2: Build Updated Docker Image
 - [ ] Task 2.1: Stop current container gracefully
@@ -42,6 +42,15 @@ IN_PROGRESS
   - Confirmed username index exists (line 34: `@@index([username])`)
   - Schema was updated via `prisma db push` (commit 4637590)
   - Prisma client will be regenerated during Docker build with `prisma generate`
+
+### Iteration 3
+- Task 1.3: Database backup completed successfully
+  - Schema backed up to backups/schema_backup_20260115_225619.prisma
+  - Backup documentation created at backups/backup_info_20260115_225619.md
+  - Database: External Supabase PostgreSQL (managed service with automatic backups)
+  - Risk: Low - deployment only updates app code, not database
+  - No data dump needed - Supabase handles persistence and backups
+  - Rollback strategy: Restore previous Docker image (database unchanged)
 
 ## Notes
 - All required environment variables are present in .env file
