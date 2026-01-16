@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { CreditCard } from 'lucide-react';
 import { CountUp, HoverScale } from '@/components/ui/animated';
+import { getBudgetStatusColor } from '@/lib/design-tokens';
 
 interface MonthlySpendingCardProps {
   current: number;
@@ -25,19 +26,7 @@ export function MonthlySpendingCard({
     }).format(amount);
   };
 
-  const getStatusColor = () => {
-    if (!budgetUsedPercentage) return 'text-muted-foreground';
-    if (budgetUsedPercentage < 80) return 'text-green-600';
-    if (budgetUsedPercentage < 100) return 'text-yellow-600';
-    return 'text-red-600';
-  };
-
-  const getProgressBarColor = () => {
-    if (!budgetUsedPercentage) return '[&>div]:bg-blue-500';
-    if (budgetUsedPercentage < 80) return '[&>div]:bg-green-500';
-    if (budgetUsedPercentage < 100) return '[&>div]:bg-yellow-500';
-    return '[&>div]:bg-red-500';
-  };
+  const statusColors = getBudgetStatusColor(budgetUsedPercentage);
 
   return (
     <HoverScale scale={1.02} className="cursor-pointer">
@@ -62,13 +51,13 @@ export function MonthlySpendingCard({
               <div className="mt-3">
                 <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
                   <span>Budget Progress</span>
-                  <span className={`${getStatusColor()} font-mono`}>
+                  <span className={`${statusColors.text} font-mono`}>
                     {budgetUsedPercentage.toFixed(0)}%
                   </span>
                 </div>
                 <Progress
                   value={Math.min(budgetUsedPercentage, 100)}
-                  className={`h-2 ${getProgressBarColor()}`}
+                  className={`h-2 ${statusColors.progressBar}`}
                 />
                 <div className="flex items-center justify-between text-xs text-muted-foreground mt-1">
                   <span className="font-mono">{formatCurrency(current)} of {formatCurrency(budget)}</span>

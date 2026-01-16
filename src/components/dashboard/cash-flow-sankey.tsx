@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { formatCurrency } from '@/lib/utils';
 import type { TimeframeValue } from './timeframe-selector';
 import { getMonthsFromTimeframe } from '@/lib/timeframe';
+import { getCurrentTheme, getChartColors } from '@/lib/design-tokens';
 
 interface SankeyData {
   nodes: Array<{ id: string; name: string; color?: string }>;
@@ -74,6 +75,10 @@ export function CashFlowSankey({ timeframe }: CashFlowSankeyProps) {
     // Clear previous content
     d3.select(svgRef.current).selectAll('*').remove();
 
+    // Get theme colors
+    const theme = getCurrentTheme();
+    const colors = getChartColors(theme);
+
     // Get container dimensions
     const container = containerRef.current;
     const width = container.clientWidth;
@@ -115,7 +120,7 @@ export function CashFlowSankey({ timeframe }: CashFlowSankeyProps) {
       .attr('stroke', (d: any) => {
         // Use source node color or default
         const sourceNode = d.source as ExtendedSankeyNode;
-        return sourceNode.color || '#6B7280';
+        return sourceNode.color || colors.linkDefault;
       })
       .attr('stroke-width', (d: any) => Math.max(1, d.width || 0))
       .attr('opacity', 0.4)
@@ -166,7 +171,7 @@ export function CashFlowSankey({ timeframe }: CashFlowSankeyProps) {
       .attr('dy', '0.35em')
       .attr('text-anchor', (d: any) => (d.x0 < width / 2 ? 'end' : 'start'))
       .attr('font-size', '12px')
-      .attr('fill', '#374151')
+      .attr('fill', colors.text)
       .text((d: ExtendedSankeyNode) => d.name || '');
 
     // Add value labels on nodes
@@ -179,7 +184,7 @@ export function CashFlowSankey({ timeframe }: CashFlowSankeyProps) {
       .attr('dy', '0.35em')
       .attr('text-anchor', (d: any) => (d.x0 < width / 2 ? 'end' : 'start'))
       .attr('font-size', '10px')
-      .attr('fill', '#6B7280')
+      .attr('fill', colors.textMuted)
       .text((d: any) => formatCurrency(d.value || 0));
   }, [data]);
 
@@ -227,13 +232,13 @@ export function CashFlowSankey({ timeframe }: CashFlowSankeyProps) {
         <div className="flex gap-4 mt-2 text-sm">
           <div>
             <span className="text-muted-foreground">Total Income: </span>
-            <span className="font-semibold text-green-600">
+            <span className="font-semibold text-success">
               {formatCurrency(data.summary.totalIncome)}
             </span>
           </div>
           <div>
             <span className="text-muted-foreground">Total Expenses: </span>
-            <span className="font-semibold text-red-600">
+            <span className="font-semibold text-error">
               {formatCurrency(data.summary.totalExpenses)}
             </span>
           </div>
@@ -241,7 +246,7 @@ export function CashFlowSankey({ timeframe }: CashFlowSankeyProps) {
             <span className="text-muted-foreground">Net: </span>
             <span
               className={`font-semibold ${
-                data.summary.netCashFlow >= 0 ? 'text-green-600' : 'text-red-600'
+                data.summary.netCashFlow >= 0 ? 'text-success' : 'text-error'
               }`}
             >
               {formatCurrency(data.summary.netCashFlow)}

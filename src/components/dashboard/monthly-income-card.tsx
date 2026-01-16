@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
 import { CountUp, HoverScale } from '@/components/ui/animated';
+import { getIncomeCategoryColor, trendColors } from '@/lib/design-tokens';
 
 interface IncomeSource {
   id: string;
@@ -39,14 +40,6 @@ export function MonthlyIncomeCard({
     .sort((a, b) => b.amount - a.amount)
     .slice(0, 3);
 
-  const getCategoryColor = (index: number) => {
-    const colors = [
-      'bg-green-500',
-      'bg-emerald-500',
-      'bg-teal-500',
-    ];
-    return colors[index] || 'bg-gray-500';
-  };
 
   return (
     <HoverScale scale={1.02} className="cursor-pointer">
@@ -70,22 +63,22 @@ export function MonthlyIncomeCard({
             <div className="flex items-center text-xs text-muted-foreground mt-1">
               {isAboveAverage && (
                 <>
-                  <TrendingUp className="mr-1 h-4 w-4 text-green-500" />
-                  <span className="text-green-500 font-mono">
+                  <TrendingUp className="mr-1 h-4 w-4 text-success" />
+                  <span className="text-success font-mono">
                     +{Math.abs(vsAveragePercentage).toFixed(1)}%
                   </span>
                 </>
               )}
               {isBelowAverage && (
                 <>
-                  <TrendingDown className="mr-1 h-4 w-4 text-red-500" />
-                  <span className="text-red-500 font-mono">
+                  <TrendingDown className="mr-1 h-4 w-4 text-error" />
+                  <span className="text-error font-mono">
                     {vsAveragePercentage.toFixed(1)}%
                   </span>
                 </>
               )}
               {!isAboveAverage && !isBelowAverage && (
-                <span className="text-gray-500">At average</span>
+                <span className="text-muted-foreground">At average</span>
               )}
               <span className="ml-1 font-mono">vs average ({formatCurrency(average)})</span>
             </div>
@@ -99,7 +92,7 @@ export function MonthlyIncomeCard({
               <div className="space-y-2">
                 {topSources.map((source, index) => (
                   <div key={source.id} className="flex items-center">
-                    <div className={`h-2 w-2 rounded-full ${getCategoryColor(index)} mr-2`} />
+                    <div className={`h-2 w-2 rounded-full ${getIncomeCategoryColor(index)} mr-2`} />
                     <div className="flex-1 flex items-center justify-between">
                       <span className="text-xs text-muted-foreground truncate">
                         {source.name}
