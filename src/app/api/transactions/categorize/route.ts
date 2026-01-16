@@ -6,10 +6,12 @@
  *
  * PUT /api/transactions/categorize/bulk
  * - Bulk categorize multiple existing transactions
+ *
+ * Rate limited (EXPENSIVE tier): 10 requests per hour
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { NextResponse } from 'next/server';
+import { withExpensiveOp } from '@/lib/api-middleware';
 import { prisma } from '@/lib/prisma';
 import { categorizeTransaction, batchCategorize, getCategoryAndSubcategoryIds } from '@/lib/rule-based-categorizer';
 
@@ -23,15 +25,8 @@ import { categorizeTransaction, batchCategorize, getCategoryAndSubcategoryIds } 
  * Response:
  * - results: Array of categorization results with category/subcategory info
  */
-export async function POST(request: NextRequest) {
-  try {
-    // Check authentication
-    const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const body = await request.json();
+export const POST = withExpensiveOp(async (req, context) => {
+  const body = await req.json();
     const { transactions } = body;
 
     if (!transactions || !Array.isArray(transactions)) {
@@ -105,14 +100,7 @@ export async function POST(request: NextRequest) {
         uncategorized: enrichedResults.filter(r => !r.categoryId).length
       }
     });
-  } catch (error) {
-    console.error('Error categorizing transactions:', error);
-    return NextResponse.json(
-      { error: 'Failed to categorize transactions' },
-      { status: 500 }
-    );
-  }
-}
+});
 
 /**
  * PUT /api/transactions/categorize/bulk
@@ -127,15 +115,8 @@ export async function POST(request: NextRequest) {
  * - skipped: number of transactions skipped
  * - errors: number of errors
  */
-export async function PUT(request: NextRequest) {
-  try {
-    // Check authentication
-    const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const body = await request.json();
+export const PUT = withExpensiveOp(async (req, context) => {
+  const body = await req.json();
     const { transactionIds, force = false } = body;
 
     if (!transactionIds || !Array.isArray(transactionIds)) {
@@ -145,7 +126,7 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const userId = session.user.id;
+    const userId = context.userId;
 
     // Fetch transactions
     const transactions = await prisma.transaction.findMany({
@@ -219,11 +200,4 @@ export async function PUT(request: NextRequest) {
       errors,
       total: transactions.length
     });
-  } catch (error) {
-    console.error('Error bulk categorizing transactions:', error);
-    return NextResponse.json(
-      { error: 'Failed to bulk categorize transactions' },
-      { status: 500 }
-    );
-  }
-}
+});

@@ -3,10 +3,11 @@
  *
  * Uses Claude AI to research unknown merchants and suggest categories.
  * Saves successful results to the merchant knowledge base.
+ * Rate limited (EXPENSIVE tier): 10 requests per hour
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { NextResponse } from 'next/server';
+import { withExpensiveOp } from '@/lib/api-middleware';
 import { researchMerchant, researchMerchantsBatch } from '@/lib/merchant-researcher';
 import { prisma } from '@/lib/prisma';
 import { createJob, JobType } from '@/lib/job-queue';
@@ -23,16 +24,9 @@ import { createJob, JobType } from '@/lib/job-queue';
  * - merchants?: Array<{merchantName, amount?, date?}> (for batch)
  * - saveToKnowledgeBase?: boolean (default: true)
  */
-export async function POST(request: NextRequest) {
-  try {
-    // Check authentication
-    const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    // Parse request body
-    const body = await request.json();
+export const POST = withExpensiveOp(async (req, context) => {
+  // Parse request body
+  const body = await req.json();
 
     // Check for API key
     if (!process.env.ANTHROPIC_API_KEY) {
@@ -59,7 +53,7 @@ export async function POST(request: NextRequest) {
       if (useBackgroundJob) {
         // Create background job
         const job = await createJob({
-          userId: session.user.id,
+          userId: context.userId,
           type: JobType.MERCHANT_RESEARCH_BATCH,
           payload: {
             merchants: merchants,
@@ -69,7 +63,8 @@ export async function POST(request: NextRequest) {
         });
 
         // Trigger processing asynchronously (don't wait)
-        fetch(`${request.nextUrl.origin}/api/jobs/process`, {
+        const url = new URL(req.url);
+        fetch(`${url.origin}/api/jobs/process`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
         }).catch((err) => console.error('Failed to trigger job processing:', err));
@@ -128,17 +123,7 @@ export async function POST(request: NextRequest) {
       success: true,
       result,
     });
-  } catch (error) {
-    console.error('Merchant research API error:', error);
-    return NextResponse.json(
-      {
-        error: 'Failed to research merchant',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    );
-  }
-}
+});
 
 /**
  * Save research result to merchant knowledge base
