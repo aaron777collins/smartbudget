@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { useCounterAnimation } from '@/hooks/use-counter-animation';
 
 interface NetWorthCardProps {
   current: number;
@@ -16,6 +17,10 @@ export function NetWorthCard({
   changePercentage,
   sparklineData = [],
 }: NetWorthCardProps) {
+  const animatedCurrent = useCounterAnimation({ end: current, duration: 1200, decimals: 2 });
+  const animatedChange = useCounterAnimation({ end: change, duration: 1200, decimals: 2, delay: 100 });
+  const animatedPercentage = useCounterAnimation({ end: changePercentage, duration: 1200, decimals: 1, delay: 100 });
+
   const isPositive = change > 0;
   const isNegative = change < 0;
   const isNeutral = change === 0;
@@ -36,7 +41,7 @@ export function NetWorthCard({
   };
 
   return (
-    <Card>
+    <Card className="transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 duration-500">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">Net Worth</CardTitle>
         <svg
@@ -47,33 +52,33 @@ export function NetWorthCard({
           strokeLinecap="round"
           strokeLinejoin="round"
           strokeWidth="2"
-          className="h-4 w-4 text-muted-foreground"
+          className="h-4 w-4 text-muted-foreground transition-transform duration-300 group-hover:scale-110"
         >
           <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
         </svg>
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{formatCurrency(current)}</div>
-        <div className="flex items-center text-xs text-muted-foreground mt-1">
+        <div className="text-2xl font-bold tabular-nums">{formatCurrency(animatedCurrent)}</div>
+        <div className="flex items-center text-xs text-muted-foreground mt-1 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-150">
           {isPositive && (
             <>
-              <TrendingUp className="mr-1 h-4 w-4 text-green-500" />
-              <span className="text-green-500">
-                +{formatCurrency(change)} ({formatPercentage(changePercentage)})
+              <TrendingUp className="mr-1 h-4 w-4 text-green-500 animate-in zoom-in duration-300 delay-300" />
+              <span className="text-green-500 tabular-nums">
+                +{formatCurrency(animatedChange)} ({formatPercentage(animatedPercentage)})
               </span>
             </>
           )}
           {isNegative && (
             <>
-              <TrendingDown className="mr-1 h-4 w-4 text-red-500" />
-              <span className="text-red-500">
-                {formatCurrency(change)} ({formatPercentage(changePercentage)})
+              <TrendingDown className="mr-1 h-4 w-4 text-red-500 animate-in zoom-in duration-300 delay-300" />
+              <span className="text-red-500 tabular-nums">
+                {formatCurrency(animatedChange)} ({formatPercentage(animatedPercentage)})
               </span>
             </>
           )}
           {isNeutral && (
             <>
-              <Minus className="mr-1 h-4 w-4 text-gray-500" />
+              <Minus className="mr-1 h-4 w-4 text-gray-500 animate-in zoom-in duration-300 delay-300" />
               <span className="text-gray-500">No change</span>
             </>
           )}
