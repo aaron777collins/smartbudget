@@ -10,6 +10,7 @@ import {
   PieChart,
   MoreHorizontal,
 } from "lucide-react"
+import { MobileMenu } from "@/components/mobile-menu"
 
 const primaryRoutes = [
   {
@@ -32,16 +33,14 @@ const primaryRoutes = [
     icon: Wallet,
     href: "/accounts",
   },
-  {
-    label: "More",
-    icon: MoreHorizontal,
-    href: "#",
-    isMore: true,
-  },
 ]
 
 export function MobileBottomNav() {
   const pathname = usePathname()
+
+  // Check if any secondary route is active
+  const secondaryRoutes = ["/recurring", "/tags", "/goals", "/insights", "/import", "/jobs", "/settings"]
+  const isMoreActive = secondaryRoutes.some(route => pathname === route)
 
   return (
     <nav
@@ -50,7 +49,7 @@ export function MobileBottomNav() {
     >
       <div className="flex items-center justify-around h-16 px-2">
         {primaryRoutes.map((route) => {
-          const isActive = route.href !== "#" && pathname === route.href
+          const isActive = pathname === route.href
 
           return (
             <Link
@@ -81,6 +80,22 @@ export function MobileBottomNav() {
             </Link>
           )
         })}
+
+        {/* More menu button */}
+        <div className={cn(
+          "flex flex-col items-center justify-center flex-1 h-full min-w-0 transition-colors duration-200",
+          isMoreActive
+            ? "text-primary"
+            : "text-muted-foreground hover:text-foreground"
+        )}>
+          <MobileMenu />
+          <span className={cn(
+            "text-xs font-medium truncate max-w-full px-1 mt-1",
+            isMoreActive && "font-semibold"
+          )}>
+            More
+          </span>
+        </div>
       </div>
     </nav>
   )

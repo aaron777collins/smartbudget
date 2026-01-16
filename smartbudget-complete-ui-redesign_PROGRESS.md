@@ -124,7 +124,7 @@ IN_PROGRESS
   - Show only on mobile (<768px), hidden on desktop
   - Active state highlighting
 
-- [ ] **Task 2.2**: Create hamburger menu for secondary navigation
+- [x] **Task 2.2**: Create hamburger menu for secondary navigation
   - New component: `src/components/mobile-menu.tsx`
   - Sheet/Drawer component for 7 secondary routes
   - Accessible via "More" button or hamburger icon
@@ -519,7 +519,47 @@ After completion:
 
 ## Completed This Iteration
 
-### Current Iteration: Task 2.1 - Mobile Bottom Navigation ✅
+### Current Iteration: Task 2.2 - Mobile Menu for Secondary Navigation ✅
+
+**Summary:** Created a mobile menu drawer that provides access to the 7 secondary routes on mobile devices. The menu is accessible via the "More" button in the bottom navigation bar and provides a smooth slide-in experience.
+
+**Files Created:**
+- `src/components/mobile-menu.tsx` - Mobile menu drawer component with 7 secondary routes
+- `src/components/ui/sheet.tsx` - shadcn/ui Sheet component (installed via CLI)
+
+**Files Modified:**
+- `src/components/mobile-bottom-nav.tsx` - Integrated MobileMenu component, replaced "More" link with menu trigger
+
+**Implementation Details:**
+- Sheet/Drawer component that slides in from the left
+- 7 secondary routes: Recurring, Tags, Goals, Insights, Import, Jobs, Settings
+- Active state highlighting matching the design system
+- Auto-closes when navigating to a route
+- Fully accessible with proper ARIA labels and semantic HTML
+- Matches the styling of the desktop sidebar (same icons and colors)
+- "More" button in bottom nav now triggers the drawer instead of being a dead link
+- Highlights "More" button when on any secondary route
+
+**Technical Details:**
+- Uses shadcn/ui Sheet component based on Radix UI Dialog
+- State management with useState to control open/close
+- usePathname hook to detect active route
+- Smooth slide-in animation from left side
+- Overlay backdrop with blur effect
+- Touch-friendly tap targets for mobile
+
+**Impact:**
+- Mobile users can now access ALL 11 routes in the application
+- Completes the mobile navigation system started in Task 2.1
+- No routes are inaccessible on mobile anymore
+- Provides a native app-like experience on mobile
+- Improves mobile usability dramatically
+
+**Next Step:** Task 2.3 - Make header responsive for mobile (collapse navigation links, show only logo + user menu)
+
+---
+
+### Previous Iteration: Task 2.1 - Mobile Bottom Navigation ✅
 
 **Summary:** Created a mobile bottom navigation bar that provides access to the 5 primary routes on mobile devices, solving the critical issue where 7 of 11 routes were inaccessible on mobile.
 
