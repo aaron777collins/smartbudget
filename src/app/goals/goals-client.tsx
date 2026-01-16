@@ -13,6 +13,7 @@ import {
   Circle,
   AlertCircle,
 } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 
 // Types
 type GoalType = 'SAVINGS' | 'DEBT_PAYOFF' | 'NET_WORTH' | 'INVESTMENT';
@@ -434,20 +435,16 @@ function GoalCard({
 
       {/* Progress Bar */}
       <div className="mb-3">
-        <div className="flex justify-between text-sm text-gray-600 mb-1">
+        <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-1">
           <span>${Number(goal.currentAmount).toLocaleString()}</span>
           <span>${Number(goal.targetAmount).toLocaleString()}</span>
         </div>
-        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-          <div
-            className="h-full transition-all duration-300"
-            style={{
-              width: `${progressPercentage}%`,
-              backgroundColor: goal.color,
-            }}
-          />
-        </div>
-        <p className="text-sm text-gray-600 mt-1">
+        <Progress
+          value={progressPercentage}
+          className="h-2"
+          aria-label={`${goal.name} progress: ${progressPercentage.toFixed(1)}% complete, $${Number(goal.currentAmount).toLocaleString()} of $${Number(goal.targetAmount).toLocaleString()}`}
+        />
+        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
           {progressPercentage.toFixed(1)}% complete
           {!goal.isCompleted && ` · $${remaining.toLocaleString()} remaining`}
         </p>
@@ -679,16 +676,12 @@ function GoalDetailModal({
               </p>
             </div>
           </div>
-          <div className="h-3 bg-gray-200 rounded-full overflow-hidden mb-2">
-            <div
-              className="h-full transition-all duration-300"
-              style={{
-                width: `${Math.min(goal.progress, 100)}%`,
-                backgroundColor: goal.color,
-              }}
-            />
-          </div>
-          <p className="text-sm text-gray-600">
+          <Progress
+            value={Math.min(goal.progress, 100)}
+            className="h-3 mb-2"
+            aria-label={`${goal.name} progress: ${goal.progress.toFixed(1)}% complete, $${Number(goal.currentAmount).toLocaleString()} of $${Number(goal.targetAmount).toLocaleString()}, $${(Number(goal.targetAmount) - Number(goal.currentAmount)).toLocaleString()} remaining`}
+          />
+          <p className="text-sm text-gray-600 dark:text-gray-400">
             {goal.progress.toFixed(1)}% complete
             {!goal.isCompleted &&
               ` · $${(Number(goal.targetAmount) - Number(goal.currentAmount)).toLocaleString()} remaining`}

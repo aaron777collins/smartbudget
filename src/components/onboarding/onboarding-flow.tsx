@@ -448,7 +448,11 @@ export default function OnboardingFlow({ open, onComplete, currentStep = 0 }: On
               </Button>
             )}
           </div>
-          <Progress value={progress} className="h-2" />
+          <Progress
+            value={progress}
+            className="h-2"
+            aria-label={`Onboarding progress: Step ${step + 1} of ${ONBOARDING_STEPS.length}, ${Math.round(progress)}% complete`}
+          />
         </DialogHeader>
 
         <div className="mt-4">

@@ -323,7 +323,11 @@ export default function BudgetDetailClient({ budgetId }: { budgetId: string }) {
             <span>Budget Used</span>
             <span className="font-semibold">{percentageUsed.toFixed(1)}%</span>
           </div>
-          <Progress value={percentageUsed} className={getProgressColor(percentageUsed)} />
+          <Progress
+            value={percentageUsed}
+            className={getProgressColor(percentageUsed)}
+            aria-label={`Overall budget usage: ${percentageUsed.toFixed(1)}% used, $${totalSpent.toLocaleString()} spent of $${totalBudget.toLocaleString()} budget`}
+          />
 
           <div className="grid grid-cols-3 gap-4 pt-4">
             <div className="text-center">
@@ -472,13 +476,17 @@ export default function BudgetDetailClient({ budgetId }: { budgetId: string }) {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Progress value={percentage} className={`flex-1 ${getProgressColor(percentage)}`} />
+                    <Progress
+                      value={percentage}
+                      className={`flex-1 ${getProgressColor(percentage)}`}
+                      aria-label={`${bc.category.name} budget: ${percentage.toFixed(0)}% used, $${spent.toLocaleString()} spent of $${budgeted.toLocaleString()} budgeted`}
+                    />
                     {percentage > 100 ? (
-                      <TrendingUp className="h-4 w-4 text-red-500" />
+                      <TrendingUp className="h-4 w-4 text-red-500" aria-label="Over budget" />
                     ) : percentage > 80 ? (
-                      <AlertCircle className="h-4 w-4 text-yellow-500" />
+                      <AlertCircle className="h-4 w-4 text-yellow-500" aria-label="Approaching budget limit" />
                     ) : (
-                      <TrendingDown className="h-4 w-4 text-green-500" />
+                      <TrendingDown className="h-4 w-4 text-green-500" aria-label="Within budget" />
                     )}
                   </div>
                 </div>

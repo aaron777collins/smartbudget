@@ -285,7 +285,11 @@ export default function BudgetWizard() {
             {Math.round(progress)}% Complete
           </Badge>
         </div>
-        <Progress value={progress} className="w-full" />
+        <Progress
+          value={progress}
+          className="w-full"
+          aria-label={`Budget wizard progress: Step ${step} of ${totalSteps}, ${Math.round(progress)}% complete`}
+        />
       </CardHeader>
 
       <CardContent className="space-y-6">

@@ -64,6 +64,7 @@ export function MonthlySpendingCard({
               <Progress
                 value={Math.min(animatedPercentage, 100)}
                 className={`h-2 ${getProgressBarColor()} transition-all duration-300`}
+                aria-label={`Monthly budget progress: ${animatedPercentage.toFixed(0)}% used, ${formatCurrency(animatedCurrent)} spent of ${formatCurrency(animatedBudget)} budget, ${daysRemaining} days remaining`}
               />
               <div className="flex items-center justify-between text-xs text-muted-foreground mt-1 tabular-nums">
                 <span>{formatCurrency(animatedCurrent)} of {formatCurrency(animatedBudget)}</span>
