@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton, SkeletonTable } from '@/components/ui/skeleton';
 import {
   Table,
   TableBody,
@@ -246,6 +247,44 @@ export default function TransactionsPage() {
     );
   }
 
+  // Loading skeleton state
+  if (loading && transactions.length === 0) {
+    return (
+      <div className={`${SPACING.page.container} ${SPACING.section.relaxed}`}>
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <Skeleton className="h-9 w-[200px]" />
+            <Skeleton className="h-5 w-[300px]" />
+          </div>
+          <Skeleton className="h-10 w-[150px]" />
+        </div>
+
+        {/* Filters and Search */}
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col md:flex-row gap-4">
+                <Skeleton className="h-10 flex-1" />
+                <Skeleton className="h-10 w-[180px]" />
+                <Skeleton className="h-10 w-[180px]" />
+                <Skeleton className="h-10 w-[140px]" />
+                <Skeleton className="h-10 w-[120px]" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Transactions Table */}
+        <Card>
+          <div className="overflow-x-auto p-6">
+            <SkeletonTable rows={10} columns={6} />
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className={`${SPACING.page.container} ${SPACING.section.relaxed}`}>
       {/* Header */}
@@ -432,13 +471,7 @@ export default function TransactionsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8">
-                    Loading transactions...
-                  </TableCell>
-                </TableRow>
-              ) : transactions.length === 0 ? (
+              {transactions.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-8">
                     <p className="text-muted-foreground">

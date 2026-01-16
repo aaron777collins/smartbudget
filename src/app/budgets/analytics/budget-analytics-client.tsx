@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Skeleton, SkeletonChart } from '@/components/ui/skeleton';
 import {
   LineChart,
   Line,
@@ -128,13 +129,53 @@ export default function BudgetAnalyticsClient() {
   if (loading) {
     return (
       <div className="space-y-6">
+        {/* Header */}
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Budget Analytics</h1>
-            <p className="text-muted-foreground">Historical performance and spending trends</p>
+          <div className="space-y-2">
+            <Skeleton className="h-9 w-[250px]" />
+            <Skeleton className="h-5 w-[400px]" />
+          </div>
+          <div className="flex gap-2">
+            <Skeleton className="h-10 w-[100px]" />
+            <Skeleton className="h-10 w-[100px]" />
           </div>
         </div>
-        <div className="text-center py-12">Loading analytics...</div>
+
+        {/* Overview Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="rounded-lg border bg-card p-6 space-y-2">
+              <Skeleton className="h-4 w-1/2" />
+              <Skeleton className="h-8 w-3/4" />
+              <Skeleton className="h-4 w-1/3" />
+            </div>
+          ))}
+        </div>
+
+        {/* Charts */}
+        <div className="space-y-4">
+          <SkeletonChart />
+          <SkeletonChart />
+        </div>
+
+        {/* Insights */}
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-[150px]" />
+            <Skeleton className="h-4 w-[250px]" />
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="flex items-start gap-3 p-3 rounded-lg border">
+                <Skeleton className="h-5 w-5 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-5 w-3/4" />
+                  <Skeleton className="h-4 w-full" />
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
       </div>
     );
   }
