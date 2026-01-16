@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
 
       // Validate all merchants are strings
       const allStrings = body.merchants.every(
-        (m: any) => typeof m === 'string'
+        (m: unknown) => typeof m === 'string'
       );
       if (!allStrings) {
         return NextResponse.json(
@@ -117,10 +117,10 @@ export async function POST(request: NextRequest) {
       { error: 'Invalid request' },
       { status: 400 }
     );
-  } catch (error: any) {
+  } catch (error) {
     console.error('Merchant normalization error:', error);
     return NextResponse.json(
-      { error: 'Failed to normalize merchant names', details: error.message },
+      { error: 'Failed to normalize merchant names', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }

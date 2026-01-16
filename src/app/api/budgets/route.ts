@@ -2,6 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { getBudgetsQuerySchema, validateQueryParams } from '@/lib/validation';
+import { Prisma } from '@prisma/client';
+
+/**
+ * Budget category input type for create/update operations
+ */
+interface BudgetCategoryInput {
+  categoryId: string;
+  amount: number;
+}
 
 // GET /api/budgets - List user's budgets
 export async function GET(request: NextRequest) {
@@ -26,7 +35,7 @@ export async function GET(request: NextRequest) {
     const { active, type, period, sortBy, sortOrder } = validation.data;
 
     // Build where clause
-    const where: any = { userId };
+    const where: Prisma.BudgetWhereInput = { userId };
 
     if (active !== undefined) {
       where.isActive = active;
@@ -41,7 +50,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Build orderBy clause
-    const orderBy: any = { [sortBy]: sortOrder };
+    const orderBy: Prisma.BudgetOrderByWithRelationInput = { [sortBy]: sortOrder };
 
     // Fetch budgets with categories
     const budgets = await prisma.budget.findMany({
@@ -131,7 +140,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify all categories exist
-    const categoryIds = body.categories.map((c: any) => c.categoryId);
+    const budgetCategories = body.categories as BudgetCategoryInput[];
+    const categoryIds = budgetCategories.map((c) => c.categoryId);
     const categories = await prisma.category.findMany({
       where: { id: { in: categoryIds } },
     });
@@ -161,7 +171,7 @@ export async function POST(request: NextRequest) {
         isActive: body.isActive !== undefined ? body.isActive : true,
         rollover: body.rollover !== undefined ? body.rollover : false,
         categories: {
-          create: body.categories.map((cat: any) => ({
+          create: budgetCategories.map((cat) => ({
             categoryId: cat.categoryId,
             amount: cat.amount,
             spent: 0,

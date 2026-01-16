@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
+
+/**
+ * Budget category input type for create/update operations
+ */
+interface BudgetCategoryInput {
+  categoryId: string;
+  amount: number;
+  spent?: number;
+}
 
 // GET /api/budgets/:id - Get budget details
 export async function GET(
@@ -83,7 +93,7 @@ export async function PATCH(
     const body = await request.json();
 
     // Build update data
-    const updateData: any = {};
+    const updateData: Prisma.BudgetUpdateInput = {};
 
     if (body.name !== undefined) updateData.name = body.name;
     if (body.type !== undefined) {
@@ -129,7 +139,8 @@ export async function PATCH(
       }
 
       // Verify all categories exist
-      const categoryIds = body.categories.map((c: any) => c.categoryId);
+      const budgetCategories = body.categories as BudgetCategoryInput[];
+      const categoryIds = budgetCategories.map((c) => c.categoryId);
       const categories = await prisma.category.findMany({
         where: { id: { in: categoryIds } },
       });
@@ -144,7 +155,7 @@ export async function PATCH(
       });
 
       updateData.categories = {
-        create: body.categories.map((cat: any) => ({
+        create: budgetCategories.map((cat) => ({
           categoryId: cat.categoryId,
           amount: cat.amount,
           spent: cat.spent !== undefined ? cat.spent : 0,

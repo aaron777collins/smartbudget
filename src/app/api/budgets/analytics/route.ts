@@ -3,6 +3,57 @@ import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { startOfMonth, endOfMonth, subMonths, format } from 'date-fns';
 
+/**
+ * Historical performance data for a month
+ */
+interface HistoricalPerformance {
+  month: string;
+  date: Date;
+  budgetId: string;
+  budgetName: string;
+  budgeted: number;
+  spent: number;
+  remaining: number;
+  variance: number;
+  percentUsed: number;
+  underBudget: boolean;
+  status: 'over' | 'near' | 'good';
+}
+
+/**
+ * Category trend data point
+ */
+interface CategoryTrendDataPoint {
+  month: string;
+  budgeted: number;
+  spent: number;
+  percentUsed: number;
+}
+
+/**
+ * Category trend with metadata
+ */
+interface CategoryTrend {
+  categoryInfo: {
+    id: string;
+    name: string;
+    slug: string;
+    color: string | null;
+    icon: string | null;
+  };
+  data: CategoryTrendDataPoint[];
+}
+
+/**
+ * Insight generated from analytics
+ */
+interface BudgetInsight {
+  type: 'warning' | 'success' | 'info';
+  title: string;
+  description: string;
+  priority: 'high' | 'medium' | 'low';
+}
+
 // GET /api/budgets/analytics - Get historical budget performance analytics
 export async function GET(request: NextRequest) {
   try {
@@ -47,7 +98,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Calculate historical performance for each month
-    const historicalPerformance = [];
+    const historicalPerformance: HistoricalPerformance[] = [];
     const now = new Date();
 
     for (let i = 0; i < months; i++) {
@@ -105,7 +156,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Calculate category trends (spending patterns by category over time)
-    const categoryTrends: Record<string, any> = {};
+    const categoryTrends: Record<string, CategoryTrend> = {};
     const allCategories = new Set<string>();
 
     // Collect all categories from all budgets
@@ -213,10 +264,10 @@ export async function GET(request: NextRequest) {
 
 // Generate actionable insights from analytics data
 function generateInsights(
-  historicalPerformance: any[],
-  categoryTrends: Record<string, any>
-): any[] {
-  const insights = [];
+  historicalPerformance: HistoricalPerformance[],
+  categoryTrends: Record<string, CategoryTrend>
+): BudgetInsight[] {
+  const insights: BudgetInsight[] = [];
 
   if (historicalPerformance.length === 0) {
     return [];
@@ -278,12 +329,12 @@ function generateInsights(
   }
 
   // Insight 4: Consistently over-budget categories
-  const problematicCategories = [];
+  const problematicCategories: string[] = [];
   for (const [categoryId, trendData] of Object.entries(categoryTrends)) {
-    const data = (trendData as any).data;
-    const overBudgetCount = data.filter((d: any) => d.percentUsed > 100).length;
+    const data = trendData.data;
+    const overBudgetCount = data.filter((d) => d.percentUsed > 100).length;
     if (overBudgetCount >= data.length * 0.6) {
-      problematicCategories.push((trendData as any).categoryInfo.name);
+      problematicCategories.push(trendData.categoryInfo.name);
     }
   }
 

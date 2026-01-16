@@ -13,6 +13,15 @@ import { prisma } from '@/lib/prisma';
 import { createJob, JobType } from '@/lib/job-queue';
 
 /**
+ * Merchant research input
+ */
+interface MerchantResearchInput {
+  merchantName: string;
+  amount?: number;
+  date?: string;
+}
+
+/**
  * POST /api/merchants/research
  *
  * Research a single merchant or batch of merchants
@@ -41,7 +50,7 @@ export const POST = withExpensiveOp(async (req, context) => {
 
     // Batch research
     if (body.merchants && Array.isArray(body.merchants)) {
-      const merchants = body.merchants.map((m: any) => ({
+      const merchants = (body.merchants as MerchantResearchInput[]).map((m) => ({
         merchantName: m.merchantName,
         amount: m.amount,
         date: m.date,
@@ -79,7 +88,7 @@ export const POST = withExpensiveOp(async (req, context) => {
 
       // For small batches, process immediately
       const results = await researchMerchantsBatch(
-        merchants.map((m: any) => ({
+        merchants.map((m) => ({
           merchantName: m.merchantName,
           amount: m.amount,
           date: m.date ? new Date(m.date) : undefined,

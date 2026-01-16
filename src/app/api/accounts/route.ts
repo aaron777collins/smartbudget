@@ -6,6 +6,7 @@ import {
   createAccountSchema,
   validateQueryParams
 } from '@/lib/validation';
+import { Prisma } from '@prisma/client';
 
 // GET /api/accounts - List user's accounts
 export async function GET(request: NextRequest) {
@@ -31,7 +32,7 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search');
 
     // Build where clause
-    const where: any = { userId };
+    const where: Prisma.AccountWhereInput = { userId };
 
     if (active !== undefined) {
       where.isActive = active;
@@ -45,7 +46,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Build orderBy clause
-    const orderBy: any = { [sortBy]: sortOrder };
+    const orderBy: Prisma.AccountOrderByWithRelationInput = { [sortBy]: sortOrder };
 
     // Fetch accounts with transaction count
     const accounts = await prisma.account.findMany({

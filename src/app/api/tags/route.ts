@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
 
 // GET /api/tags - List user's tags
 export async function GET(request: NextRequest) {
@@ -16,17 +17,17 @@ export async function GET(request: NextRequest) {
     // Query parameters
     const search = searchParams.get('search');
     const sortBy = searchParams.get('sortBy') || 'name';
-    const sortOrder = searchParams.get('sortOrder') || 'asc';
+    const sortOrder = (searchParams.get('sortOrder') || 'asc') as 'asc' | 'desc';
 
     // Build where clause
-    const where: any = { userId };
+    const where: Prisma.TagWhereInput = { userId };
 
     if (search) {
       where.name = { contains: search, mode: 'insensitive' };
     }
 
     // Build orderBy clause
-    const orderBy: any = {};
+    const orderBy: Prisma.TagOrderByWithRelationInput = {};
     if (sortBy === 'name' || sortBy === 'createdAt') {
       orderBy[sortBy] = sortOrder;
     } else {

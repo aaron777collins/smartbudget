@@ -32,12 +32,17 @@ export interface MiddlewareContext {
 }
 
 /**
+ * Route params type for dynamic routes
+ */
+export type RouteParams = { params: Promise<Record<string, string>> }
+
+/**
  * API handler type with middleware context
  */
-export type ApiHandler = (
+export type ApiHandler<TParams extends RouteParams | undefined = undefined> = (
   req: Request,
   context: MiddlewareContext,
-  params?: any
+  params?: TParams
 ) => Promise<Response>
 
 /**
@@ -59,11 +64,11 @@ function isAdmin(email: string): boolean {
  * }, { requireAuth: true })
  * ```
  */
-export function withMiddleware(
-  handler: ApiHandler,
+export function withMiddleware<TParams extends RouteParams | undefined = undefined>(
+  handler: ApiHandler<TParams>,
   options: MiddlewareOptions = {}
-): (req: Request, params?: any) => Promise<Response> {
-  return async (req: Request, params?: any) => {
+): (req: Request, params?: TParams) => Promise<Response> {
+  return async (req: Request, params?: TParams) => {
     try {
       // 1. Apply rate limiting (unless explicitly skipped)
       if (!options.skipRateLimit) {
@@ -148,21 +153,27 @@ export function withMiddleware(
 /**
  * Convenience wrapper for authenticated routes
  */
-export function withAuth(handler: ApiHandler): (req: Request, params?: any) => Promise<Response> {
+export function withAuth<TParams extends RouteParams | undefined = undefined>(
+  handler: ApiHandler<TParams>
+): (req: Request, params?: TParams) => Promise<Response> {
   return withMiddleware(handler, { requireAuth: true, rateLimitTier: 'auto' })
 }
 
 /**
  * Convenience wrapper for admin-only routes
  */
-export function withAdmin(handler: ApiHandler): (req: Request, params?: any) => Promise<Response> {
+export function withAdmin<TParams extends RouteParams | undefined = undefined>(
+  handler: ApiHandler<TParams>
+): (req: Request, params?: TParams) => Promise<Response> {
   return withMiddleware(handler, { requireAuth: true, requireAdmin: true, rateLimitTier: 'auto' })
 }
 
 /**
  * Convenience wrapper for expensive operations
  */
-export function withExpensiveOp(handler: ApiHandler): (req: Request, params?: any) => Promise<Response> {
+export function withExpensiveOp<TParams extends RouteParams | undefined = undefined>(
+  handler: ApiHandler<TParams>
+): (req: Request, params?: TParams) => Promise<Response> {
   return withMiddleware(handler, { requireAuth: true, rateLimitTier: RateLimitTier.EXPENSIVE })
 }
 
@@ -177,11 +188,11 @@ export function withExpensiveOp(handler: ApiHandler): (req: Request, params?: an
  * }, RateLimitTier.MODERATE)
  * ```
  */
-export function withRateLimit(
-  handler: (req: Request, params?: any) => Promise<Response>,
+export function withRateLimit<TParams extends RouteParams | undefined = undefined>(
+  handler: (req: Request, params?: TParams) => Promise<Response>,
   tier: RateLimitTier | 'auto' = 'auto'
-): (req: Request, params?: any) => Promise<Response> {
-  return async (req: Request, params?: any) => {
+): (req: Request, params?: TParams) => Promise<Response> {
+  return async (req: Request, params?: TParams) => {
     try {
       // Get tier
       const effectiveTier =
