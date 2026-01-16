@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { formatCurrency } from '@/lib/utils';
 import type { TimeframeValue } from './timeframe-selector';
 import { getMonthsFromTimeframe } from '@/lib/timeframe';
+import { ChartExportButton } from '@/components/charts/chart-export-button';
 
 interface SankeyData {
   nodes: Array<{ id: string; name: string; color?: string }>;
@@ -41,6 +42,7 @@ interface CashFlowSankeyProps {
 export function CashFlowSankey({ timeframe }: CashFlowSankeyProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const chartWrapperRef = useRef<HTMLDivElement>(null);
   const [data, setData] = useState<SankeyData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -219,38 +221,55 @@ export function CashFlowSankey({ timeframe }: CashFlowSankeyProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Cash Flow</CardTitle>
-        <CardDescription>
-          Income sources flowing to expenses (Current Month)
-        </CardDescription>
-        <div className="flex gap-4 mt-2 text-sm">
-          <div>
-            <span className="text-muted-foreground">Total Income: </span>
-            <span className="font-semibold text-green-600">
-              {formatCurrency(data.summary.totalIncome)}
-            </span>
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <CardTitle>Cash Flow</CardTitle>
+            <CardDescription>
+              Income sources flowing to expenses (Current Month)
+            </CardDescription>
+            <div className="flex gap-4 mt-2 text-sm">
+              <div>
+                <span className="text-muted-foreground">Total Income: </span>
+                <span className="font-semibold text-green-600">
+                  {formatCurrency(data.summary.totalIncome)}
+                </span>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Total Expenses: </span>
+                <span className="font-semibold text-red-600">
+                  {formatCurrency(data.summary.totalExpenses)}
+                </span>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Net: </span>
+                <span
+                  className={`font-semibold ${
+                    data.summary.netCashFlow >= 0 ? 'text-green-600' : 'text-red-600'
+                  }`}
+                >
+                  {formatCurrency(data.summary.netCashFlow)}
+                </span>
+              </div>
+            </div>
           </div>
-          <div>
-            <span className="text-muted-foreground">Total Expenses: </span>
-            <span className="font-semibold text-red-600">
-              {formatCurrency(data.summary.totalExpenses)}
-            </span>
-          </div>
-          <div>
-            <span className="text-muted-foreground">Net: </span>
-            <span
-              className={`font-semibold ${
-                data.summary.netCashFlow >= 0 ? 'text-green-600' : 'text-red-600'
-              }`}
-            >
-              {formatCurrency(data.summary.netCashFlow)}
-            </span>
-          </div>
+          <ChartExportButton
+            chartRef={chartWrapperRef}
+            filename="cash-flow-sankey"
+            data={data.nodes.map((node, idx) => {
+              const link = data.links.find(l => l.source === idx || l.target === idx);
+              return {
+                Node: node.name,
+                Value: link?.value || 0,
+              };
+            })}
+          />
         </div>
       </CardHeader>
       <CardContent>
-        <div ref={containerRef} className="w-full">
-          <svg ref={svgRef} className="w-full" />
+        <div ref={chartWrapperRef}>
+          <div ref={containerRef} className="w-full">
+            <svg ref={svgRef} className="w-full" />
+          </div>
         </div>
       </CardContent>
     </Card>

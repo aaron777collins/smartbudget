@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   AreaChart,
   Area,
@@ -16,6 +16,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { formatCurrency } from '@/lib/utils';
 import type { TimeframeValue } from './timeframe-selector';
 import { getMonthsFromTimeframe, buildTimeframeParams } from '@/lib/timeframe';
+import { ChartExportButton } from '@/components/charts/chart-export-button';
 
 interface CategoryMetadata {
   id: string;
@@ -78,6 +79,7 @@ interface SpendingTrendsChartProps {
 }
 
 export function SpendingTrendsChart({ timeframe }: SpendingTrendsChartProps) {
+  const chartRef = useRef<HTMLDivElement>(null);
   const [data, setData] = useState<SpendingTrendsData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -141,27 +143,42 @@ export function SpendingTrendsChart({ timeframe }: SpendingTrendsChartProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Spending Trends</CardTitle>
-        <CardDescription>
-          Monthly spending by category (Last {data.summary.totalMonths} months)
-        </CardDescription>
-        <div className="mt-2 grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <span className="text-muted-foreground">Average Monthly: </span>
-            <span className="font-semibold">
-              {formatCurrency(data.summary.averageMonthlySpending)}
-            </span>
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <CardTitle>Spending Trends</CardTitle>
+            <CardDescription>
+              Monthly spending by category (Last {data.summary.totalMonths} months)
+            </CardDescription>
+            <div className="mt-2 grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <span className="text-muted-foreground">Average Monthly: </span>
+                <span className="font-semibold">
+                  {formatCurrency(data.summary.averageMonthlySpending)}
+                </span>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Highest: </span>
+                <span className="font-semibold">
+                  {formatCurrency(data.summary.highestMonth.total)} ({data.summary.highestMonth.month})
+                </span>
+              </div>
+            </div>
           </div>
-          <div>
-            <span className="text-muted-foreground">Highest: </span>
-            <span className="font-semibold">
-              {formatCurrency(data.summary.highestMonth.total)} ({data.summary.highestMonth.month})
-            </span>
-          </div>
+          <ChartExportButton
+            chartRef={chartRef}
+            filename="spending-trends"
+            data={data.chartData.map(month => {
+              const row: Record<string, any> = { Month: month.month };
+              data.categories.forEach(cat => {
+                row[cat.name] = month[cat.name] || 0;
+              });
+              return row;
+            })}
+          />
         </div>
       </CardHeader>
       <CardContent>
-        <div role="img" aria-label={`Spending trends chart showing monthly spending by category. Average monthly spending is ${formatCurrency(data.summary.averageMonthlySpending)}. Highest spending month was ${data.summary.highestMonth.month} with ${formatCurrency(data.summary.highestMonth.total)}.`}>
+        <div ref={chartRef} role="img" aria-label={`Spending trends chart showing monthly spending by category. Average monthly spending is ${formatCurrency(data.summary.averageMonthlySpending)}. Highest spending month was ${data.summary.highestMonth.month} with ${formatCurrency(data.summary.highestMonth.total)}.`}>
           <ResponsiveContainer width="100%" height={400}>
             <AreaChart
               data={data.chartData}

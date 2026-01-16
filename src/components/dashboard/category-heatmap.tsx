@@ -7,6 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { formatCurrency } from '@/lib/utils';
 import type { TimeframeValue } from './timeframe-selector';
 import { getMonthsFromTimeframe } from '@/lib/timeframe';
+import { ChartExportButton } from '@/components/charts/chart-export-button';
 
 interface HeatmapData {
   data: Array<{
@@ -35,6 +36,7 @@ interface CategoryHeatmapProps {
 export function CategoryHeatmap({ timeframe }: CategoryHeatmapProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const chartWrapperRef = useRef<HTMLDivElement>(null);
   const [data, setData] = useState<HeatmapData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -278,17 +280,37 @@ export function CategoryHeatmap({ timeframe }: CategoryHeatmapProps) {
     );
   }
 
+  // Prepare CSV data
+  const csvData = data.data.flatMap(cat =>
+    cat.months.map(month => ({
+      Category: cat.category,
+      Month: month.month,
+      Amount: month.amount,
+    }))
+  );
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Category Spending Heat Map</CardTitle>
-        <CardDescription>
-          Spending intensity by category over the last {data.period.months} months
-        </CardDescription>
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <CardTitle>Category Spending Heat Map</CardTitle>
+            <CardDescription>
+              Spending intensity by category over the last {data.period.months} months
+            </CardDescription>
+          </div>
+          <ChartExportButton
+            chartRef={chartWrapperRef}
+            filename="category-heatmap"
+            data={csvData}
+          />
+        </div>
       </CardHeader>
       <CardContent>
-        <div ref={containerRef} className="w-full overflow-x-auto">
-          <svg ref={svgRef} className="w-full" />
+        <div ref={chartWrapperRef}>
+          <div ref={containerRef} className="w-full overflow-x-auto">
+            <svg ref={svgRef} className="w-full" />
+          </div>
         </div>
       </CardContent>
     </Card>

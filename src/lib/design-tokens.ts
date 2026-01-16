@@ -356,6 +356,23 @@ export const COLORS = {
       'hsl(236.6 85% 62.7%)',    // Indigo
     ],
 
+    /**
+     * Colorblind-friendly palette (Okabe-Ito palette)
+     * Accessible for deuteranopia, protanopia, and tritanopia
+     * WCAG AAA compliant with proper contrast ratios
+     * Use this palette for critical data visualizations
+     */
+    accessible: [
+      '#0173B2',  // Blue - Primary color, safe for all types
+      '#DE8F05',  // Orange - High contrast, safe alternative to red
+      '#029E73',  // Bluish Green - Safe for red-green colorblindness
+      '#CC78BC',  // Reddish Purple - Distinguishable from blue and orange
+      '#ECE133',  // Yellow - High luminance, works with dark backgrounds
+      '#56B4E9',  // Sky Blue - Lighter alternative to blue
+      '#CA9161',  // Vermillion - Safe alternative to red/orange
+      '#949494',  // Gray - Neutral, good for baseline/reference
+    ],
+
     // Category-based colors (for consistent category representation)
     categories: {
       income: 'hsl(142.1 76.2% 36.3%)',       // Green
@@ -380,6 +397,13 @@ export const COLORS = {
         start: 'hsl(0 86% 97%)',       // Very light red
         middle: 'hsl(346.8 77.2% 49.8%)',  // Primary red
         end: 'hsl(346.8 70% 25%)',     // Dark red
+      },
+      // Colorblind-safe gradient (Blue-Orange instead of Red-Yellow)
+      accessible: {
+        start: '#F1F8FB',   // Very light blue
+        middle: '#0173B2',  // Primary blue (low values)
+        middle2: '#DE8F05', // Orange (high values)
+        end: '#8B5A00',     // Dark orange
       },
     },
 

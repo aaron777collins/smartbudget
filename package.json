@@ -61,6 +61,7 @@
     "d3-sankey": "^0.12.3",
     "date-fns": "^4.1.0",
     "fuse.js": "^7.1.0",
+    "html2canvas": "^1.4.1",
     "jspdf": "^4.0.0",
     "jspdf-autotable": "^5.0.7",
     "lucide-react": "^0.562.0",

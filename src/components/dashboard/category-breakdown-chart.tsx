@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   PieChart,
   Pie,
@@ -15,6 +15,7 @@ import { formatCurrency } from '@/lib/utils';
 import { ELEVATION } from '@/lib/design-tokens';
 import type { TimeframeValue } from './timeframe-selector';
 import { getPeriodForAPI, buildTimeframeParams } from '@/lib/timeframe';
+import { ChartExportButton } from '@/components/charts/chart-export-button';
 
 interface CategoryData {
   id: string;
@@ -98,6 +99,7 @@ interface CategoryBreakdownChartProps {
 }
 
 export function CategoryBreakdownChart({ timeframe }: CategoryBreakdownChartProps) {
+  const chartRef = useRef<HTMLDivElement>(null);
   const [data, setData] = useState<CategoryBreakdownData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -181,23 +183,37 @@ export function CategoryBreakdownChart({ timeframe }: CategoryBreakdownChartProp
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Category Breakdown</CardTitle>
-        <CardDescription>
-          Current month spending by category
-        </CardDescription>
-        <div className="mt-2 grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <span className="text-muted-foreground">Total Spending: </span>
-            <span className="font-semibold">{formatCurrency(data.totalSpending)}</span>
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <CardTitle>Category Breakdown</CardTitle>
+            <CardDescription>
+              Current month spending by category
+            </CardDescription>
+            <div className="mt-2 grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <span className="text-muted-foreground">Total Spending: </span>
+                <span className="font-semibold">{formatCurrency(data.totalSpending)}</span>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Categories: </span>
+                <span className="font-semibold">{data.summary.categoryCount}</span>
+              </div>
+            </div>
           </div>
-          <div>
-            <span className="text-muted-foreground">Categories: </span>
-            <span className="font-semibold">{data.summary.categoryCount}</span>
-          </div>
+          <ChartExportButton
+            chartRef={chartRef}
+            filename="category-breakdown"
+            data={data.chartData.map(cat => ({
+              Category: cat.name,
+              Amount: cat.amount,
+              Percentage: cat.percentage,
+              Transactions: cat.transactionCount,
+            }))}
+          />
         </div>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-col lg:flex-row gap-6">
+        <div ref={chartRef} className="flex flex-col lg:flex-row gap-6">
           {/* Pie Chart */}
           <div className="flex-1" role="img" aria-label={`Category breakdown pie chart showing spending across ${data.summary.categoryCount} categories. Total spending: ${formatCurrency(data.totalSpending)}.${data.topCategories.length > 0 ? ` Top category: ${data.topCategories[0].name} with ${formatCurrency(data.topCategories[0].amount)}.` : ''}`}>
             <ResponsiveContainer width="100%" height={400}>
@@ -217,6 +233,14 @@ export function CategoryBreakdownChart({ timeframe }: CategoryBreakdownChartProp
                   ))}
                 </Pie>
                 <Tooltip content={<CustomTooltip />} />
+                <Legend
+                  verticalAlign="bottom"
+                  height={36}
+                  iconType="circle"
+                  formatter={(value, entry: any) => (
+                    <span className="text-xs">{entry.payload.name}</span>
+                  )}
+                />
               </PieChart>
             </ResponsiveContainer>
           </div>

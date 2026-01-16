@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Skeleton } from '@/components/ui/skeleton';
 import type { TimeframeValue } from './timeframe-selector';
 import { getMonthsFromTimeframe } from '@/lib/timeframe';
+import { ChartExportButton } from '@/components/charts/chart-export-button';
 
 interface CorrelationData {
   categories: Array<{
@@ -37,6 +38,7 @@ interface CategoryCorrelationMatrixProps {
 export function CategoryCorrelationMatrix({ timeframe }: CategoryCorrelationMatrixProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const chartWrapperRef = useRef<HTMLDivElement>(null);
   const [data, setData] = useState<CorrelationData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -306,17 +308,36 @@ export function CategoryCorrelationMatrix({ timeframe }: CategoryCorrelationMatr
     );
   }
 
+  // Prepare CSV data
+  const csvData = data.matrix.map(item => ({
+    Category1: item.category1,
+    Category2: item.category2,
+    Correlation: item.correlation,
+    'Co-occurrence': item.cooccurrence,
+  }));
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Category Correlation Matrix</CardTitle>
-        <CardDescription>
-          Categories that tend to occur together in the same months (Last {data.metadata.months} months)
-        </CardDescription>
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <CardTitle>Category Correlation Matrix</CardTitle>
+            <CardDescription>
+              Categories that tend to occur together in the same months (Last {data.metadata.months} months)
+            </CardDescription>
+          </div>
+          <ChartExportButton
+            chartRef={chartWrapperRef}
+            filename="category-correlation-matrix"
+            data={csvData}
+          />
+        </div>
       </CardHeader>
       <CardContent>
-        <div ref={containerRef} className="w-full overflow-x-auto">
-          <svg ref={svgRef} className="w-full" />
+        <div ref={chartWrapperRef}>
+          <div ref={containerRef} className="w-full overflow-x-auto">
+            <svg ref={svgRef} className="w-full" />
+          </div>
         </div>
       </CardContent>
     </Card>
