@@ -16,12 +16,13 @@ let prisma: PrismaClient
  */
 export function setupTestDatabase() {
   if (!prisma) {
+    // Set the DATABASE_URL if not already set
+    if (!process.env.DATABASE_URL) {
+      process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/smartbudget_test'
+    }
+
     prisma = new PrismaClient({
-      datasources: {
-        db: {
-          url: process.env.DATABASE_URL || 'postgresql://test:test@localhost:5432/smartbudget_test'
-        }
-      }
+      log: ['error'],
     })
   }
   return prisma
