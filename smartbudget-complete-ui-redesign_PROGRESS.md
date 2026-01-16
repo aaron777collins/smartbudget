@@ -209,11 +209,15 @@ IN_PROGRESS
   - Improved error handling with proper error messages
   - Remaining: Transactions, Budgets, Accounts pages (separate iterations)
 
-- [ ] **Task 4.5**: Implement optimistic updates
-  - Transaction create/update/delete
-  - Budget updates
-  - Account updates
-  - Add rollback on error
+- [x] **Task 4.5**: Implement optimistic updates
+  - ✅ Added optimistic updates to all transaction mutations (create, update, delete, categorize)
+  - ✅ Added optimistic updates to all budget mutations (create, update, delete, updateCategory)
+  - ✅ Added optimistic updates to all account mutations (create, update, delete)
+  - ✅ Implemented proper rollback on error with context
+  - ✅ All mutations now use onMutate callbacks to update cache optimistically
+  - ✅ All mutations properly handle Prisma Decimal types
+  - UI updates now appear instant before server confirmation
+  - Failed mutations rollback to previous state automatically
 
 ---
 
@@ -503,6 +507,55 @@ IN_PROGRESS
 1. **React Query over SWR:** Industry standard, better TypeScript support, more features
 2. **Redis for rate limiting:** Required for multi-instance deployments, better than in-memory
 3. **Zod for validation:** Type-safe, composable, integrates with TypeScript
+
+---
+
+## Completed This Iteration
+
+**Task 4.5: Implement optimistic updates**
+
+### What Was Done
+
+1. **Transaction Mutations** (src/hooks/useTransactions.ts):
+   - Added onMutate callbacks to useCreateTransaction, useUpdateTransaction, useDeleteTransaction, useCategorizeTransaction
+   - Optimistically update cache before server response
+   - Capture previous state for rollback
+   - Implement onError callbacks to restore state on failure
+
+2. **Budget Mutations** (src/hooks/useBudgets.ts):
+   - Added onMutate callbacks to useCreateBudget, useUpdateBudget, useDeleteBudget, useUpdateBudgetCategory
+   - Optimistically update both detail and list caches
+   - Proper handling of Prisma Decimal types
+   - Rollback mechanism on error
+
+3. **Account Mutations** (src/hooks/useAccounts.ts):
+   - Added onMutate callbacks to useCreateAccount, useUpdateAccount, useDeleteAccount
+   - Optimistically update cache with temporary IDs for new items
+   - Field-specific updates to avoid type conflicts
+   - Complete rollback on failure
+
+### Technical Implementation Details
+
+- **Race condition prevention**: Used queryClient.cancelQueries() to prevent concurrent updates
+- **Type safety**: Handled Prisma Decimal types properly with type assertions where needed
+- **Selective updates**: Only update specific fields to avoid spreading incompatible types
+- **Rollback pattern**: Store previous state in context, restore on error
+- **Cache consistency**: Update both detail and list caches optimistically
+
+### Benefits
+
+- **Instant UI feedback**: Users see changes immediately without waiting for server
+- **Better UX**: Perceived performance improvement from optimistic updates
+- **Error resilience**: Automatic rollback on failure prevents inconsistent state
+- **Type-safe**: All operations maintain TypeScript type safety
+
+### Files Modified
+
+- src/hooks/useTransactions.ts - 5 mutations updated
+- src/hooks/useBudgets.ts - 4 mutations updated
+- src/hooks/useAccounts.ts - 3 mutations updated
+
+Total: 12 mutation hooks now have optimistic updates with rollback
 4. **Bottom nav for mobile:** Standard pattern, better UX than hamburger-only
 5. **Incremental migration:** Lower risk than big-bang rewrite
 

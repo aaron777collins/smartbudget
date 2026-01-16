@@ -159,7 +159,7 @@ export function useTransaction(
 /**
  * Create new transaction
  *
- * @returns Mutation hook for creating transactions
+ * @returns Mutation hook for creating transactions with optimistic updates
  *
  * @example
  * ```typescript
@@ -185,6 +185,60 @@ export function useCreateTransaction(): UseMutationResult<
     mutationFn: async (data: TransactionInput) => {
       return apiClient.post<Transaction>('/api/transactions', data);
     },
+    onMutate: async (newTransaction) => {
+      // Cancel ongoing queries to prevent race conditions
+      await queryClient.cancelQueries({ queryKey: queryKeys.transactions.lists() });
+
+      // Snapshot previous values for rollback
+      const previousTransactions = queryClient.getQueriesData({
+        queryKey: queryKeys.transactions.lists(),
+      });
+
+      // Optimistically add new transaction to all list caches
+      queryClient.setQueriesData<TransactionWithRelations[]>(
+        { queryKey: queryKeys.transactions.lists() },
+        (old) => {
+          if (!old) return old;
+
+          // Create optimistic transaction object (partial - server will set proper types)
+          const optimisticTransaction: TransactionWithRelations = {
+            id: `temp-${Date.now()}`, // Temporary ID
+            userId: '', // Will be set by server
+            accountId: newTransaction.accountId,
+            amount: newTransaction.amount as any, // Decimal type from Prisma
+            type: newTransaction.type,
+            description: newTransaction.description || '',
+            merchantName: newTransaction.merchantName || '',
+            date: newTransaction.date ? new Date(newTransaction.date) : new Date(),
+            postedDate: null,
+            categoryId: newTransaction.categoryId || null,
+            subcategoryId: newTransaction.subcategoryId || null,
+            notes: newTransaction.notes || null,
+            fitid: null,
+            isReconciled: false,
+            isRecurring: false,
+            recurringRuleId: null,
+            confidenceScore: null,
+            userCorrected: false,
+            rawData: null,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          };
+
+          return [optimisticTransaction, ...old];
+        }
+      );
+
+      return { previousTransactions };
+    },
+    onError: (err, variables, context) => {
+      // Rollback optimistic updates on error
+      if (context?.previousTransactions) {
+        context.previousTransactions.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data);
+        });
+      }
+    },
     onSuccess: () => {
       // Invalidate all transaction lists to refetch with new data
       queryClient.invalidateQueries({ queryKey: queryKeys.transactions.lists() });
@@ -197,7 +251,7 @@ export function useCreateTransaction(): UseMutationResult<
 /**
  * Update existing transaction
  *
- * @returns Mutation hook for updating transactions
+ * @returns Mutation hook for updating transactions with optimistic updates
  *
  * @example
  * ```typescript
@@ -220,6 +274,78 @@ export function useUpdateTransaction(): UseMutationResult<
     mutationFn: async ({ id, data }) => {
       return apiClient.patch<Transaction>(`/api/transactions/${id}`, data);
     },
+    onMutate: async ({ id, data }) => {
+      // Cancel ongoing queries for this transaction
+      await queryClient.cancelQueries({ queryKey: queryKeys.transactions.detail(id) });
+      await queryClient.cancelQueries({ queryKey: queryKeys.transactions.lists() });
+
+      // Snapshot previous values for rollback
+      const previousTransaction = queryClient.getQueryData<TransactionWithRelations>(
+        queryKeys.transactions.detail(id)
+      );
+      const previousTransactionLists = queryClient.getQueriesData({
+        queryKey: queryKeys.transactions.lists(),
+      });
+
+      // Optimistically update detail cache
+      queryClient.setQueryData<TransactionWithRelations>(
+        queryKeys.transactions.detail(id),
+        (old) => {
+          if (!old) return old;
+          // Only update specific fields to avoid type conflicts with Decimal
+          const updated = { ...old };
+          if (data.accountId !== undefined) updated.accountId = data.accountId;
+          if (data.type !== undefined) updated.type = data.type;
+          if (data.description !== undefined) updated.description = data.description;
+          if (data.date !== undefined) updated.date = new Date(data.date);
+          if (data.categoryId !== undefined) updated.categoryId = data.categoryId;
+          if (data.subcategoryId !== undefined) updated.subcategoryId = data.subcategoryId;
+          if (data.merchantName !== undefined) updated.merchantName = data.merchantName;
+          if (data.notes !== undefined) updated.notes = data.notes;
+          updated.updatedAt = new Date();
+          return updated;
+        }
+      );
+
+      // Optimistically update all list caches
+      queryClient.setQueriesData<TransactionWithRelations[]>(
+        { queryKey: queryKeys.transactions.lists() },
+        (old) => {
+          if (!old) return old;
+          return old.map((txn) => {
+            if (txn.id !== id) return txn;
+            // Only update specific fields to avoid type conflicts
+            const updated = { ...txn };
+            if (data.accountId !== undefined) updated.accountId = data.accountId;
+            if (data.type !== undefined) updated.type = data.type;
+            if (data.description !== undefined) updated.description = data.description;
+            if (data.date !== undefined) updated.date = new Date(data.date);
+            if (data.categoryId !== undefined) updated.categoryId = data.categoryId;
+            if (data.subcategoryId !== undefined) updated.subcategoryId = data.subcategoryId;
+            if (data.merchantName !== undefined) updated.merchantName = data.merchantName;
+            if (data.notes !== undefined) updated.notes = data.notes;
+            updated.updatedAt = new Date();
+            return updated;
+          });
+        }
+      );
+
+      return { previousTransaction, previousTransactionLists };
+    },
+    onError: (err, variables, context) => {
+      // Rollback optimistic updates on error
+      if (context?.previousTransaction) {
+        queryClient.setQueryData(
+          queryKeys.transactions.detail(variables.id),
+          context.previousTransaction
+        );
+      }
+      if (context?.previousTransactionLists) {
+        context.previousTransactionLists.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data);
+        });
+      }
+    },
     onSuccess: (updatedTransaction) => {
       // Invalidate the specific transaction detail
       queryClient.invalidateQueries({
@@ -236,7 +362,7 @@ export function useUpdateTransaction(): UseMutationResult<
 /**
  * Delete transaction
  *
- * @returns Mutation hook for deleting transactions
+ * @returns Mutation hook for deleting transactions with optimistic updates
  *
  * @example
  * ```typescript
@@ -252,6 +378,47 @@ export function useDeleteTransaction(): UseMutationResult<void, Error, string> {
     mutationFn: async (id: string) => {
       return apiClient.delete<void>(`/api/transactions/${id}`);
     },
+    onMutate: async (id) => {
+      // Cancel ongoing queries to prevent race conditions
+      await queryClient.cancelQueries({ queryKey: queryKeys.transactions.lists() });
+      await queryClient.cancelQueries({ queryKey: queryKeys.transactions.detail(id) });
+
+      // Snapshot previous values for rollback
+      const previousTransactionLists = queryClient.getQueriesData({
+        queryKey: queryKeys.transactions.lists(),
+      });
+      const previousTransaction = queryClient.getQueryData<TransactionWithRelations>(
+        queryKeys.transactions.detail(id)
+      );
+
+      // Optimistically remove transaction from all list caches
+      queryClient.setQueriesData<TransactionWithRelations[]>(
+        { queryKey: queryKeys.transactions.lists() },
+        (old) => {
+          if (!old) return old;
+          return old.filter((txn) => txn.id !== id);
+        }
+      );
+
+      // Remove from detail cache
+      queryClient.removeQueries({ queryKey: queryKeys.transactions.detail(id) });
+
+      return { previousTransactionLists, previousTransaction };
+    },
+    onError: (err, id, context) => {
+      // Rollback optimistic updates on error
+      if (context?.previousTransactionLists) {
+        context.previousTransactionLists.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data);
+        });
+      }
+      if (context?.previousTransaction) {
+        queryClient.setQueryData(
+          queryKeys.transactions.detail(id),
+          context.previousTransaction
+        );
+      }
+    },
     onSuccess: () => {
       // Invalidate all transaction lists
       queryClient.invalidateQueries({ queryKey: queryKeys.transactions.lists() });
@@ -264,7 +431,7 @@ export function useDeleteTransaction(): UseMutationResult<void, Error, string> {
 /**
  * Categorize transaction (manually or with AI)
  *
- * @returns Mutation hook for categorizing transactions
+ * @returns Mutation hook for categorizing transactions with optimistic updates
  *
  * @example
  * ```typescript
@@ -290,6 +457,67 @@ export function useCategorizeTransaction(): UseMutationResult<
         categoryId,
         subcategoryId,
       });
+    },
+    onMutate: async ({ id, categoryId, subcategoryId }) => {
+      // Cancel ongoing queries to prevent race conditions
+      await queryClient.cancelQueries({ queryKey: queryKeys.transactions.detail(id) });
+      await queryClient.cancelQueries({ queryKey: queryKeys.transactions.lists() });
+
+      // Snapshot previous values for rollback
+      const previousTransaction = queryClient.getQueryData<TransactionWithRelations>(
+        queryKeys.transactions.detail(id)
+      );
+      const previousTransactionLists = queryClient.getQueriesData({
+        queryKey: queryKeys.transactions.lists(),
+      });
+
+      // Optimistically update detail cache
+      queryClient.setQueryData<TransactionWithRelations>(
+        queryKeys.transactions.detail(id),
+        (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            categoryId,
+            subcategoryId: subcategoryId || null,
+            updatedAt: new Date(),
+          };
+        }
+      );
+
+      // Optimistically update all list caches
+      queryClient.setQueriesData<TransactionWithRelations[]>(
+        { queryKey: queryKeys.transactions.lists() },
+        (old) => {
+          if (!old) return old;
+          return old.map((txn) =>
+            txn.id === id
+              ? {
+                  ...txn,
+                  categoryId,
+                  subcategoryId: subcategoryId || null,
+                  updatedAt: new Date(),
+                }
+              : txn
+          );
+        }
+      );
+
+      return { previousTransaction, previousTransactionLists };
+    },
+    onError: (err, variables, context) => {
+      // Rollback optimistic updates on error
+      if (context?.previousTransaction) {
+        queryClient.setQueryData(
+          queryKeys.transactions.detail(variables.id),
+          context.previousTransaction
+        );
+      }
+      if (context?.previousTransactionLists) {
+        context.previousTransactionLists.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data);
+        });
+      }
     },
     onSuccess: (updatedTransaction) => {
       // Invalidate the specific transaction

@@ -172,7 +172,7 @@ export function useAccountBalance(
 /**
  * Create new account
  *
- * @returns Mutation hook for creating accounts
+ * @returns Mutation hook for creating accounts with optimistic updates
  *
  * @example
  * ```typescript
@@ -200,6 +200,53 @@ export function useCreateAccount(): UseMutationResult<
     mutationFn: async (data: AccountInput) => {
       return apiClient.post<Account>('/api/accounts', data);
     },
+    onMutate: async (newAccount) => {
+      // Cancel ongoing queries to prevent race conditions
+      await queryClient.cancelQueries({ queryKey: queryKeys.accounts.lists() });
+
+      // Snapshot previous values for rollback
+      const previousAccounts = queryClient.getQueriesData({
+        queryKey: queryKeys.accounts.lists(),
+      });
+
+      // Optimistically add new account to all list caches
+      queryClient.setQueriesData<AccountWithRelations[]>(
+        { queryKey: queryKeys.accounts.lists() },
+        (old) => {
+          if (!old) return old;
+
+          // Create optimistic account object (partial - server will set proper types)
+          const optimisticAccount: AccountWithRelations = {
+            id: `temp-${Date.now()}`, // Temporary ID
+            userId: '', // Will be set by server
+            name: newAccount.name,
+            accountType: newAccount.type,
+            institution: newAccount.institution || '',
+            accountNumber: newAccount.accountNumber || null,
+            currentBalance: 0 as any, // Decimal type from Prisma
+            availableBalance: null,
+            currency: newAccount.currency || 'USD',
+            color: newAccount.color || '#2563EB',
+            icon: newAccount.icon || 'wallet',
+            isActive: newAccount.isActive !== false,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          };
+
+          return [optimisticAccount, ...old];
+        }
+      );
+
+      return { previousAccounts };
+    },
+    onError: (err, variables, context) => {
+      // Rollback optimistic updates on error
+      if (context?.previousAccounts) {
+        context.previousAccounts.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data);
+        });
+      }
+    },
     onSuccess: () => {
       // Invalidate all account lists to refetch with new data
       queryClient.invalidateQueries({ queryKey: queryKeys.accounts.lists() });
@@ -212,7 +259,7 @@ export function useCreateAccount(): UseMutationResult<
 /**
  * Update existing account
  *
- * @returns Mutation hook for updating accounts
+ * @returns Mutation hook for updating accounts with optimistic updates
  *
  * @example
  * ```typescript
@@ -235,6 +282,65 @@ export function useUpdateAccount(): UseMutationResult<
     mutationFn: async ({ id, data }) => {
       return apiClient.patch<Account>(`/api/accounts/${id}`, data);
     },
+    onMutate: async ({ id, data }) => {
+      // Cancel ongoing queries for this account
+      await queryClient.cancelQueries({ queryKey: queryKeys.accounts.detail(id) });
+      await queryClient.cancelQueries({ queryKey: queryKeys.accounts.lists() });
+
+      // Snapshot previous values for rollback
+      const previousAccount = queryClient.getQueryData<AccountWithRelations>(
+        queryKeys.accounts.detail(id)
+      );
+      const previousAccountLists = queryClient.getQueriesData({
+        queryKey: queryKeys.accounts.lists(),
+      });
+
+      // Optimistically update detail cache
+      queryClient.setQueryData<AccountWithRelations>(
+        queryKeys.accounts.detail(id),
+        (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            ...data,
+            updatedAt: new Date(),
+          };
+        }
+      );
+
+      // Optimistically update all list caches
+      queryClient.setQueriesData<AccountWithRelations[]>(
+        { queryKey: queryKeys.accounts.lists() },
+        (old) => {
+          if (!old) return old;
+          return old.map((account) =>
+            account.id === id
+              ? {
+                  ...account,
+                  ...data,
+                  updatedAt: new Date(),
+                }
+              : account
+          );
+        }
+      );
+
+      return { previousAccount, previousAccountLists };
+    },
+    onError: (err, variables, context) => {
+      // Rollback optimistic updates on error
+      if (context?.previousAccount) {
+        queryClient.setQueryData(
+          queryKeys.accounts.detail(variables.id),
+          context.previousAccount
+        );
+      }
+      if (context?.previousAccountLists) {
+        context.previousAccountLists.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data);
+        });
+      }
+    },
     onSuccess: (updatedAccount) => {
       // Invalidate the specific account detail
       queryClient.invalidateQueries({
@@ -255,7 +361,7 @@ export function useUpdateAccount(): UseMutationResult<
 /**
  * Delete account
  *
- * @returns Mutation hook for deleting accounts
+ * @returns Mutation hook for deleting accounts with optimistic updates
  *
  * @example
  * ```typescript
@@ -270,6 +376,47 @@ export function useDeleteAccount(): UseMutationResult<void, Error, string> {
   return useMutation({
     mutationFn: async (id: string) => {
       return apiClient.delete<void>(`/api/accounts/${id}`);
+    },
+    onMutate: async (id) => {
+      // Cancel ongoing queries to prevent race conditions
+      await queryClient.cancelQueries({ queryKey: queryKeys.accounts.lists() });
+      await queryClient.cancelQueries({ queryKey: queryKeys.accounts.detail(id) });
+
+      // Snapshot previous values for rollback
+      const previousAccountLists = queryClient.getQueriesData({
+        queryKey: queryKeys.accounts.lists(),
+      });
+      const previousAccount = queryClient.getQueryData<AccountWithRelations>(
+        queryKeys.accounts.detail(id)
+      );
+
+      // Optimistically remove account from all list caches
+      queryClient.setQueriesData<AccountWithRelations[]>(
+        { queryKey: queryKeys.accounts.lists() },
+        (old) => {
+          if (!old) return old;
+          return old.filter((account) => account.id !== id);
+        }
+      );
+
+      // Remove from detail cache
+      queryClient.removeQueries({ queryKey: queryKeys.accounts.detail(id) });
+
+      return { previousAccountLists, previousAccount };
+    },
+    onError: (err, id, context) => {
+      // Rollback optimistic updates on error
+      if (context?.previousAccountLists) {
+        context.previousAccountLists.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data);
+        });
+      }
+      if (context?.previousAccount) {
+        queryClient.setQueryData(
+          queryKeys.accounts.detail(id),
+          context.previousAccount
+        );
+      }
     },
     onSuccess: () => {
       // Invalidate all account lists

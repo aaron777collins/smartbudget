@@ -201,7 +201,7 @@ export function useBudgetAnalytics(
 /**
  * Create new budget
  *
- * @returns Mutation hook for creating budgets
+ * @returns Mutation hook for creating budgets with optimistic updates
  *
  * @example
  * ```typescript
@@ -231,6 +231,51 @@ export function useCreateBudget(): UseMutationResult<
     mutationFn: async (data: BudgetInput) => {
       return apiClient.post<Budget>('/api/budgets', data);
     },
+    onMutate: async (newBudget) => {
+      // Cancel ongoing queries to prevent race conditions
+      await queryClient.cancelQueries({ queryKey: queryKeys.budgets.lists() });
+
+      // Snapshot previous values for rollback
+      const previousBudgets = queryClient.getQueriesData({
+        queryKey: queryKeys.budgets.lists(),
+      });
+
+      // Optimistically add new budget to all list caches
+      queryClient.setQueriesData<BudgetWithRelations[]>(
+        { queryKey: queryKeys.budgets.lists() },
+        (old) => {
+          if (!old) return old;
+
+          // Create optimistic budget object (partial - server will set proper types)
+          const optimisticBudget: BudgetWithRelations = {
+            id: `temp-${Date.now()}`, // Temporary ID
+            userId: '', // Will be set by server
+            name: newBudget.name,
+            type: newBudget.type,
+            period: newBudget.period,
+            startDate: newBudget.startDate ? new Date(newBudget.startDate) : new Date(),
+            endDate: newBudget.endDate ? new Date(newBudget.endDate) : null,
+            totalAmount: (newBudget.totalAmount || 0) as any, // Decimal type from Prisma
+            rollover: newBudget.rolloverUnspent || false,
+            isActive: newBudget.isActive !== false,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          };
+
+          return [optimisticBudget, ...old];
+        }
+      );
+
+      return { previousBudgets };
+    },
+    onError: (err, variables, context) => {
+      // Rollback optimistic updates on error
+      if (context?.previousBudgets) {
+        context.previousBudgets.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data);
+        });
+      }
+    },
     onSuccess: () => {
       // Invalidate all budget lists to refetch with new data
       queryClient.invalidateQueries({ queryKey: queryKeys.budgets.lists() });
@@ -241,7 +286,7 @@ export function useCreateBudget(): UseMutationResult<
 /**
  * Update existing budget
  *
- * @returns Mutation hook for updating budgets
+ * @returns Mutation hook for updating budgets with optimistic updates
  *
  * @example
  * ```typescript
@@ -264,6 +309,75 @@ export function useUpdateBudget(): UseMutationResult<
     mutationFn: async ({ id, data }) => {
       return apiClient.patch<Budget>(`/api/budgets/${id}`, data);
     },
+    onMutate: async ({ id, data }) => {
+      // Cancel ongoing queries for this budget
+      await queryClient.cancelQueries({ queryKey: queryKeys.budgets.detail(id) });
+      await queryClient.cancelQueries({ queryKey: queryKeys.budgets.lists() });
+      await queryClient.cancelQueries({ queryKey: queryKeys.budgets.analytics(id) });
+
+      // Snapshot previous values for rollback
+      const previousBudget = queryClient.getQueryData<BudgetWithRelations>(
+        queryKeys.budgets.detail(id)
+      );
+      const previousBudgetLists = queryClient.getQueriesData({
+        queryKey: queryKeys.budgets.lists(),
+      });
+
+      // Optimistically update detail cache
+      queryClient.setQueryData<BudgetWithRelations>(
+        queryKeys.budgets.detail(id),
+        (old) => {
+          if (!old) return old;
+          // Only update specific fields to avoid type conflicts with Decimal
+          const updated = { ...old };
+          if (data.name !== undefined) updated.name = data.name;
+          if (data.type !== undefined) updated.type = data.type;
+          if (data.period !== undefined) updated.period = data.period;
+          if (data.startDate !== undefined) updated.startDate = new Date(data.startDate);
+          if (data.endDate !== undefined) updated.endDate = data.endDate ? new Date(data.endDate) : null;
+          if (data.isActive !== undefined) updated.isActive = data.isActive;
+          updated.updatedAt = new Date();
+          return updated;
+        }
+      );
+
+      // Optimistically update all list caches
+      queryClient.setQueriesData<BudgetWithRelations[]>(
+        { queryKey: queryKeys.budgets.lists() },
+        (old) => {
+          if (!old) return old;
+          return old.map((budget) => {
+            if (budget.id !== id) return budget;
+            // Only update specific fields to avoid type conflicts
+            const updated = { ...budget };
+            if (data.name !== undefined) updated.name = data.name;
+            if (data.type !== undefined) updated.type = data.type;
+            if (data.period !== undefined) updated.period = data.period;
+            if (data.startDate !== undefined) updated.startDate = new Date(data.startDate);
+            if (data.endDate !== undefined) updated.endDate = data.endDate ? new Date(data.endDate) : null;
+            if (data.isActive !== undefined) updated.isActive = data.isActive;
+            updated.updatedAt = new Date();
+            return updated;
+          });
+        }
+      );
+
+      return { previousBudget, previousBudgetLists };
+    },
+    onError: (err, variables, context) => {
+      // Rollback optimistic updates on error
+      if (context?.previousBudget) {
+        queryClient.setQueryData(
+          queryKeys.budgets.detail(variables.id),
+          context.previousBudget
+        );
+      }
+      if (context?.previousBudgetLists) {
+        context.previousBudgetLists.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data);
+        });
+      }
+    },
     onSuccess: (updatedBudget) => {
       // Invalidate the specific budget detail
       queryClient.invalidateQueries({
@@ -282,7 +396,7 @@ export function useUpdateBudget(): UseMutationResult<
 /**
  * Delete budget
  *
- * @returns Mutation hook for deleting budgets
+ * @returns Mutation hook for deleting budgets with optimistic updates
  *
  * @example
  * ```typescript
@@ -298,6 +412,47 @@ export function useDeleteBudget(): UseMutationResult<void, Error, string> {
     mutationFn: async (id: string) => {
       return apiClient.delete<void>(`/api/budgets/${id}`);
     },
+    onMutate: async (id) => {
+      // Cancel ongoing queries to prevent race conditions
+      await queryClient.cancelQueries({ queryKey: queryKeys.budgets.lists() });
+      await queryClient.cancelQueries({ queryKey: queryKeys.budgets.detail(id) });
+
+      // Snapshot previous values for rollback
+      const previousBudgetLists = queryClient.getQueriesData({
+        queryKey: queryKeys.budgets.lists(),
+      });
+      const previousBudget = queryClient.getQueryData<BudgetWithRelations>(
+        queryKeys.budgets.detail(id)
+      );
+
+      // Optimistically remove budget from all list caches
+      queryClient.setQueriesData<BudgetWithRelations[]>(
+        { queryKey: queryKeys.budgets.lists() },
+        (old) => {
+          if (!old) return old;
+          return old.filter((budget) => budget.id !== id);
+        }
+      );
+
+      // Remove from detail cache
+      queryClient.removeQueries({ queryKey: queryKeys.budgets.detail(id) });
+
+      return { previousBudgetLists, previousBudget };
+    },
+    onError: (err, id, context) => {
+      // Rollback optimistic updates on error
+      if (context?.previousBudgetLists) {
+        context.previousBudgetLists.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data);
+        });
+      }
+      if (context?.previousBudget) {
+        queryClient.setQueryData(
+          queryKeys.budgets.detail(id),
+          context.previousBudget
+        );
+      }
+    },
     onSuccess: () => {
       // Invalidate all budget lists
       queryClient.invalidateQueries({ queryKey: queryKeys.budgets.lists() });
@@ -308,7 +463,7 @@ export function useDeleteBudget(): UseMutationResult<void, Error, string> {
 /**
  * Update budget category allocation
  *
- * @returns Mutation hook for updating category budgets
+ * @returns Mutation hook for updating category budgets with optimistic updates
  *
  * @example
  * ```typescript
@@ -333,6 +488,70 @@ export function useUpdateBudgetCategory(): UseMutationResult<
       return apiClient.patch<Budget>(`/api/budgets/${budgetId}/categories/${categoryId}`, {
         amount,
       });
+    },
+    onMutate: async ({ budgetId, categoryId, amount }) => {
+      // Cancel ongoing queries for this budget
+      await queryClient.cancelQueries({ queryKey: queryKeys.budgets.detail(budgetId) });
+      await queryClient.cancelQueries({ queryKey: queryKeys.budgets.analytics(budgetId) });
+      await queryClient.cancelQueries({ queryKey: queryKeys.budgets.lists() });
+
+      // Snapshot previous values for rollback
+      const previousBudget = queryClient.getQueryData<BudgetWithRelations>(
+        queryKeys.budgets.detail(budgetId)
+      );
+      const previousBudgetLists = queryClient.getQueriesData({
+        queryKey: queryKeys.budgets.lists(),
+      });
+
+      // Optimistically update budget detail cache
+      queryClient.setQueryData<BudgetWithRelations>(
+        queryKeys.budgets.detail(budgetId),
+        (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            categories: old.categories?.map((cat) =>
+              cat.categoryId === categoryId ? { ...cat, amount } : cat
+            ),
+            updatedAt: new Date(),
+          };
+        }
+      );
+
+      // Optimistically update all list caches
+      queryClient.setQueriesData<BudgetWithRelations[]>(
+        { queryKey: queryKeys.budgets.lists() },
+        (old) => {
+          if (!old) return old;
+          return old.map((budget) =>
+            budget.id === budgetId
+              ? {
+                  ...budget,
+                  categories: budget.categories?.map((cat) =>
+                    cat.categoryId === categoryId ? { ...cat, amount } : cat
+                  ),
+                  updatedAt: new Date(),
+                }
+              : budget
+          );
+        }
+      );
+
+      return { previousBudget, previousBudgetLists };
+    },
+    onError: (err, variables, context) => {
+      // Rollback optimistic updates on error
+      if (context?.previousBudget) {
+        queryClient.setQueryData(
+          queryKeys.budgets.detail(variables.budgetId),
+          context.previousBudget
+        );
+      }
+      if (context?.previousBudgetLists) {
+        context.previousBudgetLists.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data);
+        });
+      }
     },
     onSuccess: (updatedBudget) => {
       // Invalidate the specific budget
