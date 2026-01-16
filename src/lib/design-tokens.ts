@@ -483,7 +483,7 @@ export const INTERACTION = {
 
   // Focus states
   focus: {
-    default: 'focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
+    default: 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
     visible: 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
     within: 'focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2',
   },

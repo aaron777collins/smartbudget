@@ -16,7 +16,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         <aside className="hidden md:flex w-64 border-r" aria-label="Main navigation">
           <Sidebar />
         </aside>
-        <main id="main-content" className="flex-1 overflow-y-auto pb-20 md:pb-8" tabIndex={-1}>
+        <main id="main-content" className="flex-1 overflow-y-auto pb-20 md:pb-8">
           {children}
         </main>
       </div>
