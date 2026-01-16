@@ -210,7 +210,7 @@ Block 6 (Testing - FINAL):
   - Update placeholder text
   - Update form submission to send username
 
-- [ ] Task 3.4: Update sign-up form (`src/app/auth/signup/page.tsx`)
+- [x] Task 3.4: Update sign-up form (`src/app/auth/signup/page.tsx`)
   - Change input field from "Email" to "Username"
   - Update input type from "email" to "text"
   - Add username validation hints
@@ -418,6 +418,18 @@ Block 6 (Testing - FINAL):
 ---
 
 ## Completed This Iteration
+
+**Task 3.4: Update sign-up form (`src/app/auth/signup/page.tsx`)** ✓
+- Changed state variable from `email` to `username` (line 16)
+- Updated Label text from "Email" to "Username" (line 107)
+- Changed Input id, type, and placeholder from email to username format (lines 109-111)
+- Added username validation hint: "3-20 characters, alphanumeric and underscores only" (lines 117-119)
+- Updated value and onChange handler to use `username` and `setUsername` (lines 112-113)
+- Changed API request body from `{ name, email, password }` to `{ name, username, password }` (line 47)
+- Changed signIn credentials from `email` to `username` (line 60)
+- Verified build passes without errors
+
+## Previously Completed This Iteration
 
 **Task 3.3: Update sign-in form (`src/app/auth/signin/page.tsx`)** ✓
 - Changed state variable from `email` to `username` (line 18)

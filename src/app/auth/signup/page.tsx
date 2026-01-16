@@ -13,7 +13,7 @@ export default function SignUpPage() {
   const router = useRouter()
 
   const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
+  const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [error, setError] = useState("")
@@ -44,7 +44,7 @@ export default function SignUpPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, username, password }),
       })
 
       const data = await response.json()
@@ -57,7 +57,7 @@ export default function SignUpPage() {
 
       // Sign in the user after successful signup
       const result = await signIn("credentials", {
-        email,
+        username,
         password,
         redirect: false,
       })
@@ -104,16 +104,19 @@ export default function SignUpPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="username">Username</Label>
               <Input
-                id="email"
-                type="email"
-                placeholder="name@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                id="username"
+                type="text"
+                placeholder="your_username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 required
                 disabled={isLoading}
               />
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                3-20 characters, alphanumeric and underscores only
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
