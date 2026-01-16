@@ -192,7 +192,7 @@ Block 6 (Testing - FINAL):
 
 ### Phase 3: Update Authentication System
 
-- [ ] Task 3.1: Update NextAuth config (`src/auth.ts`)
+- [x] Task 3.1: Update NextAuth config (`src/auth.ts`)
   - Modify Credentials provider to accept username instead of email
   - Update user lookup query to find by username
   - Keep email support for GitHub OAuth users
@@ -418,6 +418,17 @@ Block 6 (Testing - FINAL):
 ---
 
 ## Completed This Iteration
+
+**Task 3.1: Update NextAuth config (`src/auth.ts`)** ✓
+- Modified Credentials provider to accept `username` instead of `email`
+- Updated user lookup query to use `prisma.user.findUnique({ where: { username } })`
+- Changed credentials definition from `email: { label: "Email", type: "email" }` to `username: { label: "Username", type: "text" }`
+- Updated authorize function to validate `credentials?.username` instead of `credentials?.email`
+- Added `username` field to the returned user object in authorize callback
+- Email support for GitHub OAuth users is preserved (GitHub provider still uses email)
+- Session callbacks remain unchanged (already properly configured)
+
+## Previously Completed This Iteration
 
 **Task 2.3: Create seed script for default user** ✓
 - Updated `prisma/seed.js` to include bcryptjs import
