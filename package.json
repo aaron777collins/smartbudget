@@ -79,6 +79,7 @@
     "zod": "^4.3.5"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.11.0",
     "@next/bundle-analyzer": "^16.1.2",
     "@playwright/test": "^1.57.0",
     "@prisma/client": "^5.22.0",
@@ -90,6 +91,7 @@
     "@typescript-eslint/parser": "^8.53.0",
     "@vitejs/plugin-react": "^5.1.2",
     "autoprefixer": "^10.4.23",
+    "axe-core": "^4.11.1",
     "dotenv": "^17.2.3",
     "eslint": "^9.39.2",
     "eslint-config-next": "^16.1.1",
