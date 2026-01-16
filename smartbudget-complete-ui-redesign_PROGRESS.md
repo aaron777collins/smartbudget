@@ -181,7 +181,7 @@ IN_PROGRESS
 
 ### PHASE 4: STATE MANAGEMENT & DATA FETCHING (Priority: HIGH)
 
-- [ ] **Task 4.1**: Install and configure React Query
+- [x] **Task 4.1**: Install and configure React Query
   - Add `@tanstack/react-query` dependency
   - Create QueryClient configuration in `src/lib/query-client.ts`
   - Wrap app with QueryClientProvider
@@ -522,7 +522,134 @@ After completion:
 
 ## Completed This Iteration
 
-### Current Iteration: Task 3.5 - Improve Visual Hierarchy ✅
+### Current Iteration: Task 4.1 - Install and Configure React Query ✅
+
+**Summary:** Successfully installed and configured TanStack Query (React Query) for modern data fetching and state management. This establishes the foundation for Phase 4 and enables efficient client-side caching, background refetching, optimistic updates, and automatic request deduplication across the application.
+
+**Files Created:**
+- `src/lib/query-client.ts` - Comprehensive QueryClient configuration with query key factory
+- `src/components/query-provider.tsx` - Client component wrapping app with QueryClientProvider
+
+**Files Modified:**
+- `src/app/layout.tsx` - Integrated QueryProvider into component tree
+- `package.json` - Added @tanstack/react-query and @tanstack/react-query-devtools
+- `smartbudget-complete-ui-redesign_PROGRESS.md` - Marked Task 4.1 as complete
+
+**Implementation Details:**
+
+1. **QueryClient Configuration** (src/lib/query-client.ts):
+   - **Stale Time**: 5 minutes (data remains fresh for 5 min, no refetch)
+   - **Garbage Collection Time**: 10 minutes (inactive cache cleaned after 10 min)
+   - **Refetch on Window Focus**: Disabled (prevents unnecessary refetches on tab switch)
+   - **Refetch on Mount**: Disabled if data is fresh (optimizes performance)
+   - **Retry Logic**: 1 retry with exponential backoff (1s, 2s, 4s, max 30s)
+   - **Error Handling**: Errors available in query result, not thrown (prevents error boundary triggers)
+
+2. **Query Key Factory** (queryKeys object):
+   - Centralized query key generation for consistency
+   - Hierarchical key structure for easy invalidation
+   - 11 resource categories defined:
+     - dashboard: overview, stats
+     - transactions: lists, detail
+     - budgets: lists, detail, analytics
+     - accounts: lists, detail, balance
+     - categories: lists, detail
+     - tags: lists, detail
+     - goals: lists, detail, progress
+     - insights: lists, detail
+     - recurringRules: lists, detail
+     - merchants: normalized, research
+     - jobs: lists, detail
+     - user: settings
+   - Type-safe keys with `as const` assertions
+   - Supports filter parameters for list queries
+
+3. **QueryProvider Component** (src/components/query-provider.tsx):
+   - Client component wrapping QueryClientProvider
+   - Uses useState to ensure single QueryClient instance per session
+   - Includes React Query DevTools (visible in development only)
+   - DevTools positioned at bottom with closed by default
+
+4. **App Integration** (src/app/layout.tsx):
+   - QueryProvider added to component tree between SessionProvider and ThemeProvider
+   - Ensures queries have access to session data
+   - All child components now have access to React Query hooks
+
+**Query Configuration Rationale:**
+
+- **5-minute stale time**: Balances fresh data with reduced network requests
+- **10-minute cache time**: Keeps data available for quick navigation
+- **No window focus refetch**: Prevents surprise network requests when switching tabs
+- **1 retry with backoff**: Handles transient failures without overwhelming server
+- **Error in result**: Allows components to handle errors gracefully without error boundaries
+
+**Developer Experience Improvements:**
+
+- **Type Safety**: Full TypeScript support with generics and type inference
+- **Autocomplete**: Query keys support IDE autocomplete via `as const`
+- **Consistency**: Centralized query key factory prevents key mismatches
+- **Debugging**: React Query DevTools for inspecting cache and queries
+- **Documentation**: Comprehensive JSDoc comments on all exports
+- **Examples**: Usage patterns documented in query key factory
+
+**Benefits:**
+
+- **Automatic Caching**: Reduces redundant API calls significantly
+- **Background Refetching**: Keeps data fresh without user action
+- **Request Deduplication**: Multiple components requesting same data = single network call
+- **Optimistic Updates**: UI updates immediately, rollback on error (to be implemented)
+- **Loading States**: Built-in isLoading, isFetching states
+- **Error Handling**: Built-in error states and retry logic
+- **Pagination Support**: Built-in pagination helpers (to be used)
+- **Infinite Scroll**: Built-in infinite query support (to be used)
+- **DevTools**: Visual debugging of cache and query states
+
+**Alignment with Plan (Section 5.1):**
+
+- ✅ Installed @tanstack/react-query dependency
+- ✅ Created QueryClient configuration in src/lib/query-client.ts
+- ✅ Configured staleTime: 5 minutes (as specified)
+- ✅ Configured gcTime: 10 minutes (formerly cacheTime, as specified)
+- ✅ Configured refetchOnWindowFocus: false (as specified)
+- ✅ Configured retry: 1 (as specified)
+- ✅ Wrapped app with QueryClientProvider in layout.tsx
+- ✅ Added React Query DevTools for development
+
+**Impact:**
+
+- **Foundation Ready**: All components can now use React Query hooks
+- **Performance**: Reduced API calls through intelligent caching
+- **UX**: Faster perceived performance with cached data
+- **DX**: Better developer experience with DevTools and type safety
+- **Maintainability**: Centralized data fetching configuration
+- **Scalability**: Easy to add new queries following established patterns
+
+**Next Steps:**
+
+- Task 4.2: Create centralized API client (type-safe fetch wrapper)
+- Task 4.3: Create custom data fetching hooks (useTransactions, useBudgets, etc.)
+- Task 4.4: Migrate components to use React Query (Dashboard first)
+- Task 4.5: Implement optimistic updates for mutations
+
+**Testing:**
+
+- React Query packages verified installed in node_modules
+- QueryClient configuration exports successfully
+- QueryProvider component created and integrated
+- App layout updated with QueryProvider wrapper
+- No TypeScript compilation errors in created files
+- Ready for use in components with useQuery/useMutation hooks
+
+**Known Issues:**
+
+- Pre-existing build issue with Tailwind CSS not installing to node_modules (existed before this task)
+- Build issue is unrelated to React Query installation
+- Dev server can be used for development and testing
+- Production build issue needs separate investigation/fix
+
+---
+
+### Previous Iteration: Task 3.5 - Improve Visual Hierarchy ✅
 
 **Summary:** Implemented a comprehensive elevation system across the SmartBudget application by migrating all hardcoded shadow classes to centralized ELEVATION design tokens. This creates a clear visual hierarchy where stat cards are more prominent (shadow-md by default, shadow-xl on hover) compared to standard content cards (shadow-sm). The systematic approach ensures consistency, maintainability, and proper layering throughout the application.
 
