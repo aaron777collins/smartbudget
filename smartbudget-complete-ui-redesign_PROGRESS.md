@@ -247,11 +247,12 @@ IN_PROGRESS
   - All components fully typed with TypeScript and include comprehensive JSDoc documentation
   - All components support accessibility features (ARIA labels, keyboard navigation)
 
-- [ ] **Task 5.4**: Extract custom hooks
-  - `useCurrency` - Currency formatting with user preferences
-  - `useFormatDate` - Consistent date formatting
-  - `useDebounce` - Debounced values for search/filters
-  - `useMediaQuery` - Responsive breakpoint detection
+- [x] **Task 5.4**: Extract custom hooks
+  - ✅ `useCurrency` - Currency formatting with user preferences
+  - ✅ `useFormatDate` - Consistent date formatting
+  - ✅ `useDebounce` - Debounced values for search/filters
+  - ✅ `useMediaQuery` - Responsive breakpoint detection
+  - ✅ Created barrel export `src/hooks/index.ts` for centralized imports
 
 ---
 
@@ -579,7 +580,109 @@ After completion:
 
 ## Completed This Iteration
 
-### Current Iteration: Task 4.4 - Migrate Dashboard to React Query ✅
+### Current Iteration: Task 5.4 - Extract Custom Hooks ✅
+
+**Summary:** Successfully created four essential custom utility hooks (`useCurrency`, `useFormatDate`, `useDebounce`, `useMediaQuery`) to improve code reusability, consistency, and developer experience across the application. These hooks provide centralized, type-safe utilities for common operations like currency formatting, date formatting, debouncing, and responsive design detection.
+
+**Files Created:**
+- `src/hooks/useCurrency.ts` (4.4 KB) - Currency formatting with user preferences
+- `src/hooks/useFormatDate.ts` (6.7 KB) - Consistent date formatting with multiple output formats
+- `src/hooks/useDebounce.ts` (5.8 KB) - Debounced values and callbacks for search/filters
+- `src/hooks/useMediaQuery.ts` (6.5 KB) - Responsive breakpoint detection and viewport utilities
+- `src/hooks/index.ts` (1.8 KB) - Barrel export for all hooks
+
+**Features Implemented:**
+
+1. **useCurrency Hook:**
+   - Automatically fetches user's preferred currency from settings (with USD fallback)
+   - Supports compact notation for charts (e.g., $1.2K, $45.3M)
+   - Configurable fraction digits and symbol display
+   - Currency override capability
+   - Includes parseCurrency helper for input parsing
+   - Full TypeScript support with comprehensive JSDoc
+
+2. **useFormatDate Hook:**
+   - Automatically fetches user's preferred date format from settings
+   - Supports 5 common date format presets (MM/DD/YYYY, DD/MM/YYYY, etc.)
+   - Multiple output modes: standard, relative ("2 days ago"), distance ("in 3 hours")
+   - Convenience methods: formatCompact, formatDateTime, formatForInput
+   - Handles Date objects, ISO strings, and timestamps
+   - Powered by date-fns for robust date handling
+   - Full TypeScript support with comprehensive JSDoc
+
+3. **useDebounce Hook:**
+   - Generic hook for debouncing any value type
+   - Configurable delay (default: 500ms)
+   - Prevents unnecessary re-renders and API calls
+   - Includes useDebounceCallback for debouncing functions
+   - Advanced options: leading edge execution, maxWait timeout
+   - Proper cleanup to prevent memory leaks
+   - Full TypeScript support with comprehensive JSDoc
+
+4. **useMediaQuery Hook:**
+   - Core hook accepts any CSS media query string
+   - SSR-safe (returns false during server-side rendering)
+   - Convenience hooks: useIsMobile, useIsTablet, useIsDesktop
+   - Accessibility hooks: usePrefersReducedMotion, usePrefersDarkMode
+   - useBreakpoint returns current breakpoint name
+   - useViewport returns detailed viewport information
+   - Tailwind CSS breakpoint constants exported
+   - Full TypeScript support with comprehensive JSDoc
+
+5. **Barrel Export (index.ts):**
+   - Centralized export for all hooks (utility + data fetching)
+   - Enables clean imports: `import { useCurrency, useFormatDate } from '@/hooks'`
+   - Exports both hooks and their TypeScript types
+   - Includes all existing React Query hooks for consistency
+
+**Benefits:**
+
+- ✅ **Code Reusability**: Common operations now centralized in reusable hooks
+- ✅ **Consistency**: Currency and date formatting now consistent across the app
+- ✅ **Type Safety**: Full TypeScript support with proper types and generics
+- ✅ **Performance**: Debouncing reduces unnecessary API calls and re-renders
+- ✅ **Responsive Design**: Media query hooks simplify responsive component logic
+- ✅ **User Preferences**: Currency and date formatting respect user settings
+- ✅ **Developer Experience**: Comprehensive JSDoc makes hooks easy to use
+- ✅ **Accessibility**: Includes hooks for prefers-reduced-motion and color scheme
+- ✅ **SSR Safe**: All hooks handle server-side rendering properly
+
+**Usage Examples:**
+
+```tsx
+// Currency formatting
+const { formatCurrency, currency } = useCurrency();
+formatCurrency(1234.56) // "$1,234.56" (using user's preferred currency)
+formatCurrency(1234.56, { compact: true }) // "$1.2K"
+
+// Date formatting
+const { formatDate, formatRelativeTime } = useFormatDate();
+formatDate('2024-01-15') // "01/15/2024" (using user's preferred format)
+formatRelativeTime('2024-01-15') // "2 days ago"
+
+// Debouncing
+const [search, setSearch] = useState('');
+const debouncedSearch = useDebounce(search, 500);
+// Only triggers API call after user stops typing for 500ms
+
+// Responsive design
+const isMobile = useIsMobile();
+const breakpoint = useBreakpoint();
+return isMobile ? <MobileNav /> : <DesktopNav />;
+```
+
+**Validation:**
+- ✅ TypeScript compilation passes with no errors
+- ✅ All hooks properly typed with generics and interfaces
+- ✅ Barrel export resolves all imports correctly
+- ✅ 10 total hook files in src/hooks/ directory
+- ✅ Comprehensive JSDoc documentation for IntelliSense
+
+**Next Task:** Task 6.1 - Add text labels to progress bars (Accessibility phase)
+
+---
+
+### Previous Iteration: Task 4.4 - Migrate Dashboard to React Query ✅
 
 **Summary:** Successfully migrated the Dashboard component from vanilla fetch + useState pattern to React Query. This is the first page-level migration and demonstrates the benefits of React Query: automatic caching, background refetching, simplified state management, and better error handling. The dashboard now has a 2-minute stale time and 10-minute cache time, significantly reducing unnecessary API calls.
 
