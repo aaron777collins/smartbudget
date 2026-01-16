@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import {
+  getAccountsQuerySchema,
+  createAccountSchema,
+  validateQueryParams
+} from '@/lib/validation';
 
 // GET /api/accounts - List user's accounts
 export async function GET(request: NextRequest) {
@@ -13,17 +18,23 @@ export async function GET(request: NextRequest) {
     const userId = session.user.id;
     const { searchParams } = new URL(request.url);
 
-    // Query parameters
-    const active = searchParams.get('active');
+    // Validate query parameters
+    const validation = validateQueryParams(getAccountsQuerySchema, searchParams);
+    if (!validation.success || !validation.data) {
+      return NextResponse.json(
+        { error: validation.error?.message, details: validation.error?.details },
+        { status: 400 }
+      );
+    }
+
+    const { active, sortBy, sortOrder } = validation.data;
     const search = searchParams.get('search');
-    const sortBy = searchParams.get('sortBy') || 'name';
-    const sortOrder = searchParams.get('sortOrder') || 'asc';
 
     // Build where clause
     const where: any = { userId };
 
-    if (active !== null) {
-      where.isActive = active === 'true';
+    if (active !== undefined) {
+      where.isActive = active;
     }
 
     if (search) {
@@ -34,12 +45,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Build orderBy clause
-    const orderBy: any = {};
-    if (sortBy === 'name' || sortBy === 'institution' || sortBy === 'accountType' || sortBy === 'currentBalance') {
-      orderBy[sortBy] = sortOrder;
-    } else {
-      orderBy.name = 'asc';
-    }
+    const orderBy: any = { [sortBy]: sortOrder };
 
     // Fetch accounts with transaction count
     const accounts = await prisma.account.findMany({
@@ -73,27 +79,24 @@ export async function POST(request: NextRequest) {
     const userId = session.user.id;
     const body = await request.json();
 
-    // Validate required fields
-    if (!body.name) {
-      return NextResponse.json({ error: 'Account name is required' }, { status: 400 });
-    }
-    if (!body.institution) {
-      return NextResponse.json({ error: 'Institution is required' }, { status: 400 });
-    }
-    if (!body.accountType) {
-      return NextResponse.json({ error: 'Account type is required' }, { status: 400 });
-    }
-    if (body.currentBalance === undefined || body.currentBalance === null) {
-      return NextResponse.json({ error: 'Current balance is required' }, { status: 400 });
+    // Validate request body
+    const result = createAccountSchema.safeParse(body);
+    if (!result.success) {
+      return NextResponse.json(
+        { error: 'Validation failed', details: result.error.flatten() },
+        { status: 400 }
+      );
     }
 
+    const validatedData = result.data;
+
     // Check for duplicate account
-    if (body.accountNumber) {
+    if (validatedData.accountNumber) {
       const existingAccount = await prisma.account.findFirst({
         where: {
           userId,
-          institution: body.institution,
-          accountNumber: body.accountNumber,
+          institution: validatedData.institution,
+          accountNumber: validatedData.accountNumber,
         },
       });
 
@@ -109,16 +112,15 @@ export async function POST(request: NextRequest) {
     const account = await prisma.account.create({
       data: {
         userId,
-        name: body.name,
-        institution: body.institution,
-        accountType: body.accountType,
-        accountNumber: body.accountNumber || null,
-        currency: body.currency || 'CAD',
-        currentBalance: body.currentBalance,
-        availableBalance: body.availableBalance || null,
-        color: body.color || '#2563EB',
-        icon: body.icon || 'wallet',
-        isActive: body.isActive !== undefined ? body.isActive : true,
+        name: validatedData.name,
+        institution: validatedData.institution || '',
+        accountType: validatedData.accountType,
+        accountNumber: validatedData.accountNumber || null,
+        currentBalance: validatedData.currentBalance,
+        color: validatedData.color || '#2563EB',
+        icon: validatedData.icon || 'wallet',
+        isActive: validatedData.isActive,
+        currency: 'CAD',
       },
     });
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { getBudgetsQuerySchema, validateQueryParams } from '@/lib/validation';
 
 // GET /api/budgets - List user's budgets
 export async function GET(request: NextRequest) {
@@ -13,18 +14,22 @@ export async function GET(request: NextRequest) {
     const userId = session.user.id;
     const { searchParams } = new URL(request.url);
 
-    // Query parameters
-    const active = searchParams.get('active');
-    const type = searchParams.get('type');
-    const period = searchParams.get('period');
-    const sortBy = searchParams.get('sortBy') || 'createdAt';
-    const sortOrder = searchParams.get('sortOrder') || 'desc';
+    // Validate query parameters
+    const validation = validateQueryParams(getBudgetsQuerySchema, searchParams);
+    if (!validation.success || !validation.data) {
+      return NextResponse.json(
+        { error: validation.error?.message, details: validation.error?.details },
+        { status: 400 }
+      );
+    }
+
+    const { active, type, period, sortBy, sortOrder } = validation.data;
 
     // Build where clause
     const where: any = { userId };
 
-    if (active !== null) {
-      where.isActive = active === 'true';
+    if (active !== undefined) {
+      where.isActive = active;
     }
 
     if (type) {
@@ -36,12 +41,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Build orderBy clause
-    const orderBy: any = {};
-    if (sortBy === 'name' || sortBy === 'type' || sortBy === 'period' || sortBy === 'startDate' || sortBy === 'totalAmount' || sortBy === 'createdAt') {
-      orderBy[sortBy] = sortOrder;
-    } else {
-      orderBy.createdAt = 'desc';
-    }
+    const orderBy: any = { [sortBy]: sortOrder };
 
     // Fetch budgets with categories
     const budgets = await prisma.budget.findMany({

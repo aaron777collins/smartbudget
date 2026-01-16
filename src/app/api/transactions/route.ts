@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import type { TransactionType } from '@prisma/client';
+import { getTransactionsQuerySchema, validateQueryParams } from '@/lib/validation';
 
 // GET /api/transactions - List transactions with filtering
 export async function GET(request: NextRequest) {
@@ -17,22 +18,36 @@ export async function GET(request: NextRequest) {
     const userId = session.user.id;
     const { searchParams } = new URL(request.url);
 
-    // Parse query parameters
-    const accountId = searchParams.get('accountId');
-    const categoryId = searchParams.get('categoryId');
-    const tagId = searchParams.get('tagId');
-    const startDate = searchParams.get('startDate');
-    const endDate = searchParams.get('endDate');
-    const search = searchParams.get('search');
-    const minAmount = searchParams.get('minAmount');
-    const maxAmount = searchParams.get('maxAmount');
-    const type = searchParams.get('type');
-    const isReconciled = searchParams.get('isReconciled');
-    const isRecurring = searchParams.get('isRecurring');
-    const limit = parseInt(searchParams.get('limit') || '50');
-    const offset = parseInt(searchParams.get('offset') || '0');
-    const sortBy = searchParams.get('sortBy') || 'date';
-    const sortOrder = searchParams.get('sortOrder') || 'desc';
+    // Validate query parameters
+    const validation = validateQueryParams(getTransactionsQuerySchema, searchParams);
+    if (!validation.success || !validation.data) {
+      return NextResponse.json(
+        { error: validation.error?.message, details: validation.error?.details },
+        { status: 400 }
+      );
+    }
+
+    const {
+      accountId,
+      categoryId,
+      subcategoryId,
+      type,
+      startDate,
+      endDate,
+      minAmount,
+      maxAmount,
+      search,
+      tags,
+      excludeTags,
+      uncategorizedOnly,
+      sortBy,
+      sortOrder,
+      page,
+      limit,
+    } = validation.data;
+
+    // Calculate offset from page
+    const offset = (page - 1) * limit;
 
     // Build where clause
     const where: any = { userId };
@@ -45,12 +60,31 @@ export async function GET(request: NextRequest) {
       where.categoryId = categoryId;
     }
 
-    if (tagId) {
-      where.tags = {
-        some: {
-          id: tagId,
-        },
-      };
+    // Handle tags filter (comma-separated IDs)
+    if (tags) {
+      const tagIds = tags.split(',').filter(Boolean);
+      if (tagIds.length > 0) {
+        where.tags = {
+          some: {
+            id: { in: tagIds },
+          },
+        };
+      }
+    }
+
+    if (excludeTags) {
+      const excludeTagIds = excludeTags.split(',').filter(Boolean);
+      if (excludeTagIds.length > 0) {
+        where.tags = {
+          none: {
+            id: { in: excludeTagIds },
+          },
+        };
+      }
+    }
+
+    if (uncategorizedOnly) {
+      where.categoryId = null;
     }
 
     if (startDate || endDate) {
@@ -72,13 +106,13 @@ export async function GET(request: NextRequest) {
     }
 
     // Amount range filters
-    if (minAmount || maxAmount) {
+    if (minAmount !== undefined || maxAmount !== undefined) {
       where.amount = {};
-      if (minAmount) {
-        where.amount.gte = parseFloat(minAmount);
+      if (minAmount !== undefined) {
+        where.amount.gte = minAmount;
       }
-      if (maxAmount) {
-        where.amount.lte = parseFloat(maxAmount);
+      if (maxAmount !== undefined) {
+        where.amount.lte = maxAmount;
       }
     }
 
@@ -87,14 +121,9 @@ export async function GET(request: NextRequest) {
       where.type = type as TransactionType;
     }
 
-    // Reconciliation status filter
-    if (isReconciled !== null && isReconciled !== undefined && isReconciled !== '') {
-      where.isReconciled = isReconciled === 'true';
-    }
-
-    // Recurring status filter
-    if (isRecurring !== null && isRecurring !== undefined && isRecurring !== '') {
-      where.isRecurring = isRecurring === 'true';
+    // Subcategory filter
+    if (subcategoryId) {
+      where.subcategoryId = subcategoryId;
     }
 
     // Fetch transactions
