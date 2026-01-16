@@ -14,7 +14,7 @@ IN_PROGRESS
 - [x] Task 1.3: Run database backup before deployment
 
 ### Block 2: Build Updated Docker Image
-- [ ] Task 2.1: Stop current container gracefully
+- [x] Task 2.1: Stop current container gracefully
 - [ ] Task 2.2: Build new Docker image
 - [ ] Task 2.3: Verify database migrations ready
 
@@ -51,6 +51,13 @@ IN_PROGRESS
   - Risk: Low - deployment only updates app code, not database
   - No data dump needed - Supabase handles persistence and backups
   - Rollback strategy: Restore previous Docker image (database unchanged)
+
+### Iteration 4
+- Task 2.1: Stopped current container gracefully
+  - Command: `docker compose down` (note: using v2 syntax, not docker-compose)
+  - Container smartbudget-app stopped, removed successfully
+  - No errors during shutdown
+  - Previous container was healthy, running for 24 hours
 
 ## Notes
 - All required environment variables are present in .env file
