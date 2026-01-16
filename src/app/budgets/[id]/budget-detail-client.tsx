@@ -285,6 +285,7 @@ export default function BudgetDetailClient({ budgetId }: { budgetId: string }) {
             size="icon"
             onClick={() => fetchProgress()}
             disabled={isRefreshing}
+            aria-label="Refresh budget progress"
           >
             <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
           </Button>
@@ -295,7 +296,7 @@ export default function BudgetDetailClient({ budgetId }: { budgetId: string }) {
           >
             {autoRefresh ? 'Auto-refresh ON' : 'Auto-refresh OFF'}
           </Button>
-          <Button variant="outline" size="icon" disabled>
+          <Button variant="outline" size="icon" disabled aria-label="Edit budget (coming soon)">
             <Edit className="h-4 w-4" />
           </Button>
           <Button
@@ -303,6 +304,7 @@ export default function BudgetDetailClient({ budgetId }: { budgetId: string }) {
             size="icon"
             onClick={deleteBudget}
             className="text-red-500 hover:text-red-700 hover:bg-red-50"
+            aria-label="Delete budget"
           >
             <Trash2 className="h-4 w-4" />
           </Button>

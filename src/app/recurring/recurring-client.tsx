@@ -241,6 +241,7 @@ export default function RecurringClient() {
                         variant="ghost"
                         size="icon"
                         onClick={() => openDeleteDialog(rule.id)}
+                        aria-label="Delete recurring transaction"
                       >
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>

@@ -191,7 +191,7 @@ export default function BudgetAnalyticsClient() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" asChild>
-            <Link href="/budgets">
+            <Link href="/budgets" aria-label="Back to budgets">
               <ArrowLeft className="h-4 w-4" />
             </Link>
           </Button>
@@ -215,6 +215,7 @@ export default function BudgetAnalyticsClient() {
             size="icon"
             onClick={handleRefresh}
             disabled={refreshing}
+            aria-label="Refresh analytics"
           >
             <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
           </Button>

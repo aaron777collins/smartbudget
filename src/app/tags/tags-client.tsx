@@ -269,6 +269,7 @@ export default function TagsClient() {
                       size="icon"
                       className="h-7 w-7"
                       onClick={() => openEditDialog(tag)}
+                      aria-label="Edit tag"
                     >
                       <Edit className="h-3.5 w-3.5" />
                     </Button>
@@ -277,6 +278,7 @@ export default function TagsClient() {
                       size="icon"
                       className="h-7 w-7"
                       onClick={() => openDeleteDialog(tag)}
+                      aria-label="Delete tag"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>

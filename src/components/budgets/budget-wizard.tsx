@@ -572,6 +572,7 @@ export default function BudgetWizard() {
                         size="icon"
                         onClick={() => removeCategory(allocation.categoryId)}
                         className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                        aria-label="Remove category"
                       >
                         <Minus className="h-4 w-4" />
                       </Button>
