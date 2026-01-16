@@ -1,0 +1,101 @@
+
+> smartbudget@1.0.0 build
+> next build
+
+▲ Next.js 16.1.2 (Turbopack)
+- Environments: .env
+- Experiments (use with caution):
+  · optimizePackageImports
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 14.4s
+  Running TypeScript ...
+  Collecting page data using 11 workers ...
+  Generating static pages using 11 workers (0/58) ...
+  Generating static pages using 11 workers (14/58) 
+  Generating static pages using 11 workers (28/58) 
+  Generating static pages using 11 workers (43/58) 
+✓ Generating static pages using 11 workers (58/58) in 596.9ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /accounts
+├ ƒ /api/accounts
+├ ƒ /api/accounts/[id]
+├ ƒ /api/auth/[...nextauth]
+├ ƒ /api/auth/signup
+├ ƒ /api/budgets
+├ ƒ /api/budgets/[id]
+├ ƒ /api/budgets/[id]/forecast
+├ ƒ /api/budgets/[id]/progress
+├ ƒ /api/budgets/analytics
+├ ƒ /api/budgets/templates
+├ ƒ /api/categories
+├ ƒ /api/categories/[id]/subcategories
+├ ƒ /api/dashboard/cash-flow-sankey
+├ ƒ /api/dashboard/category-breakdown
+├ ƒ /api/dashboard/category-correlation
+├ ƒ /api/dashboard/category-heatmap
+├ ƒ /api/dashboard/overview
+├ ƒ /api/dashboard/spending-trends
+├ ƒ /api/feedback
+├ ƒ /api/filter-presets
+├ ƒ /api/filter-presets/[id]
+├ ƒ /api/goals
+├ ƒ /api/goals/[id]
+├ ƒ /api/goals/[id]/progress
+├ ƒ /api/health
+├ ƒ /api/import/parse-csv
+├ ƒ /api/import/parse-ofx
+├ ƒ /api/insights/anomalies
+├ ƒ /api/insights/savings-opportunities
+├ ƒ /api/insights/spending-patterns
+├ ƒ /api/insights/subscriptions
+├ ƒ /api/insights/weekly-digest
+├ ƒ /api/jobs
+├ ƒ /api/jobs/[id]
+├ ƒ /api/jobs/process
+├ ƒ /api/merchants/normalize
+├ ƒ /api/merchants/research
+├ ƒ /api/merchants/stats
+├ ƒ /api/ml/stats
+├ ƒ /api/ml/train
+├ ƒ /api/recurring-rules
+├ ƒ /api/recurring-rules/[id]
+├ ƒ /api/recurring-rules/detect
+├ ƒ /api/recurring-rules/upcoming
+├ ƒ /api/tags
+├ ƒ /api/tags/[id]
+├ ƒ /api/transactions
+├ ƒ /api/transactions/[id]
+├ ƒ /api/transactions/[id]/split
+├ ƒ /api/transactions/[id]/tags
+├ ƒ /api/transactions/categorize
+├ ƒ /api/transactions/export
+├ ƒ /api/transactions/import
+├ ƒ /api/user/settings
+├ ○ /auth/error
+├ ○ /auth/signin
+├ ○ /auth/signup
+├ ƒ /budgets
+├ ƒ /budgets/[id]
+├ ○ /budgets/analytics
+├ ƒ /budgets/create
+├ ƒ /dashboard
+├ ○ /goals
+├ ○ /import
+├ ƒ /insights
+├ ○ /jobs
+├ ƒ /recurring
+├ ○ /settings
+├ ƒ /tags
+└ ○ /transactions
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
