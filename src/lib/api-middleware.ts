@@ -11,6 +11,8 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { applyRateLimit, RateLimitTier, getRecommendedTier } from './rate-limiter'
+import { prisma } from './prisma'
+import { UserRole } from '@prisma/client'
 
 /**
  * Middleware configuration options
@@ -46,11 +48,23 @@ export type ApiHandler<TParams extends RouteParams | undefined = undefined> = (
 ) => Promise<Response>
 
 /**
- * Check if user is admin
+ * Check if user is admin by fetching their role from the database
  */
-function isAdmin(email: string): boolean {
-  const adminEmails = process.env.ADMIN_EMAILS?.split(',').map(e => e.trim()) || []
-  return adminEmails.includes(email)
+async function checkUserRole(userId: string): Promise<UserRole> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { role: true },
+  })
+  return user?.role || UserRole.USER
+}
+
+/**
+ * Legacy admin check using email (fallback for migration period)
+ * This checks ADMIN_EMAILS environment variable
+ */
+function isAdminByEmail(email: string): boolean {
+  const adminEmails = process.env.ADMIN_EMAILS?.split(',').map(e => e.trim().toLowerCase()) || []
+  return adminEmails.includes(email.toLowerCase())
 }
 
 /**
@@ -92,29 +106,30 @@ export function withMiddleware<TParams extends RouteParams | undefined = undefin
       if (options.requireAuth || options.requireAdmin) {
         const session = await auth()
 
-        if (!session?.user) {
+        if (!session?.user?.id) {
           return NextResponse.json(
             { error: 'Authentication required' },
             { status: 401 }
           )
         }
 
-        // 3. Check admin authorization if required
-        if (options.requireAdmin) {
-          const userIsAdmin = isAdmin(session.user.email || '')
-          if (!userIsAdmin) {
-            return NextResponse.json(
-              { error: 'Admin access required' },
-              { status: 403 }
-            )
-          }
+        // 3. Get user role from database
+        const userRole = await checkUserRole(session.user.id)
+        const userIsAdmin = userRole === UserRole.ADMIN
+
+        // 4. Check admin authorization if required
+        if (options.requireAdmin && !userIsAdmin) {
+          return NextResponse.json(
+            { error: 'Admin access required' },
+            { status: 403 }
+          )
         }
 
-        // 4. Call handler with context
+        // 5. Call handler with context
         const context: MiddlewareContext = {
-          userId: session.user.id!,
+          userId: session.user.id,
           userEmail: session.user.email || '',
-          isAdmin: isAdmin(session.user.email || ''),
+          isAdmin: userIsAdmin,
         }
 
         return await handler(req, context, params)

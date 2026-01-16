@@ -4,12 +4,12 @@
  * Processes pending jobs from the queue.
  * Can be called manually or via a cron job.
  *
- * SECURITY: Admin-only access required
+ * SECURITY: Admin-only access required (using RBAC)
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { auth } from '@/auth';
+import { withAdmin, MiddlewareContext } from '@/lib/api-middleware';
 import { processPendingJobs } from '@/lib/job-queue';
 
 /**
@@ -20,17 +20,6 @@ const processJobsSchema = z.object({
 });
 
 /**
- * Check if user is an admin
- * Admins are defined via ADMIN_EMAILS environment variable (comma-separated)
- */
-function isAdmin(email: string | null | undefined): boolean {
-  if (!email) return false;
-
-  const adminEmails = process.env.ADMIN_EMAILS?.split(',').map(e => e.trim().toLowerCase()) || [];
-  return adminEmails.includes(email.toLowerCase());
-}
-
-/**
  * POST /api/jobs/process
  * Process pending jobs
  *
@@ -39,27 +28,13 @@ function isAdmin(email: string | null | undefined): boolean {
  * 2. Manually by an admin user
  *
  * @requires Authentication - User must be logged in
- * @requires Authorization - User must be an admin (defined in ADMIN_EMAILS env var)
+ * @requires Authorization - User must have ADMIN role in database
  */
-export async function POST(request: NextRequest) {
+async function handleProcessJobs(
+  request: Request,
+  context: MiddlewareContext
+): Promise<Response> {
   try {
-    // Authentication check
-    const session = await auth();
-    if (!session?.user?.email) {
-      return NextResponse.json(
-        { error: 'Unauthorized - Authentication required' },
-        { status: 401 }
-      );
-    }
-
-    // Authorization check - admin only
-    if (!isAdmin(session.user.email)) {
-      return NextResponse.json(
-        { error: 'Forbidden - Admin access required' },
-        { status: 403 }
-      );
-    }
-
     // Parse and validate input
     const body = await request.json().catch(() => ({}));
     const validationResult = processJobsSchema.safeParse(body);
@@ -82,6 +57,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: `Processing up to ${limit} pending jobs`,
+      processedBy: context.userEmail,
     });
   } catch (error) {
     console.error('Process jobs error:', error);
@@ -94,3 +70,6 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+// Export with admin middleware that checks database role
+export const POST = withAdmin(handleProcessJobs);
