@@ -50,10 +50,30 @@ IN_PROGRESS
 
 **Committed:** a37ca32 - feat: Replace all hardcoded Tailwind colors with design tokens
 
+### Task 2: Remove TypeScript `any` Types - IN PROGRESS ⚙️
+
+**Started:** Working through files with the most `any` occurrences
+
+**Files Modified:** 1 file (so far)
+- src/components/dashboard/cash-flow-sankey.tsx (15 occurrences removed → 0 remaining)
+
+**Changes Made:**
+- Created proper TypeScript interfaces for D3 sankey nodes and links
+- Replaced all `any` type annotations in D3 callbacks with `ExtendedSankeyNode` and `ExtendedSankeyLink`
+- Added null coalescing operators for optional properties (x0, y0, x1, y1)
+- Maintained all existing functionality while improving type safety
+
+**Verification:**
+- ✅ Zero `any` types remaining in cash-flow-sankey.tsx
+- ✅ TypeScript compilation passes (pre-existing Recharts errors unrelated)
+
+**Next Steps:**
+- Continue with remaining 35 files containing `any` types
+- Priority: job-queue.ts (8), API routes (17), other components
+
 ## Notes
 
-- Build system has pre-existing Turbopack module resolution issue (unrelated to color changes)
-- TypeScript has pre-existing Recharts type errors (unrelated to color changes)
-- All color replacements maintain full backward compatibility
-- Next iteration should focus on Task 2: Remove TypeScript `any` types
+- Build system has pre-existing Turbopack module resolution issue (unrelated to changes)
+- TypeScript has pre-existing Recharts type errors (unrelated to changes)
+- Task 2 is in progress: 1/36 files completed (cash-flow-sankey.tsx)
 

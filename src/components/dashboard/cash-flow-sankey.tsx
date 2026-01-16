@@ -32,6 +32,15 @@ interface ExtendedSankeyNode extends SankeyNode<{}, {}> {
 
 interface ExtendedSankeyLink extends SankeyLink<ExtendedSankeyNode, {}> {
   value: number;
+  width?: number;
+  source: ExtendedSankeyNode;
+  target: ExtendedSankeyNode;
+}
+
+// Type for the computed sankey graph
+interface SankeyGraph {
+  nodes: ExtendedSankeyNode[];
+  links: ExtendedSankeyLink[];
 }
 
 interface CashFlowSankeyProps {
@@ -108,7 +117,8 @@ export function CashFlowSankey({ timeframe }: CashFlowSankeyProps) {
         [width - margin.right, height - margin.bottom],
       ]);
 
-    const { nodes, links } = sankeyGenerator(sankeyData as any);
+    const graph = sankeyGenerator(sankeyData as SankeyGraph) as SankeyGraph;
+    const { nodes, links } = graph;
 
     // Add links
     g.append('g')
@@ -117,12 +127,12 @@ export function CashFlowSankey({ timeframe }: CashFlowSankeyProps) {
       .join('path')
       .attr('d', sankeyLinkHorizontal())
       .attr('fill', 'none')
-      .attr('stroke', (d: any) => {
+      .attr('stroke', (d: ExtendedSankeyLink) => {
         // Use source node color or default
-        const sourceNode = d.source as ExtendedSankeyNode;
+        const sourceNode = d.source;
         return sourceNode.color || colors.linkDefault;
       })
-      .attr('stroke-width', (d: any) => Math.max(1, d.width || 0))
+      .attr('stroke-width', (d: ExtendedSankeyLink) => Math.max(1, d.width || 0))
       .attr('opacity', 0.4)
       .on('mouseover', function () {
         d3.select(this).attr('opacity', 0.7);
@@ -131,7 +141,7 @@ export function CashFlowSankey({ timeframe }: CashFlowSankeyProps) {
         d3.select(this).attr('opacity', 0.4);
       })
       .append('title')
-      .text((d: any) => `${formatCurrency(d.value)}`);
+      .text((d: ExtendedSankeyLink) => `${formatCurrency(d.value)}`);
 
     // Add nodes
     const node = g
@@ -142,10 +152,10 @@ export function CashFlowSankey({ timeframe }: CashFlowSankeyProps) {
 
     node
       .append('rect')
-      .attr('x', (d: any) => d.x0)
-      .attr('y', (d: any) => d.y0)
-      .attr('height', (d: any) => Math.max(0, d.y1 - d.y0))
-      .attr('width', (d: any) => d.x1 - d.x0)
+      .attr('x', (d: ExtendedSankeyNode) => d.x0 ?? 0)
+      .attr('y', (d: ExtendedSankeyNode) => d.y0 ?? 0)
+      .attr('height', (d: ExtendedSankeyNode) => Math.max(0, (d.y1 ?? 0) - (d.y0 ?? 0)))
+      .attr('width', (d: ExtendedSankeyNode) => (d.x1 ?? 0) - (d.x0 ?? 0))
       .attr('fill', (d: ExtendedSankeyNode) => d.color || '#2563EB')
       .attr('opacity', 0.8)
       .on('mouseover', function () {
@@ -155,7 +165,7 @@ export function CashFlowSankey({ timeframe }: CashFlowSankeyProps) {
         d3.select(this).attr('opacity', 0.8);
       })
       .append('title')
-      .text((d: any) => {
+      .text((d: ExtendedSankeyNode) => {
         const value = d.value || 0;
         return `${d.name}\n${formatCurrency(value)}`;
       });
@@ -163,13 +173,15 @@ export function CashFlowSankey({ timeframe }: CashFlowSankeyProps) {
     // Add labels
     node
       .append('text')
-      .attr('x', (d: any) => {
+      .attr('x', (d: ExtendedSankeyNode) => {
         // Position labels to the left or right based on position
-        return d.x0 < width / 2 ? d.x0 - 6 : d.x1 + 6;
+        const x0 = d.x0 ?? 0;
+        const x1 = d.x1 ?? 0;
+        return x0 < width / 2 ? x0 - 6 : x1 + 6;
       })
-      .attr('y', (d: any) => (d.y0 + d.y1) / 2)
+      .attr('y', (d: ExtendedSankeyNode) => ((d.y0 ?? 0) + (d.y1 ?? 0)) / 2)
       .attr('dy', '0.35em')
-      .attr('text-anchor', (d: any) => (d.x0 < width / 2 ? 'end' : 'start'))
+      .attr('text-anchor', (d: ExtendedSankeyNode) => ((d.x0 ?? 0) < width / 2 ? 'end' : 'start'))
       .attr('font-size', '12px')
       .attr('fill', colors.text)
       .text((d: ExtendedSankeyNode) => d.name || '');
@@ -177,15 +189,17 @@ export function CashFlowSankey({ timeframe }: CashFlowSankeyProps) {
     // Add value labels on nodes
     node
       .append('text')
-      .attr('x', (d: any) => {
-        return d.x0 < width / 2 ? d.x0 - 6 : d.x1 + 6;
+      .attr('x', (d: ExtendedSankeyNode) => {
+        const x0 = d.x0 ?? 0;
+        const x1 = d.x1 ?? 0;
+        return x0 < width / 2 ? x0 - 6 : x1 + 6;
       })
-      .attr('y', (d: any) => (d.y0 + d.y1) / 2 + 16)
+      .attr('y', (d: ExtendedSankeyNode) => ((d.y0 ?? 0) + (d.y1 ?? 0)) / 2 + 16)
       .attr('dy', '0.35em')
-      .attr('text-anchor', (d: any) => (d.x0 < width / 2 ? 'end' : 'start'))
+      .attr('text-anchor', (d: ExtendedSankeyNode) => ((d.x0 ?? 0) < width / 2 ? 'end' : 'start'))
       .attr('font-size', '10px')
       .attr('fill', colors.textMuted)
-      .text((d: any) => formatCurrency(d.value || 0));
+      .text((d: ExtendedSankeyNode) => formatCurrency(d.value || 0));
   }, [data]);
 
   if (loading) {
