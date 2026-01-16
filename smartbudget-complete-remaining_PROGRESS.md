@@ -48,3 +48,12 @@ IN_PROGRESS
 - ✅ TypeScript type checks pass
 - ✅ Dark mode compatible via CSS custom properties
 
+**Committed:** a37ca32 - feat: Replace all hardcoded Tailwind colors with design tokens
+
+## Notes
+
+- Build system has pre-existing Turbopack module resolution issue (unrelated to color changes)
+- TypeScript has pre-existing Recharts type errors (unrelated to color changes)
+- All color replacements maintain full backward compatibility
+- Next iteration should focus on Task 2: Remove TypeScript `any` types
+
