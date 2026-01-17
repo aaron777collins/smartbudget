@@ -8,7 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Calendar, DollarSign, AlertCircle, ExternalLink } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { HoverScale } from '@/components/ui/animated';
+import { HoverScale, CountUp } from '@/components/ui/animated';
 
 interface UpcomingExpense {
   id: string;
@@ -148,7 +148,14 @@ export function UpcomingExpenses() {
             </div>
             <div className="text-center">
               <p className="text-xs text-muted-foreground">Amount</p>
-              <p className="font-bold font-mono">${summary.totalAmount.toFixed(0)}</p>
+              <p className="font-bold font-mono">
+                <CountUp
+                  to={summary.totalAmount}
+                  duration={1.2}
+                  decimals={0}
+                  prefix="$"
+                />
+              </p>
             </div>
             <div className="text-center">
               <p className="text-xs text-muted-foreground">Due Soon</p>
@@ -181,7 +188,11 @@ export function UpcomingExpenses() {
               <div className="text-right">
                 <p className="font-bold font-mono flex items-center gap-1">
                   <DollarSign className="h-4 w-4" />
-                  {parseFloat(expense.amount.toString()).toFixed(2)}
+                  <CountUp
+                    to={parseFloat(expense.amount.toString())}
+                    duration={1.2}
+                    decimals={2}
+                  />
                 </p>
               </div>
             </div>
