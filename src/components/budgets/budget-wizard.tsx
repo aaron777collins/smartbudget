@@ -606,7 +606,7 @@ export default function BudgetWizard() {
             <div>
               <h3 className="text-lg font-semibold mb-4">Review Your Budget</h3>
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label className="text-sm font-medium text-muted-foreground">Name</Label>
                     <p className="font-semibold">{name}</p>

@@ -261,9 +261,9 @@ export default function BudgetDetailClient({ budgetId }: { budgetId: string }) {
   const projectedTotal = daysElapsed > 0 && progress ? (totalSpent / daysElapsed) * progress.daysInPeriod : totalSpent;
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-4 md:p-6 space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-start">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
         <div>
           <Link href="/budgets">
             <Button variant="ghost" size="sm" className="mb-2">
@@ -272,7 +272,7 @@ export default function BudgetDetailClient({ budgetId }: { budgetId: string }) {
             </Button>
           </Link>
           <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold">{budget.name}</h1>
+            <h1 className="text-2xl md:text-3xl font-bold">{budget.name}</h1>
             {budget.isActive && <Badge variant="default">Active</Badge>}
           </div>
           <p className="text-muted-foreground mt-1">
@@ -325,7 +325,7 @@ export default function BudgetDetailClient({ budgetId }: { budgetId: string }) {
           </div>
           <Progress value={percentageUsed} className={getProgressColor(percentageUsed)} />
 
-          <div className="grid grid-cols-3 gap-4 pt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
             <div className="text-center">
               <p className="text-sm text-muted-foreground">Spent</p>
               <p className="text-2xl font-bold font-mono text-error">
@@ -369,7 +369,7 @@ export default function BudgetDetailClient({ budgetId }: { budgetId: string }) {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-muted-foreground">Spending Pace</p>
                 <div className="flex items-center gap-2 mt-1">

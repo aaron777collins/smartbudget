@@ -141,7 +141,7 @@ export default function BudgetsClient() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-4 md:p-6 space-y-6">
       {success && (
         <Pulse scale={1.02} duration={0.6}>
           <Alert className="bg-success/10 border-success">
@@ -151,9 +151,9 @@ export default function BudgetsClient() {
         </Pulse>
       )}
 
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Budgets</h1>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Budgets</h1>
           <p className="text-muted-foreground mt-1">
             Create and manage your budgets to track spending
           </p>
