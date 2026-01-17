@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Shake } from '@/components/ui/animated';
 import { Wallet, CreditCard, Landmark, PiggyBank, TrendingUp, HelpCircle, Trash2 } from 'lucide-react';
 
 interface Account {
@@ -234,9 +235,11 @@ export function AccountFormDialog({ open, onClose, account }: AccountFormDialogP
           <form onSubmit={handleSubmit}>
             <div className="space-y-4 py-4">
               {error && (
-                <div className="bg-destructive/10 border border-destructive rounded-md p-3 text-sm text-destructive">
-                  {error}
-                </div>
+                <Shake trigger={!!error} duration={0.5} intensity={10}>
+                  <div className="bg-destructive/10 border border-destructive rounded-md p-3 text-sm text-destructive">
+                    {error}
+                  </div>
+                </Shake>
               )}
 
               {/* Account Name */}

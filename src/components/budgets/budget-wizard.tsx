@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Shake } from '@/components/ui/animated';
 import {
   ArrowLeft,
   ArrowRight,
@@ -290,10 +291,12 @@ export default function BudgetWizard() {
 
       <CardContent className="space-y-6">
         {error && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
+          <Shake trigger={!!error} duration={0.5} intensity={10}>
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          </Shake>
         )}
 
         {/* Step 1: Basic Info */}

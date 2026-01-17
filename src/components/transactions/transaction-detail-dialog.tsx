@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Shake } from '@/components/ui/animated';
 import { Calendar, DollarSign, Store, FileText, Tag, Trash2, Search, Loader2, Split } from 'lucide-react';
 import { CategorySelector } from './category-selector';
 import { SplitTransactionEditor } from './split-transaction-editor';
@@ -555,11 +556,13 @@ export function TransactionDetailDialog({
 
               {/* Research Error */}
               {researchError && (
-                <div className="p-4 bg-error/10 border border-error/20 rounded-lg">
-                  <p className="text-sm text-error">
-                    <strong>Research failed:</strong> {researchError}
-                  </p>
-                </div>
+                <Shake trigger={!!researchError} duration={0.5} intensity={10}>
+                  <div className="p-4 bg-error/10 border border-error/20 rounded-lg">
+                    <p className="text-sm text-error">
+                      <strong>Research failed:</strong> {researchError}
+                    </p>
+                  </div>
+                </Shake>
               )}
 
               <div className="space-y-2">

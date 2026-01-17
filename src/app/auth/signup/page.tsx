@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Shake } from "@/components/ui/animated"
 
 export default function SignUpPage() {
   const router = useRouter()
@@ -100,9 +101,11 @@ export default function SignUpPage() {
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             {error && (
-              <div className="rounded-md bg-error/10 p-3 text-sm text-error ">
-                {error}
-              </div>
+              <Shake trigger={!!error} duration={0.5} intensity={10}>
+                <div className="rounded-md bg-error/10 p-3 text-sm text-error ">
+                  {error}
+                </div>
+              </Shake>
             )}
             <div className="space-y-2">
               <Label htmlFor="username">Username</Label>

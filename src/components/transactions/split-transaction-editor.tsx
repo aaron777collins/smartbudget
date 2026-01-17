@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Shake } from '@/components/ui/animated';
 import { Plus, X, AlertCircle, Check } from 'lucide-react';
 import {
   Select,
@@ -386,10 +387,12 @@ export function SplitTransactionEditor({
 
       {/* Error Display */}
       {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
+        <Shake trigger={!!error} duration={0.5} intensity={10}>
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        </Shake>
       )}
 
       {/* Success Display */}

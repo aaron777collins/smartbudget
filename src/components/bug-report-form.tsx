@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Shake } from "@/components/ui/animated"
 import { Loader2, Check, AlertCircle, Bug } from "lucide-react"
 
 interface BugReportFormProps {
@@ -121,10 +122,12 @@ export function BugReportForm({ onSuccess }: BugReportFormProps) {
       )}
 
       {submitStatus === "error" && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{errorMessage}</AlertDescription>
-        </Alert>
+        <Shake trigger={submitStatus === "error"} duration={0.5} intensity={10}>
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{errorMessage}</AlertDescription>
+          </Alert>
+        </Shake>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
