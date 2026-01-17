@@ -495,12 +495,12 @@ export default function BudgetWizard() {
                         <strong>Based on:</strong> {templateData.analysis.periodsAnalyzed} months, {templateData.analysis.transactionCount} transactions
                       </p>
                       <p>
-                        <strong>Monthly Average:</strong> ${templateData.analysis.monthlyAverage.toLocaleString()}
+                        <strong>Monthly Average:</strong> <span className="font-mono">${templateData.analysis.monthlyAverage.toLocaleString()}</span>
                       </p>
                     </div>
                   )}
                   <p className="text-sm text-muted-foreground">
-                    {templateData.categories.length} categories • ${templateData.totalAmount?.toLocaleString() || 0} total
+                    {templateData.categories.length} categories • <span className="font-mono">${templateData.totalAmount?.toLocaleString() || 0}</span> total
                   </p>
                 </CardContent>
               </Card>
@@ -581,7 +581,7 @@ export default function BudgetWizard() {
               <CardContent className="p-4">
                 <div className="flex justify-between items-center">
                   <span className="font-semibold">Total Budget:</span>
-                  <span className="text-2xl font-bold text-primary">
+                  <span className="text-2xl font-bold font-mono text-primary">
                     ${allocations.reduce((sum, a) => sum + (a.amount || 0), 0).toLocaleString()}
                   </span>
                 </div>
@@ -625,7 +625,7 @@ export default function BudgetWizard() {
                     {allocations.map((allocation) => (
                       <div key={allocation.categoryId} className="flex justify-between items-center p-2 bg-muted rounded">
                         <span>{allocation.categoryName}</span>
-                        <span className="font-semibold">${(allocation.amount || 0).toLocaleString()}</span>
+                        <span className="font-semibold font-mono">${(allocation.amount || 0).toLocaleString()}</span>
                       </div>
                     ))}
                   </div>
@@ -635,7 +635,7 @@ export default function BudgetWizard() {
                   <CardContent className="p-4">
                     <div className="flex justify-between items-center">
                       <span className="font-semibold text-lg">Total Budget:</span>
-                      <span className="text-3xl font-bold text-primary">
+                      <span className="text-3xl font-bold font-mono text-primary">
                         ${totalAmount.toLocaleString()}
                       </span>
                     </div>

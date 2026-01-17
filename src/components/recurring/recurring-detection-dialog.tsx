@@ -244,7 +244,7 @@ export function RecurringDetectionDialog({
                             </div>
                             <div className="flex items-center gap-1 text-muted-foreground">
                               <DollarSign className="h-3 w-3" />
-                              <span>${pattern.amount.toFixed(2)}</span>
+                              <span className="font-mono">${pattern.amount.toFixed(2)}</span>
                             </div>
                             <div className="flex items-center gap-1 text-muted-foreground">
                               <Calendar className="h-3 w-3" />

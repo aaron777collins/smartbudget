@@ -489,11 +489,11 @@ export default function TransactionsPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <span
-                        className={
+                        className={`font-mono ${
                           transaction.type === 'DEBIT'
                             ? 'text-error'
                             : 'text-success'
-                        }
+                        }`}
                       >
                         {formatAmount(transaction.amount, transaction.type)}
                       </span>

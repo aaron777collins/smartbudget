@@ -148,7 +148,7 @@ export function UpcomingExpenses() {
             </div>
             <div className="text-center">
               <p className="text-xs text-muted-foreground">Amount</p>
-              <p className="font-bold">${summary.totalAmount.toFixed(0)}</p>
+              <p className="font-bold font-mono">${summary.totalAmount.toFixed(0)}</p>
             </div>
             <div className="text-center">
               <p className="text-xs text-muted-foreground">Due Soon</p>
@@ -179,7 +179,7 @@ export function UpcomingExpenses() {
                 </p>
               </div>
               <div className="text-right">
-                <p className="font-bold flex items-center gap-1">
+                <p className="font-bold font-mono flex items-center gap-1">
                   <DollarSign className="h-4 w-4" />
                   {parseFloat(expense.amount.toString()).toFixed(2)}
                 </p>

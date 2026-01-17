@@ -358,7 +358,7 @@ export function TransactionDetailDialog({
                 <div>
                   <div className="text-sm text-muted-foreground">Amount</div>
                   <div
-                    className={`text-2xl font-bold ${
+                    className={`text-2xl font-bold font-mono ${
                       transaction.type === 'DEBIT'
                         ? 'text-error'
                         : 'text-success'
@@ -625,7 +625,7 @@ export function TransactionDetailDialog({
                       {transaction.splits.map((split, idx) => (
                         <div key={split.id} className="flex justify-between items-center">
                           <span className="text-muted-foreground">Split {idx + 1}</span>
-                          <Badge variant="secondary">
+                          <Badge variant="secondary" className="font-mono">
                             ${parseFloat(split.amount).toFixed(2)}
                             {split.percentage && ` (${parseFloat(split.percentage).toFixed(1)}%)`}
                           </Badge>

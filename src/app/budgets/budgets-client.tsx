@@ -196,7 +196,7 @@ export default function BudgetsClient() {
                 <div className="space-y-2">
                   <div className="flex items-center text-sm">
                     <DollarSign className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span className="font-semibold">
+                    <span className="font-semibold font-mono">
                       ${Number(budget.totalAmount).toLocaleString()}
                     </span>
                     <span className="text-muted-foreground ml-1">total</span>
