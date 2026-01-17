@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Shake } from "@/components/ui/animated"
+import { Shake, Pulse } from "@/components/ui/animated"
 import { Loader2, Check, AlertCircle, Bug } from "lucide-react"
 
 interface BugReportFormProps {
@@ -113,12 +113,14 @@ export function BugReportForm({ onSuccess }: BugReportFormProps) {
       </div>
 
       {submitStatus === "success" && (
-        <Alert className="bg-success/10 border-success/20">
-          <Check className="h-4 w-4 text-success" />
-          <AlertDescription className="text-success">
-            Thank you! Your feedback has been submitted successfully.
-          </AlertDescription>
-        </Alert>
+        <Pulse scale={1.02} duration={0.6}>
+          <Alert className="bg-success/10 border-success/20">
+            <Check className="h-4 w-4 text-success" />
+            <AlertDescription className="text-success">
+              Thank you! Your feedback has been submitted successfully.
+            </AlertDescription>
+          </Alert>
+        </Pulse>
       )}
 
       {submitStatus === "error" && (

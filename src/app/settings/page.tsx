@@ -17,7 +17,7 @@ import {
 import { Switch } from "@/components/ui/switch"
 import { BugReportForm } from "@/components/bug-report-form"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Shake } from "@/components/ui/animated"
+import { Shake, Pulse } from "@/components/ui/animated"
 import {
   Settings as SettingsIcon,
   User,
@@ -167,12 +167,14 @@ export default function SettingsPage() {
         </TabsList>
 
         {saveStatus === "success" && (
-          <Alert className="bg-success/10 border-success/20">
-            <Check className="h-4 w-4 text-success" />
-            <AlertDescription className="text-success">
-              Settings saved successfully!
-            </AlertDescription>
-          </Alert>
+          <Pulse scale={1.02} duration={0.6}>
+            <Alert className="bg-success/10 border-success/20">
+              <Check className="h-4 w-4 text-success" />
+              <AlertDescription className="text-success">
+                Settings saved successfully!
+              </AlertDescription>
+            </Alert>
+          </Pulse>
         )}
 
         {saveStatus === "error" && (

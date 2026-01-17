@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Shake } from '@/components/ui/animated';
+import { Shake, Pulse } from '@/components/ui/animated';
 import { Plus, X, AlertCircle, Check } from 'lucide-react';
 import {
   Select,
@@ -397,10 +397,12 @@ export function SplitTransactionEditor({
 
       {/* Success Display */}
       {success && (
-        <Alert className="border-success/20 text-success">
-          <Check className="h-4 w-4 text-success" />
-          <AlertDescription>Splits saved successfully!</AlertDescription>
-        </Alert>
+        <Pulse scale={1.02} duration={0.6}>
+          <Alert className="border-success/20 text-success">
+            <Check className="h-4 w-4 text-success" />
+            <AlertDescription>Splits saved successfully!</AlertDescription>
+          </Alert>
+        </Pulse>
       )}
 
       {/* Action Buttons */}
