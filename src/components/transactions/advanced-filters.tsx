@@ -21,9 +21,11 @@ import {
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
-import { Filter, X } from 'lucide-react';
+import { Filter, X, AlertCircle } from 'lucide-react';
 import { DateRange } from 'react-day-picker';
 import { Badge } from '@/components/ui/badge';
+import { Shake } from '@/components/ui/animated';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface Account {
   id: string;
@@ -71,6 +73,7 @@ export function AdvancedFilters({
   const [categories, setCategories] = useState<Category[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
   const [localFilters, setLocalFilters] = useState<TransactionFilters>(filters);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchAccounts();
@@ -88,9 +91,13 @@ export function AdvancedFilters({
       if (response.ok) {
         const data = await response.json();
         setAccounts(data);
+      } else {
+        throw new Error('Failed to fetch accounts');
       }
-    } catch (error) {
-      console.error('Error fetching accounts:', error);
+    } catch (err) {
+      console.error('Error fetching accounts:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load accounts';
+      setError(errorMessage);
     }
   };
 
@@ -100,9 +107,13 @@ export function AdvancedFilters({
       if (response.ok) {
         const data = await response.json();
         setCategories(data);
+      } else {
+        throw new Error('Failed to fetch categories');
       }
-    } catch (error) {
-      console.error('Error fetching categories:', error);
+    } catch (err) {
+      console.error('Error fetching categories:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load categories';
+      setError(errorMessage);
     }
   };
 
@@ -112,9 +123,13 @@ export function AdvancedFilters({
       if (response.ok) {
         const data = await response.json();
         setTags(data);
+      } else {
+        throw new Error('Failed to fetch tags');
       }
-    } catch (error) {
-      console.error('Error fetching tags:', error);
+    } catch (err) {
+      console.error('Error fetching tags:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load tags';
+      setError(errorMessage);
     }
   };
 
@@ -157,6 +172,15 @@ export function AdvancedFilters({
             Apply filters to narrow down your transaction search
           </DialogDescription>
         </DialogHeader>
+
+        {error && (
+          <Shake trigger={!!error} duration={0.5} intensity={10}>
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          </Shake>
+        )}
 
         <div className="grid gap-6 py-4">
           {/* Account Filter */}

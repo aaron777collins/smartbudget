@@ -13,6 +13,8 @@ import {
   Circle,
   AlertCircle,
 } from 'lucide-react';
+import { Shake } from '@/components/ui/animated';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 // Types
 type GoalType = 'SAVINGS' | 'DEBT_PAYOFF' | 'NET_WORTH' | 'INVESTMENT';
@@ -68,6 +70,7 @@ export function GoalsClient() {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
@@ -104,6 +107,7 @@ export function GoalsClient() {
 
   const handleCreateGoal = async (goalData: Partial<Goal>) => {
     try {
+      setActionError(null);
       const response = await fetch('/api/goals', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -118,12 +122,14 @@ export function GoalsClient() {
       await fetchGoals();
       setShowCreateModal(false);
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to create goal');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create goal';
+      setActionError(errorMessage);
     }
   };
 
   const handleUpdateGoal = async (goalId: string, updates: Partial<Goal>) => {
     try {
+      setActionError(null);
       const response = await fetch(`/api/goals/${goalId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -139,7 +145,8 @@ export function GoalsClient() {
       setEditingGoal(null);
       setSelectedGoal(null);
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to update goal');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update goal';
+      setActionError(errorMessage);
     }
   };
 
@@ -147,6 +154,7 @@ export function GoalsClient() {
     if (!confirm('Are you sure you want to delete this goal?')) return;
 
     try {
+      setActionError(null);
       const response = await fetch(`/api/goals/${goalId}`, {
         method: 'DELETE',
       });
@@ -159,12 +167,14 @@ export function GoalsClient() {
       await fetchGoals();
       setSelectedGoal(null);
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to delete goal');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete goal';
+      setActionError(errorMessage);
     }
   };
 
   const handleAddProgress = async (goalId: string, amount: number) => {
     try {
+      setActionError(null);
       const response = await fetch(`/api/goals/${goalId}/progress`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -181,7 +191,8 @@ export function GoalsClient() {
         await fetchGoalProgress(goalId);
       }
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to update progress');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update progress';
+      setActionError(errorMessage);
     }
   };
 
@@ -203,10 +214,15 @@ export function GoalsClient() {
   if (error) {
     return (
       <div className="p-8">
-        <div className="bg-error/10 border border-error/20 rounded-lg p-4 text-error">
-          <p className="font-semibold">Error loading goals</p>
-          <p className="text-sm">{error}</p>
-        </div>
+        <Shake trigger={!!error} duration={0.5} intensity={10}>
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              <p className="font-semibold">Error loading goals</p>
+              <p className="text-sm">{error}</p>
+            </AlertDescription>
+          </Alert>
+        </Shake>
       </div>
     );
   }
@@ -216,6 +232,15 @@ export function GoalsClient() {
 
   return (
     <div className="p-8 space-y-6">
+      {actionError && (
+        <Shake trigger={!!actionError} duration={0.5} intensity={10}>
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{actionError}</AlertDescription>
+          </Alert>
+        </Shake>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

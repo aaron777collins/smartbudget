@@ -11,8 +11,10 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { Download, FileText, FileSpreadsheet, Loader2 } from 'lucide-react';
+import { Download, FileText, FileSpreadsheet, Loader2, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { Shake } from '@/components/ui/animated';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface ExportDialogProps {
   open: boolean;
@@ -35,9 +37,11 @@ interface ExportDialogProps {
 export function ExportDialog({ open, onOpenChange, filters = {} }: ExportDialogProps) {
   const [selectedFormat, setSelectedFormat] = useState<'csv' | 'json'>('csv');
   const [isExporting, setIsExporting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleExport = async () => {
     setIsExporting(true);
+    setError(null);
 
     try {
       // Build query string with filters
@@ -83,9 +87,11 @@ export function ExportDialog({ open, onOpenChange, filters = {} }: ExportDialogP
       }
 
       onOpenChange(false);
-    } catch (error) {
-      console.error('Export error:', error);
-      toast.error('Failed to export transactions');
+    } catch (err) {
+      console.error('Export error:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to export transactions';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsExporting(false);
     }
@@ -100,6 +106,15 @@ export function ExportDialog({ open, onOpenChange, filters = {} }: ExportDialogP
             Export your transactions in CSV or JSON format. Current filters will be applied to the export.
           </DialogDescription>
         </DialogHeader>
+
+        {error && (
+          <Shake trigger={!!error} duration={0.5} intensity={10}>
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          </Shake>
+        )}
 
         <div className="space-y-6 py-4">
           {/* Format Selection */}

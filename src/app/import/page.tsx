@@ -5,11 +5,13 @@ import { FileUpload, UploadedFile } from "@/components/file-upload";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Info, Upload, FileText, Database, CheckCircle } from "lucide-react";
+import { Info, Upload, FileText, Database, CheckCircle, AlertCircle } from "lucide-react";
+import { Shake } from "@/components/ui/animated";
 
 export default function ImportPage() {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [processingError, setProcessingError] = useState<string | null>(null);
 
   const handleFilesSelected = (files: File[]) => {
     const newFiles: UploadedFile[] = files.map((file) => ({
@@ -29,6 +31,7 @@ export default function ImportPage() {
     if (uploadedFiles.length === 0) return;
 
     setIsProcessing(true);
+    setProcessingError(null);
 
     // Process each file
     for (let i = 0; i < uploadedFiles.length; i++) {
@@ -180,6 +183,7 @@ export default function ImportPage() {
 
     try {
       setIsProcessing(true);
+      setProcessingError(null);
 
       // Import each file's transactions
       for (const uploadedFile of uploadedFiles.filter(f => f.status === "success")) {
@@ -218,9 +222,10 @@ export default function ImportPage() {
       alert(`Successfully imported ${totalTransactions} transactions! Auto-categorization applied where possible.`);
       // Redirect to transactions page
       window.location.href = '/transactions';
-    } catch (error) {
-      console.error('Import error:', error);
-      alert(error instanceof Error ? error.message : 'Failed to import transactions');
+    } catch (err) {
+      console.error('Import error:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to import transactions';
+      setProcessingError(errorMessage);
     } finally {
       setIsProcessing(false);
     }
@@ -249,6 +254,15 @@ export default function ImportPage() {
           Upload your bank statements to automatically import and categorize transactions
         </p>
       </div>
+
+      {processingError && (
+        <Shake trigger={!!processingError} duration={0.5} intensity={10}>
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{processingError}</AlertDescription>
+          </Alert>
+        </Shake>
+      )}
 
       {/* Info Alert */}
       <Alert>

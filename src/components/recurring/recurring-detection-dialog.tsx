@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, TrendingUp, Calendar, DollarSign, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
+import { Shake } from '@/components/ui/animated';
 
 interface RecurringPattern {
   merchantName: string;
@@ -49,9 +50,11 @@ export function RecurringDetectionDialog({
   const [patterns, setPatterns] = useState<RecurringPattern[]>([]);
   const [summary, setSummary] = useState<DetectionSummary | null>(null);
   const [selectedPatterns, setSelectedPatterns] = useState<Set<number>>(new Set());
+  const [error, setError] = useState<string | null>(null);
 
   const detectPatterns = async () => {
     setDetecting(true);
+    setError(null);
     try {
       const response = await fetch('/api/recurring-rules/detect?minOccurrences=3&lookbackMonths=6');
       if (!response.ok) throw new Error('Failed to detect patterns');
@@ -73,9 +76,11 @@ export function RecurringDetectionDialog({
       } else {
         toast.success(`Found ${data.patterns.length} recurring patterns!`);
       }
-    } catch (error) {
-      console.error('Error detecting patterns:', error);
-      toast.error('Failed to detect recurring patterns');
+    } catch (err) {
+      console.error('Error detecting patterns:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to detect recurring patterns';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setDetecting(false);
     }
@@ -83,11 +88,14 @@ export function RecurringDetectionDialog({
 
   const createRules = async () => {
     if (selectedPatterns.size === 0) {
-      toast.warning('Please select at least one pattern to create');
+      const errorMessage = 'Please select at least one pattern to create';
+      setError(errorMessage);
+      toast.warning(errorMessage);
       return;
     }
 
     setLoading(true);
+    setError(null);
     try {
       const selectedPatternsList = Array.from(selectedPatterns).map((idx) => patterns[idx]);
 
@@ -114,9 +122,11 @@ export function RecurringDetectionDialog({
         toast.warning(`Created ${successCount} of ${selectedPatternsList.length} rules`);
         onRulesCreated();
       }
-    } catch (error) {
-      console.error('Error creating rules:', error);
-      toast.error('Failed to create recurring rules');
+    } catch (err) {
+      console.error('Error creating rules:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create recurring rules';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -155,6 +165,15 @@ export function RecurringDetectionDialog({
             Automatically detect recurring patterns from your transaction history
           </DialogDescription>
         </DialogHeader>
+
+        {error && (
+          <Shake trigger={!!error} duration={0.5} intensity={10}>
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          </Shake>
+        )}
 
         {!summary ? (
           <div className="space-y-4">

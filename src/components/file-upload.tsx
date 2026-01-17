@@ -5,6 +5,8 @@ import { useDropzone } from "react-dropzone";
 import { Upload, File, X, CheckCircle2, AlertCircle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Shake } from "@/components/ui/animated";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export interface AccountInfo {
   accountName?: string;
@@ -53,16 +55,39 @@ export function FileUpload({
   maxSize = 10 * 1024 * 1024, // 10MB default
 }: FileUploadProps) {
   const [dragActive, setDragActive] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const onDrop = useCallback(
-    (acceptedFiles: File[]) => {
+    (acceptedFiles: File[], rejectedFiles: any[]) => {
+      setUploadError(null);
+
+      if (rejectedFiles.length > 0) {
+        const errors = rejectedFiles.map(f => {
+          if (f.errors[0]?.code === 'file-too-large') {
+            return `${f.file.name}: File too large (max ${formatFileSize(maxSize)})`;
+          } else if (f.errors[0]?.code === 'file-invalid-type') {
+            return `${f.file.name}: Invalid file type`;
+          }
+          return `${f.file.name}: ${f.errors[0]?.message || 'Upload failed'}`;
+        });
+        setUploadError(errors.join(', '));
+      }
+
       if (acceptedFiles.length > 0) {
         onFilesSelected(acceptedFiles);
       }
       setDragActive(false);
     },
-    [onFilesSelected]
+    [onFilesSelected, maxSize]
   );
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + " " + sizes[i];
+  };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -76,14 +101,6 @@ export function FileUpload({
     onDragEnter: () => setDragActive(true),
     onDragLeave: () => setDragActive(false),
   });
-
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + " " + sizes[i];
-  };
 
   const getStatusIcon = (status: UploadedFile["status"]) => {
     switch (status) {
@@ -102,6 +119,15 @@ export function FileUpload({
 
   return (
     <div className="space-y-4">
+      {uploadError && (
+        <Shake trigger={!!uploadError} duration={0.5} intensity={10}>
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{uploadError}</AlertDescription>
+          </Alert>
+        </Shake>
+      )}
+
       {/* Drop Zone */}
       <Card
         {...getRootProps()}
