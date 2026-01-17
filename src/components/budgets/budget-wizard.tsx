@@ -483,7 +483,7 @@ export default function BudgetWizard() {
             {loadingTemplate && (
               <Card>
                 <CardContent className="pt-6">
-                  <Skeleton className="h-20 w-full" />
+                  <Skeleton className="h-32 w-full" />
                 </CardContent>
               </Card>
             )}
