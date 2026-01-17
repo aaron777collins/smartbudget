@@ -6,8 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { HoverScale } from '@/components/ui/animated';
-import { PlusCircle, Calendar, DollarSign, Target, Trash2, BarChart3 } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { HoverScale, Pulse } from '@/components/ui/animated';
+import { PlusCircle, Calendar, DollarSign, Target, Trash2, BarChart3, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 
 interface BudgetCategory {
@@ -58,6 +59,7 @@ export default function BudgetsClient() {
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string>('');
   const router = useRouter();
 
   useEffect(() => {
@@ -86,6 +88,7 @@ export default function BudgetsClient() {
     }
 
     try {
+      setSuccess('');
       const response = await fetch(`/api/budgets/${id}`, {
         method: 'DELETE',
       });
@@ -96,6 +99,8 @@ export default function BudgetsClient() {
 
       // Refresh budgets list
       fetchBudgets();
+      setSuccess('Budget deleted successfully!');
+      setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to delete budget');
     }
@@ -137,6 +142,15 @@ export default function BudgetsClient() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
+      {success && (
+        <Pulse scale={1.02} duration={0.6}>
+          <Alert className="bg-success/10 border-success">
+            <CheckCircle className="h-4 w-4 text-success" />
+            <AlertDescription className="text-success">{success}</AlertDescription>
+          </Alert>
+        </Pulse>
+      )}
+
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Budgets</h1>

@@ -20,8 +20,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Shake } from '@/components/ui/animated';
-import { Wallet, CreditCard, Landmark, PiggyBank, TrendingUp, HelpCircle, Trash2 } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Shake, Pulse } from '@/components/ui/animated';
+import { Wallet, CreditCard, Landmark, PiggyBank, TrendingUp, HelpCircle, Trash2, CheckCircle } from 'lucide-react';
 
 interface Account {
   id: string;
@@ -90,6 +91,7 @@ export function AccountFormDialog({ open, onClose, account }: AccountFormDialogP
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
@@ -121,12 +123,14 @@ export function AccountFormDialog({ open, onClose, account }: AccountFormDialogP
       });
     }
     setError('');
+    setSuccess('');
     setShowDeleteConfirm(false);
   }, [account, open]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
     setLoading(true);
 
     try {
@@ -157,7 +161,8 @@ export function AccountFormDialog({ open, onClose, account }: AccountFormDialogP
         throw new Error(data.error || 'Failed to save account');
       }
 
-      onClose();
+      setSuccess(isEditing ? 'Account updated successfully!' : 'Account created successfully!');
+      setTimeout(() => onClose(), 1500);
     } catch (error) {
       console.error('Error saving account:', error);
       setError(error instanceof Error ? error.message : 'Failed to save account');
@@ -171,6 +176,7 @@ export function AccountFormDialog({ open, onClose, account }: AccountFormDialogP
 
     setLoading(true);
     setError('');
+    setSuccess('');
 
     try {
       const response = await fetch(`/api/accounts/${account.id}`, {
@@ -182,7 +188,8 @@ export function AccountFormDialog({ open, onClose, account }: AccountFormDialogP
         throw new Error(data.error || 'Failed to delete account');
       }
 
-      onClose();
+      setSuccess('Account deleted successfully!');
+      setTimeout(() => onClose(), 1500);
     } catch (error) {
       console.error('Error deleting account:', error);
       setError(error instanceof Error ? error.message : 'Failed to delete account');
@@ -234,6 +241,15 @@ export function AccountFormDialog({ open, onClose, account }: AccountFormDialogP
         ) : (
           <form onSubmit={handleSubmit}>
             <div className="space-y-4 py-4">
+              {success && (
+                <Pulse scale={1.02} duration={0.6}>
+                  <Alert className="bg-success/10 border-success">
+                    <CheckCircle className="h-4 w-4 text-success" />
+                    <AlertDescription className="text-success">{success}</AlertDescription>
+                  </Alert>
+                </Pulse>
+              )}
+
               {error && (
                 <Shake trigger={!!error} duration={0.5} intensity={10}>
                   <div className="bg-destructive/10 border border-destructive rounded-md p-3 text-sm text-destructive">

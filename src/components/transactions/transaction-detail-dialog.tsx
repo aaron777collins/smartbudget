@@ -13,8 +13,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Shake } from '@/components/ui/animated';
-import { Calendar, DollarSign, Store, FileText, Tag, Trash2, Search, Loader2, Split } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Shake, Pulse } from '@/components/ui/animated';
+import { Calendar, DollarSign, Store, FileText, Tag, Trash2, Search, Loader2, Split, CheckCircle } from 'lucide-react';
 import { CategorySelector } from './category-selector';
 import { SplitTransactionEditor } from './split-transaction-editor';
 import { TagSelector } from './tag-selector';
@@ -104,6 +105,7 @@ export function TransactionDetailDialog({
   const [researchError, setResearchError] = useState<string | null>(null);
   const [showSplitEditor, setShowSplitEditor] = useState(false);
   const [updatingTags, setUpdatingTags] = useState(false);
+  const [success, setSuccess] = useState<string>('');
 
   useEffect(() => {
     if (transactionId && open) {
@@ -134,6 +136,7 @@ export function TransactionDetailDialog({
 
     try {
       setLoading(true);
+      setSuccess('');
       const response = await fetch(`/api/transactions/${transactionId}`, {
         method: 'PATCH',
         headers: {
@@ -154,6 +157,8 @@ export function TransactionDetailDialog({
       const updated = await response.json();
       setTransaction(updated);
       setEditing(false);
+      setSuccess('Transaction updated successfully!');
+      setTimeout(() => setSuccess(''), 3000);
       onUpdate?.();
     } catch (error) {
       console.error('Error updating transaction:', error);
@@ -185,6 +190,7 @@ export function TransactionDetailDialog({
     if (!transactionId) return;
 
     setUpdatingTags(true);
+    setSuccess('');
     try {
       const response = await fetch(`/api/transactions/${transactionId}/tags`, {
         method: 'PATCH',
@@ -201,6 +207,8 @@ export function TransactionDetailDialog({
       const updated = await response.json();
       setTransaction(updated);
       setFormData(updated);
+      setSuccess('Tags updated successfully!');
+      setTimeout(() => setSuccess(''), 3000);
       onUpdate?.();
     } catch (error) {
       console.error('Error updating tags:', error);
@@ -350,6 +358,15 @@ export function TransactionDetailDialog({
           </div>
         ) : transaction ? (
           <div className="space-y-6">
+            {success && (
+              <Pulse scale={1.02} duration={0.6}>
+                <Alert className="bg-success/10 border-success">
+                  <CheckCircle className="h-4 w-4 text-success" />
+                  <AlertDescription className="text-success">{success}</AlertDescription>
+                </Alert>
+              </Pulse>
+            )}
+
             {/* Amount - Prominent Display */}
             <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
               <div className="flex items-center gap-3">

@@ -13,7 +13,7 @@ import {
   Circle,
   AlertCircle,
 } from 'lucide-react';
-import { Shake } from '@/components/ui/animated';
+import { Shake, Pulse } from '@/components/ui/animated';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 // Types
@@ -71,6 +71,7 @@ export function GoalsClient() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string>('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
@@ -108,6 +109,7 @@ export function GoalsClient() {
   const handleCreateGoal = async (goalData: Partial<Goal>) => {
     try {
       setActionError(null);
+      setSuccess('');
       const response = await fetch('/api/goals', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -121,6 +123,8 @@ export function GoalsClient() {
 
       await fetchGoals();
       setShowCreateModal(false);
+      setSuccess('Goal created successfully!');
+      setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create goal';
       setActionError(errorMessage);
@@ -130,6 +134,7 @@ export function GoalsClient() {
   const handleUpdateGoal = async (goalId: string, updates: Partial<Goal>) => {
     try {
       setActionError(null);
+      setSuccess('');
       const response = await fetch(`/api/goals/${goalId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -144,6 +149,8 @@ export function GoalsClient() {
       await fetchGoals();
       setEditingGoal(null);
       setSelectedGoal(null);
+      setSuccess('Goal updated successfully!');
+      setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update goal';
       setActionError(errorMessage);
@@ -155,6 +162,7 @@ export function GoalsClient() {
 
     try {
       setActionError(null);
+      setSuccess('');
       const response = await fetch(`/api/goals/${goalId}`, {
         method: 'DELETE',
       });
@@ -166,6 +174,8 @@ export function GoalsClient() {
 
       await fetchGoals();
       setSelectedGoal(null);
+      setSuccess('Goal deleted successfully!');
+      setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete goal';
       setActionError(errorMessage);
@@ -175,6 +185,7 @@ export function GoalsClient() {
   const handleAddProgress = async (goalId: string, amount: number) => {
     try {
       setActionError(null);
+      setSuccess('');
       const response = await fetch(`/api/goals/${goalId}/progress`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -190,6 +201,8 @@ export function GoalsClient() {
       if (selectedGoal?.id === goalId) {
         await fetchGoalProgress(goalId);
       }
+      setSuccess('Progress updated successfully!');
+      setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update progress';
       setActionError(errorMessage);
@@ -232,6 +245,15 @@ export function GoalsClient() {
 
   return (
     <div className="p-8 space-y-6">
+      {success && (
+        <Pulse scale={1.02} duration={0.6}>
+          <Alert className="bg-success/10 border-success">
+            <CheckCircle2 className="h-4 w-4 text-success" />
+            <AlertDescription className="text-success">{success}</AlertDescription>
+          </Alert>
+        </Pulse>
+      )}
+
       {actionError && (
         <Shake trigger={!!actionError} duration={0.5} intensity={10}>
           <Alert variant="destructive">
