@@ -48,7 +48,7 @@ export function Header() {
       <div className="container flex h-16 items-center">
         <div className="mr-4 flex items-center">
           {status === "authenticated" && <MobileNav />}
-          <Link href="/" className="mr-6 flex items-center space-x-2" aria-label="SmartBudget home">
+          <Link href="/" className="mr-6 flex items-center space-x-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:rounded-md" aria-label="SmartBudget home">
             <Wallet className="h-6 w-6 text-primary" aria-hidden="true" />
             <span className="font-bold text-xl">SmartBudget</span>
           </Link>
@@ -56,28 +56,28 @@ export function Header() {
             <nav className="hidden md:flex items-center space-x-6 text-sm font-medium" aria-label="Primary navigation">
               <Link
                 href="/dashboard"
-                className="transition-colors hover:text-foreground/80 text-foreground/60"
+                className="transition-colors hover:text-foreground/80 text-foreground/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:rounded-sm"
                 aria-current={pathname === "/dashboard" ? "page" : undefined}
               >
                 Dashboard
               </Link>
               <Link
                 href="/transactions"
-                className="transition-colors hover:text-foreground/80 text-foreground/60"
+                className="transition-colors hover:text-foreground/80 text-foreground/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:rounded-sm"
                 aria-current={pathname === "/transactions" ? "page" : undefined}
               >
                 Transactions
               </Link>
               <Link
                 href="/budgets"
-                className="transition-colors hover:text-foreground/80 text-foreground/60"
+                className="transition-colors hover:text-foreground/80 text-foreground/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:rounded-sm"
                 aria-current={pathname === "/budgets" ? "page" : undefined}
               >
                 Budgets
               </Link>
               <Link
                 href="/accounts"
-                className="transition-colors hover:text-foreground/80 text-foreground/60"
+                className="transition-colors hover:text-foreground/80 text-foreground/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:rounded-sm"
                 aria-current={pathname === "/accounts" ? "page" : undefined}
               >
                 Accounts

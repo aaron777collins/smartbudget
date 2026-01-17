@@ -123,7 +123,7 @@ export function MobileNav() {
               href={route.href}
               onClick={() => setOpen(false)}
               className={cn(
-                "text-sm group flex p-3 w-full justify-start font-medium cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-lg transition-colors duration-200",
+                "text-sm group flex p-3 w-full justify-start font-medium cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-lg transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                 pathname === route.href
                   ? "bg-accent text-accent-foreground"
                   : "text-muted-foreground"
