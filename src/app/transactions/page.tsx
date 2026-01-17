@@ -250,7 +250,7 @@ export default function TransactionsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Transactions</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Transactions</h1>
           <p className="text-muted-foreground">
             View and manage all your transactions
           </p>

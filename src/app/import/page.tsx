@@ -249,7 +249,7 @@ export default function ImportPage() {
     <div className="space-y-6">
       {/* Page Header */}
       <div>
-        <h1 className="text-3xl font-bold mb-2">Import Transactions</h1>
+        <h1 className="text-3xl font-bold tracking-tight mb-2">Import Transactions</h1>
         <p className="text-muted-foreground">
           Upload your bank statements to automatically import and categorize transactions
         </p>

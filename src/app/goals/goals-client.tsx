@@ -266,7 +266,7 @@ export function GoalsClient() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Financial Goals</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Financial Goals</h1>
           <p className="text-muted-foreground mt-1">
             Track your progress toward your financial objectives
           </p>

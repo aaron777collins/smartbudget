@@ -42,7 +42,7 @@ export default function Error({
           </div>
         </div>
 
-        <h1 className="mb-3 text-center text-3xl font-bold text-foreground">
+        <h1 className="mb-3 text-center text-3xl font-bold tracking-tight text-foreground">
           Oops! Something went wrong
         </h1>
 

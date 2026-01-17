@@ -139,7 +139,7 @@ export default function SettingsPage() {
           <SettingsIcon className="h-8 w-8 text-primary" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold">Settings</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
           <p className="text-muted-foreground">
             Manage your account preferences and application settings
           </p>

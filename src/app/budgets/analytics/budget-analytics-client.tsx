@@ -131,7 +131,7 @@ export default function BudgetAnalyticsClient() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Budget Analytics</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Budget Analytics</h1>
             <p className="text-muted-foreground">Historical performance and spending trends</p>
           </div>
         </div>
@@ -145,7 +145,7 @@ export default function BudgetAnalyticsClient() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Budget Analytics</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Budget Analytics</h1>
             <p className="text-muted-foreground">Historical performance and spending trends</p>
           </div>
         </div>
@@ -197,7 +197,7 @@ export default function BudgetAnalyticsClient() {
             </Link>
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">Budget Analytics</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Budget Analytics</h1>
             <p className="text-muted-foreground">Historical performance and spending trends</p>
           </div>
         </div>
