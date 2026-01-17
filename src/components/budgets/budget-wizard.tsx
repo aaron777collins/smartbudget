@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Shake } from '@/components/ui/animated';
+import { Shake, FadeIn } from '@/components/ui/animated';
 import {
   ArrowLeft,
   ArrowRight,
@@ -301,7 +301,8 @@ export default function BudgetWizard() {
 
         {/* Step 1: Basic Info */}
         {step === 1 && (
-          <div className="space-y-6">
+          <FadeIn key="step-1" duration={0.4} direction="up">
+            <div className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="name">Budget Name *</Label>
               <Input
@@ -378,12 +379,14 @@ export default function BudgetWizard() {
                 </Popover>
               </div>
             </div>
-          </div>
+            </div>
+          </FadeIn>
         )}
 
         {/* Step 2: Template Selection */}
         {step === 2 && (
-          <div className="space-y-6">
+          <FadeIn key="step-2" duration={0.4} direction="up">
+            <div className="space-y-6">
             <div>
               <Label>Choose a Starting Point</Label>
               <p className="text-sm text-muted-foreground mt-1">
@@ -508,12 +511,14 @@ export default function BudgetWizard() {
                 </CardContent>
               </Card>
             )}
-          </div>
+            </div>
+          </FadeIn>
         )}
 
         {/* Step 3: Category Allocation */}
         {step === 3 && (
-          <div className="space-y-6">
+          <FadeIn key="step-3" duration={0.4} direction="up">
+            <div className="space-y-6">
             <div className="flex justify-between items-center">
               <div>
                 <Label>Category Allocations</Label>
@@ -590,12 +595,14 @@ export default function BudgetWizard() {
                 </div>
               </CardContent>
             </Card>
-          </div>
+            </div>
+          </FadeIn>
         )}
 
         {/* Step 4: Review and Create */}
         {step === 4 && (
-          <div className="space-y-6">
+          <FadeIn key="step-4" duration={0.4} direction="up">
+            <div className="space-y-6">
             <div>
               <h3 className="text-lg font-semibold mb-4">Review Your Budget</h3>
               <div className="space-y-4">
@@ -646,7 +653,8 @@ export default function BudgetWizard() {
                 </Card>
               </div>
             </div>
-          </div>
+            </div>
+          </FadeIn>
         )}
 
         {/* Navigation Buttons */}
