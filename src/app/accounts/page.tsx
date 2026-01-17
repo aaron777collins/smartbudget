@@ -161,7 +161,7 @@ export default function AccountsPage() {
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Card>
+        <Card className="hover:shadow-lg transition-all duration-200 hover:scale-[1.02]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Balance</CardTitle>
             <Wallet className="h-4 w-4 text-muted-foreground" />
@@ -174,7 +174,7 @@ export default function AccountsPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover:shadow-lg transition-all duration-200 hover:scale-[1.02]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Available Balance</CardTitle>
             <CreditCard className="h-4 w-4 text-muted-foreground" />
@@ -187,7 +187,7 @@ export default function AccountsPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover:shadow-lg transition-all duration-200 hover:scale-[1.02]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Transactions</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
@@ -202,7 +202,7 @@ export default function AccountsPage() {
       </div>
 
       {/* Search and Filter */}
-      <Card>
+      <Card className="hover:shadow-lg transition-all duration-200">
         <CardHeader>
           <CardTitle>Your Accounts</CardTitle>
           <CardDescription>
@@ -252,7 +252,7 @@ export default function AccountsPage() {
                 </TableHeader>
                 <TableBody>
                   {accounts.map((account) => (
-                    <TableRow key={account.id}>
+                    <TableRow key={account.id} className="hover:bg-accent transition-colors duration-200">
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <div

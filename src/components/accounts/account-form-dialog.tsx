@@ -355,7 +355,7 @@ export function AccountFormDialog({ open, onClose, account }: AccountFormDialogP
                         key={option.value}
                         type="button"
                         onClick={() => setFormData({ ...formData, icon: option.value })}
-                        className={`flex items-center gap-2 p-3 rounded-md border transition-colors ${
+                        className={`flex items-center gap-2 p-3 rounded-md border transition-all duration-200 hover:scale-[1.02] ${
                           formData.icon === option.value
                             ? 'border-primary bg-primary/10'
                             : 'border-border hover:bg-accent'
@@ -378,7 +378,7 @@ export function AccountFormDialog({ open, onClose, account }: AccountFormDialogP
                       key={option.value}
                       type="button"
                       onClick={() => setFormData({ ...formData, color: option.value })}
-                      className={`w-10 h-10 rounded-full border-2 transition-all ${
+                      className={`w-10 h-10 rounded-full border-2 transition-all duration-200 hover:scale-110 ${
                         formData.color === option.value ? 'border-foreground scale-110' : 'border-border'
                       }`}
                       style={{ backgroundColor: option.value }}
