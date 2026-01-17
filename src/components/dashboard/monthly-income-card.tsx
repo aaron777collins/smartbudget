@@ -86,7 +86,7 @@ export function MonthlyIncomeCard({
 
           {topSources.length > 0 && (
             <div className="mt-4">
-              <p className="text-xs font-medium text-muted-foreground mb-2">
+              <p className="text-sm font-medium text-muted-foreground mb-2">
                 Income Sources
               </p>
               <div className="space-y-2">

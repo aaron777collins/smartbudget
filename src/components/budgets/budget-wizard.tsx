@@ -608,29 +608,29 @@ export default function BudgetWizard() {
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label className="text-muted-foreground">Name</Label>
+                    <Label className="text-sm font-medium text-muted-foreground">Name</Label>
                     <p className="font-semibold">{name}</p>
                   </div>
                   <div>
-                    <Label className="text-muted-foreground">Type</Label>
+                    <Label className="text-sm font-medium text-muted-foreground">Type</Label>
                     <p className="font-semibold">
                       {budgetTypes.find(bt => bt.value === type)?.label}
                     </p>
                   </div>
                   <div>
-                    <Label className="text-muted-foreground">Period</Label>
+                    <Label className="text-sm font-medium text-muted-foreground">Period</Label>
                     <p className="font-semibold">
                       {budgetPeriods.find(bp => bp.value === period)?.label}
                     </p>
                   </div>
                   <div>
-                    <Label className="text-muted-foreground">Start Date</Label>
+                    <Label className="text-sm font-medium text-muted-foreground">Start Date</Label>
                     <p className="font-semibold">{format(startDate, 'PPP')}</p>
                   </div>
                 </div>
 
                 <div>
-                  <Label className="text-muted-foreground">Categories ({allocations.length})</Label>
+                  <Label className="text-sm font-medium text-muted-foreground">Categories ({allocations.length})</Label>
                   <div className="mt-2 space-y-2">
                     {allocations.map((allocation) => (
                       <div key={allocation.categoryId} className="flex justify-between items-center p-2 bg-muted rounded">

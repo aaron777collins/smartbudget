@@ -49,7 +49,7 @@ export function MonthlySpendingCard({
           {budget !== null && budgetUsedPercentage !== null ? (
             <>
               <div className="mt-3">
-                <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
+                <div className="flex items-center justify-between text-sm font-medium text-muted-foreground mb-1">
                   <span>Budget Progress</span>
                   <span className={`${statusColors.text} font-mono`}>
                     {budgetUsedPercentage.toFixed(0)}%

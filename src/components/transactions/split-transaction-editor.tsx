@@ -227,7 +227,7 @@ export function SplitTransactionEditor({
               <div className="flex-1 space-y-3">
                 {/* Category Selector */}
                 <div className="space-y-2">
-                  <Label className="text-xs">Category</Label>
+                  <Label className="text-sm font-medium">Category</Label>
                   <Select
                     value={split.categoryId}
                     onValueChange={(value) => {
@@ -271,7 +271,7 @@ export function SplitTransactionEditor({
                 {/* Amount and Percentage */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
-                    <Label className="text-xs">Amount</Label>
+                    <Label className="text-sm font-medium">Amount</Label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                         $
@@ -290,7 +290,7 @@ export function SplitTransactionEditor({
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-xs">Percentage</Label>
+                    <Label className="text-sm font-medium">Percentage</Label>
                     <div className="relative">
                       <Input
                         type="number"
@@ -314,7 +314,7 @@ export function SplitTransactionEditor({
 
                 {/* Notes (Optional) */}
                 <div className="space-y-2">
-                  <Label className="text-xs">Notes (Optional)</Label>
+                  <Label className="text-sm font-medium">Notes (Optional)</Label>
                   <Input
                     value={split.notes || ''}
                     onChange={(e) => updateSplit(index, 'notes', e.target.value)}

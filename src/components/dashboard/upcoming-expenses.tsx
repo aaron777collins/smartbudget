@@ -143,11 +143,11 @@ export function UpcomingExpenses() {
         {summary && (
           <div className="grid grid-cols-4 gap-2 p-3 bg-muted rounded-lg text-sm">
             <div className="text-center">
-              <p className="text-xs text-muted-foreground">Total</p>
+              <p className="text-sm font-medium text-muted-foreground">Total</p>
               <p className="font-bold">{summary.total}</p>
             </div>
             <div className="text-center">
-              <p className="text-xs text-muted-foreground">Amount</p>
+              <p className="text-sm font-medium text-muted-foreground">Amount</p>
               <p className="font-bold font-mono">
                 <CountUp
                   to={summary.totalAmount}
@@ -158,11 +158,11 @@ export function UpcomingExpenses() {
               </p>
             </div>
             <div className="text-center">
-              <p className="text-xs text-muted-foreground">Due Soon</p>
+              <p className="text-sm font-medium text-muted-foreground">Due Soon</p>
               <p className="font-bold text-warning">{summary.dueSoon}</p>
             </div>
             <div className="text-center">
-              <p className="text-xs text-muted-foreground">Overdue</p>
+              <p className="text-sm font-medium text-muted-foreground">Overdue</p>
               <p className="font-bold text-error">{summary.overdue}</p>
             </div>
           </div>
