@@ -550,7 +550,7 @@ export function TransactionDetailDialog({
                                 href={source}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-xs text-primary hover:underline"
+                                className="text-xs text-muted-foreground hover:underline"
                               >
                                 {source}
                               </a>
@@ -563,7 +563,7 @@ export function TransactionDetailDialog({
 
                   {editing && researchResult.categorySlug && (
                     <div className="pt-2 border-t border-primary/20">
-                      <p className="text-xs text-primary">
+                      <p className="text-xs text-muted-foreground">
                         The suggested category has been applied. Review and save when ready.
                       </p>
                     </div>

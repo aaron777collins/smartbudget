@@ -789,19 +789,19 @@ function GoalDetailModal({
                 </p>
                 <div className="grid grid-cols-3 gap-3">
                   <div>
-                    <p className="text-xs text-primary">Daily</p>
+                    <p className="text-xs text-muted-foreground">Daily</p>
                     <p className="text-lg font-semibold text-primary">
                       ${progress.dailyRequiredAmount.toFixed(2)}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-primary">Weekly</p>
+                    <p className="text-xs text-muted-foreground">Weekly</p>
                     <p className="text-lg font-semibold text-primary">
                       ${progress.weeklyRequiredAmount?.toFixed(2)}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-primary">Monthly</p>
+                    <p className="text-xs text-muted-foreground">Monthly</p>
                     <p className="text-lg font-semibold text-primary">
                       ${progress.monthlyRequiredAmount?.toFixed(2)}
                     </p>
@@ -818,7 +818,7 @@ function GoalDetailModal({
                 <p className="text-lg font-semibold text-primary">
                   {new Date(progress.projectedCompletionDate).toLocaleDateString()}
                 </p>
-                <p className="text-xs text-primary mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   Based on your current progress rate
                 </p>
               </div>

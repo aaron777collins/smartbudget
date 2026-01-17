@@ -69,7 +69,7 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
             .filter(entry => entry.value > 0)
             .sort((a, b) => b.value - a.value)
             .map((entry, index) => (
-              <div key={index} className="flex items-center gap-2 text-xs">
+              <div key={index} className="flex items-center gap-2 text-xs text-muted-foreground">
                 <div
                   className="h-2 w-2 rounded-full"
                   style={{ backgroundColor: entry.color }}
@@ -204,11 +204,11 @@ export function SpendingTrendsChart({ timeframe }: SpendingTrendsChartProps) {
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis
                 dataKey="month"
-                className="text-xs"
+                className="text-xs text-muted-foreground"
                 tick={{ fill: 'hsl(var(--muted-foreground))' }}
               />
               <YAxis
-                className="text-xs"
+                className="text-xs text-muted-foreground"
                 tick={{ fill: 'hsl(var(--muted-foreground))' }}
                 tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
               />

@@ -62,7 +62,7 @@ export default function Error({
             </pre>
             {error.stack && (
               <details className="mt-2">
-                <summary className="cursor-pointer text-xs font-medium text-foreground">
+                <summary className="cursor-pointer text-xs font-medium text-muted-foreground">
                   Stack Trace
                 </summary>
                 <pre className="mt-2 max-h-64 overflow-auto text-xs text-muted-foreground">
