@@ -38,7 +38,13 @@ export default function RootLayout({
               enableSystem
             >
               {children}
-              <Toaster position="top-right" richColors />
+              <Toaster
+                position="top-right"
+                richColors
+                closeButton
+                expand={true}
+                duration={4000}
+              />
             </ThemeProvider>
           </SessionProvider>
         </ErrorBoundary>
