@@ -98,7 +98,15 @@ export function CashFlowSankey({ timeframe }: CashFlowSankeyProps) {
     const container = containerRef.current;
     const width = container.clientWidth;
     const height = 500;
-    const margin = { top: 20, right: 150, bottom: 20, left: 150 };
+
+    // Responsive margins - smaller margins on mobile
+    const isMobile = width < 640;
+    const margin = {
+      top: 20,
+      right: isMobile ? 60 : 150,
+      bottom: 20,
+      left: isMobile ? 60 : 150
+    };
 
     const svg = d3
       .select(svgRef.current)

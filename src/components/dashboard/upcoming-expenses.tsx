@@ -141,7 +141,7 @@ export function UpcomingExpenses() {
       <CardContent className="space-y-4">
         {/* Summary Bar */}
         {summary && (
-          <div className="grid grid-cols-4 gap-2 p-3 bg-muted rounded-lg text-sm">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 p-3 bg-muted rounded-lg text-sm">
             <div className="text-center">
               <p className="text-sm font-medium text-muted-foreground">Total</p>
               <p className="font-bold">{summary.total}</p>
