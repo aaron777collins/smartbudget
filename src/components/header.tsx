@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useSession, signOut } from "next-auth/react"
 import { usePathname } from "next/navigation"
+import { useState, useEffect } from "react"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -19,9 +20,30 @@ import { Wallet, LogOut, Settings, User } from "lucide-react"
 export function Header() {
   const { data: session, status } = useSession()
   const pathname = usePathname()
+  const [isScrolled, setIsScrolled] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY
+      setIsScrolled(scrollPosition > 10)
+    }
+
+    // Check initial scroll position
+    handleScroll()
+
+    // Add scroll event listener
+    window.addEventListener("scroll", handleScroll, { passive: true })
+
+    // Cleanup
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header
+      className={`sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-shadow duration-200 ${
+        isScrolled ? "shadow-md" : ""
+      }`}
+    >
       <div className="container flex h-16 items-center">
         <div className="mr-4 flex">
           <Link href="/" className="mr-6 flex items-center space-x-2" aria-label="SmartBudget home">
