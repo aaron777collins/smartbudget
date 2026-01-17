@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { HoverScale } from '@/components/ui/animated';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -254,42 +255,44 @@ export default function TagsClient() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {tags.map((tag) => (
-            <Card key={tag.id} className="hover:shadow-md transition-shadow">
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <Badge
-                    style={{ backgroundColor: tag.color }}
-                    className="text-white"
-                  >
-                    #{tag.name}
-                  </Badge>
-                  <div className="flex gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7"
-                      onClick={() => openEditDialog(tag)}
+            <HoverScale key={tag.id} scale={1.02}>
+              <Card className="h-full">
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <Badge
+                      style={{ backgroundColor: tag.color }}
+                      className="text-white"
                     >
-                      <Edit className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7"
-                      onClick={() => openDeleteDialog(tag)}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
+                      #{tag.name}
+                    </Badge>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={() => openEditDialog(tag)}
+                      >
+                        <Edit className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={() => openDeleteDialog(tag)}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-sm text-muted-foreground">
-                  {tag._count.transactions}{' '}
-                  {tag._count.transactions === 1 ? 'transaction' : 'transactions'}
-                </div>
-              </CardContent>
-            </Card>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-sm text-muted-foreground">
+                    {tag._count.transactions}{' '}
+                    {tag._count.transactions === 1 ? 'transaction' : 'transactions'}
+                  </div>
+                </CardContent>
+              </Card>
+            </HoverScale>
           ))}
         </div>
       )}

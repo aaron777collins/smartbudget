@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { HoverScale } from '@/components/ui/animated';
 import { PlusCircle, Calendar, DollarSign, Target, Trash2, BarChart3 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -178,72 +179,74 @@ export default function BudgetsClient() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {budgets.map((budget) => (
-            <Card key={budget.id} className="relative">
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div className="space-y-1">
-                    <CardTitle>{budget.name}</CardTitle>
-                    <CardDescription>
-                      {budgetTypeLabels[budget.type]} · {budgetPeriodLabels[budget.period]}
-                    </CardDescription>
-                  </div>
-                  {budget.isActive && (
-                    <Badge variant="default">Active</Badge>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex items-center text-sm">
-                    <DollarSign className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span className="font-semibold font-mono">
-                      ${Number(budget.totalAmount).toLocaleString()}
-                    </span>
-                    <span className="text-muted-foreground ml-1">total</span>
-                  </div>
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    <span>
-                      Started {new Date(budget.startDate).toLocaleDateString()}
-                    </span>
-                  </div>
-                </div>
-
-                <div>
-                  <p className="text-sm text-muted-foreground mb-2">
-                    {budget.categories.length} categories
-                  </p>
-                  <div className="flex flex-wrap gap-1">
-                    {budget.categories.slice(0, 5).map((bc) => (
-                      <Badge key={bc.id} variant="outline" className="text-xs">
-                        {bc.category.name}
-                      </Badge>
-                    ))}
-                    {budget.categories.length > 5 && (
-                      <Badge variant="outline" className="text-xs">
-                        +{budget.categories.length - 5} more
-                      </Badge>
+            <HoverScale key={budget.id} scale={1.02}>
+              <Card className="relative h-full">
+                <CardHeader>
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-1">
+                      <CardTitle>{budget.name}</CardTitle>
+                      <CardDescription>
+                        {budgetTypeLabels[budget.type]} · {budgetPeriodLabels[budget.period]}
+                      </CardDescription>
+                    </div>
+                    {budget.isActive && (
+                      <Badge variant="default">Active</Badge>
                     )}
                   </div>
-                </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center text-sm">
+                      <DollarSign className="h-4 w-4 mr-2 text-muted-foreground" />
+                      <span className="font-semibold font-mono">
+                        ${Number(budget.totalAmount).toLocaleString()}
+                      </span>
+                      <span className="text-muted-foreground ml-1">total</span>
+                    </div>
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <Calendar className="h-4 w-4 mr-2" />
+                      <span>
+                        Started {new Date(budget.startDate).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
 
-                <div className="flex gap-2 pt-2">
-                  <Link href={`/budgets/${budget.id}`} className="flex-1">
-                    <Button variant="outline" className="w-full">
-                      View Details
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      {budget.categories.length} categories
+                    </p>
+                    <div className="flex flex-wrap gap-1">
+                      {budget.categories.slice(0, 5).map((bc) => (
+                        <Badge key={bc.id} variant="outline" className="text-xs">
+                          {bc.category.name}
+                        </Badge>
+                      ))}
+                      {budget.categories.length > 5 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{budget.categories.length - 5} more
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 pt-2">
+                    <Link href={`/budgets/${budget.id}`} className="flex-1">
+                      <Button variant="outline" className="w-full">
+                        View Details
+                      </Button>
+                    </Link>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => deleteBudget(budget.id)}
+                      className="text-error "
+                    >
+                      <Trash2 className="h-4 w-4" />
                     </Button>
-                  </Link>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => deleteBudget(budget.id)}
-                    className="text-error "
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                  </div>
+                </CardContent>
+              </Card>
+            </HoverScale>
           ))}
         </div>
       )}

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { HoverScale } from '@/components/ui/animated';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Repeat,
@@ -228,49 +229,51 @@ export default function RecurringClient() {
             {rules.map((rule) => {
               const daysUntil = getDaysUntilDue(rule.nextDueDate);
               return (
-                <Card key={rule.id} className="hover:shadow-md transition-shadow">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <div className="space-y-1 flex-1">
-                        <CardTitle className="text-lg">{rule.merchantName}</CardTitle>
+                <HoverScale key={rule.id} scale={1.02}>
+                  <Card className="h-full">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <div className="space-y-1 flex-1">
+                          <CardTitle className="text-lg">{rule.merchantName}</CardTitle>
+                          <div className="flex items-center gap-2">
+                            {getDueBadge(daysUntil)}
+                          </div>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => openDeleteDialog(rule.id)}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="grid grid-cols-2 gap-3 text-sm">
                         <div className="flex items-center gap-2">
-                          {getDueBadge(daysUntil)}
+                          <DollarSign className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium">${parseFloat(rule.amount.toString()).toFixed(2)}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                          <span className="capitalize">{getFrequencyLabel(rule.frequency)}</span>
                         </div>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => openDeleteDialog(rule.id)}
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                      <div className="flex items-center gap-2">
-                        <DollarSign className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-medium">${parseFloat(rule.amount.toString()).toFixed(2)}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                        <span className="capitalize">{getFrequencyLabel(rule.frequency)}</span>
-                      </div>
-                    </div>
 
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Calendar className="h-4 w-4" />
-                      <span>Next: {new Date(rule.nextDueDate).toLocaleDateString()}</span>
-                    </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Calendar className="h-4 w-4" />
+                        <span>Next: {new Date(rule.nextDueDate).toLocaleDateString()}</span>
+                      </div>
 
-                    <div className="pt-2 border-t">
-                      <p className="text-xs text-muted-foreground">
-                        {rule._count.transactions} linked transaction
-                        {rule._count.transactions !== 1 ? 's' : ''}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
+                      <div className="pt-2 border-t">
+                        <p className="text-xs text-muted-foreground">
+                          {rule._count.transactions} linked transaction
+                          {rule._count.transactions !== 1 ? 's' : ''}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </HoverScale>
               );
             })}
           </div>
