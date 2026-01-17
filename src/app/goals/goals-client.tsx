@@ -226,7 +226,7 @@ export function GoalsClient() {
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-all duration-200 hover:shadow-lg hover:scale-105"
         >
           <Plus className="w-4 h-4" />
           New Goal
@@ -235,21 +235,21 @@ export function GoalsClient() {
 
       {/* Summary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-card rounded-lg border border-border p-4">
+        <div className="bg-card rounded-lg border border-border p-4 hover:shadow-lg transition-all duration-200 hover:scale-[1.02]">
           <div className="flex items-center gap-2 text-muted-foreground mb-2">
             <Target className="w-4 h-4" />
             <span className="text-sm font-medium">Total Goals</span>
           </div>
           <p className="text-2xl font-bold text-foreground">{goals.length}</p>
         </div>
-        <div className="bg-card rounded-lg border border-border p-4">
+        <div className="bg-card rounded-lg border border-border p-4 hover:shadow-lg transition-all duration-200 hover:scale-[1.02]">
           <div className="flex items-center gap-2 text-primary mb-2">
             <TrendingUp className="w-4 h-4" />
             <span className="text-sm font-medium">Active</span>
           </div>
           <p className="text-2xl font-bold text-primary">{activeGoals.length}</p>
         </div>
-        <div className="bg-card rounded-lg border border-border p-4">
+        <div className="bg-card rounded-lg border border-border p-4 hover:shadow-lg transition-all duration-200 hover:scale-[1.02]">
           <div className="flex items-center gap-2 text-success mb-2">
             <CheckCircle2 className="w-4 h-4" />
             <span className="text-sm font-medium">Completed</span>
@@ -258,7 +258,7 @@ export function GoalsClient() {
             {completedGoals.length}
           </p>
         </div>
-        <div className="bg-card rounded-lg border border-border p-4">
+        <div className="bg-card rounded-lg border border-border p-4 hover:shadow-lg transition-all duration-200 hover:scale-[1.02]">
           <div className="flex items-center gap-2 text-primary mb-2">
             <DollarSign className="w-4 h-4" />
             <span className="text-sm font-medium">Total Target</span>
@@ -325,7 +325,7 @@ export function GoalsClient() {
           </p>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-all duration-200 hover:shadow-lg hover:scale-105"
           >
             <Plus className="w-5 h-5" />
             Create Your First Goal
@@ -388,7 +388,7 @@ function GoalCard({
 
   return (
     <div
-      className="bg-card rounded-lg border border-border p-4 hover:shadow-md transition-shadow cursor-pointer"
+      className="bg-card rounded-lg border border-border p-4 hover:shadow-lg transition-all duration-200 cursor-pointer hover:scale-[1.02]"
       onClick={() => onSelect(goal)}
     >
       <div className="flex items-start justify-between mb-3">
@@ -414,7 +414,7 @@ function GoalCard({
               e.stopPropagation();
               onEdit(goal);
             }}
-            className="p-1 hover:bg-muted rounded"
+            className="p-1 hover:bg-muted rounded transition-colors duration-200"
           >
             <Edit className="w-4 h-4 text-muted-foreground" />
           </button>
@@ -423,7 +423,7 @@ function GoalCard({
               e.stopPropagation();
               onDelete(goal.id);
             }}
-            className="p-1 hover:bg-muted rounded"
+            className="p-1 hover:bg-muted rounded transition-colors duration-200"
           >
             <Trash2 className="w-4 h-4 text-error" />
           </button>
@@ -496,8 +496,8 @@ function GoalFormModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-card rounded-lg p-6 max-w-md w-full mx-4">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="bg-card rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
         <h2 className="text-2xl font-bold text-foreground mb-4">
           {goal ? 'Edit Goal' : 'Create New Goal'}
         </h2>
@@ -598,13 +598,13 @@ function GoalFormModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-border text-foreground rounded-lg hover:bg-muted"
+              className="flex-1 px-4 py-2 border border-border text-foreground rounded-lg hover:bg-muted transition-all duration-200"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
+              className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-all duration-200 hover:shadow-lg"
             >
               {goal ? 'Update Goal' : 'Create Goal'}
             </button>
@@ -640,8 +640,8 @@ function GoalDetailModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-card rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="bg-card rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto shadow-xl">
         <div className="flex items-start justify-between mb-4">
           <div>
             <h2 className="text-2xl font-bold text-foreground">{goal.name}</h2>
@@ -797,7 +797,7 @@ function GoalDetailModal({
               <button
                 onClick={handleAddProgress}
                 disabled={!addAmount || parseFloat(addAmount) === 0}
-                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 disabled:bg-muted disabled:cursor-not-allowed"
+                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-all duration-200 hover:shadow-lg disabled:bg-muted disabled:cursor-not-allowed disabled:hover:shadow-none"
               >
                 Add
               </button>
@@ -812,13 +812,13 @@ function GoalDetailModal({
         <div className="flex gap-2">
           <button
             onClick={onEdit}
-            className="flex-1 px-4 py-2 border border-border text-foreground rounded-lg hover:bg-muted"
+            className="flex-1 px-4 py-2 border border-border text-foreground rounded-lg hover:bg-muted transition-all duration-200"
           >
             Edit Goal
           </button>
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
+            className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-all duration-200 hover:shadow-lg"
           >
             Close
           </button>
