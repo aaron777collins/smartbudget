@@ -229,7 +229,7 @@ export function CategoryBreakdownChart({ timeframe }: CategoryBreakdownChartProp
                     labelLine={false}
                     label={CustomLabel as never}
                     outerRadius="80%"
-                    fill="#8884d8"
+                    fill={getChartColorByIndex(0, theme)}
                     dataKey="amount"
                     animationBegin={0}
                     animationDuration={800}

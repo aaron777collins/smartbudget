@@ -201,13 +201,16 @@ export function CategoryCorrelationMatrix({ timeframe }: CategoryCorrelationMatr
           .attr('stroke', hoverStrokeColor)
           .attr('stroke-width', 3);
 
-        // Show tooltip
+        // Show tooltip with theme-aware colors
+        const tooltipBg = theme === 'dark' ? 'rgba(31, 41, 55, 0.95)' : 'rgba(0, 0, 0, 0.8)';
+        const tooltipText = theme === 'dark' ? '#D1D5DB' : 'white';
+
         const tooltip = d3.select('body')
           .append('div')
           .attr('class', 'correlation-tooltip')
           .style('position', 'absolute')
-          .style('background', 'rgba(0, 0, 0, 0.8)')
-          .style('color', 'white')
+          .style('background', tooltipBg)
+          .style('color', tooltipText)
           .style('padding', '8px 12px')
           .style('border-radius', '6px')
           .style('font-size', '12px')
@@ -231,6 +234,9 @@ export function CategoryCorrelationMatrix({ timeframe }: CategoryCorrelationMatr
       });
 
     // Add correlation value text for higher correlations
+    // Use theme-aware contrasting text for high correlations (darker cells)
+    const lightTextColor = theme === 'dark' ? '#F3F4F6' : '#fff';
+
     g.selectAll('.cell-text')
       .data(cells.filter(d => d.correlation > 0.3))
       .join('text')
@@ -241,7 +247,7 @@ export function CategoryCorrelationMatrix({ timeframe }: CategoryCorrelationMatr
       .attr('text-anchor', 'middle')
       .attr('font-size', '11px')
       .attr('font-weight', 'bold')
-      .attr('fill', d => d.correlation > 0.6 ? '#fff' : textColor)
+      .attr('fill', d => d.correlation > 0.6 ? lightTextColor : textColor)
       .attr('pointer-events', 'none')
       .text(d => (d.correlation * 100).toFixed(0) + '%');
 

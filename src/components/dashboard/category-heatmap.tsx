@@ -186,13 +186,16 @@ export function CategoryHeatmap({ timeframe }: CategoryHeatmapProps) {
               .attr('stroke', hoverStrokeColor)
               .attr('stroke-width', 3);
 
-            // Show tooltip
+            // Show tooltip with theme-aware colors
+            const tooltipBg = theme === 'dark' ? 'rgba(31, 41, 55, 0.95)' : 'rgba(0, 0, 0, 0.8)';
+            const tooltipText = theme === 'dark' ? '#D1D5DB' : 'white';
+
             const tooltip = d3.select('body')
               .append('div')
               .attr('class', 'heatmap-tooltip')
               .style('position', 'absolute')
-              .style('background', 'rgba(0, 0, 0, 0.8)')
-              .style('color', 'white')
+              .style('background', tooltipBg)
+              .style('color', tooltipText)
               .style('padding', '8px 12px')
               .style('border-radius', '6px')
               .style('font-size', '12px')
@@ -217,8 +220,9 @@ export function CategoryHeatmap({ timeframe }: CategoryHeatmapProps) {
 
         // Add amount text for larger values
         if (month.amount > 0 && month.amount > data.scale.max * 0.1) {
-          // Use white text for high values (darker cells), dark text for low values (lighter cells)
-          const cellTextColor = month.amount > data.scale.max * 0.5 ? '#fff' : textColor;
+          // Use theme-aware contrasting text for high values (darker cells), standard text for low values (lighter cells)
+          const lightTextColor = theme === 'dark' ? '#F3F4F6' : '#fff';
+          const cellTextColor = month.amount > data.scale.max * 0.5 ? lightTextColor : textColor;
 
           cell
             .append('text')
