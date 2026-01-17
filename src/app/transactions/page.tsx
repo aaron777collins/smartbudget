@@ -248,14 +248,14 @@ export default function TransactionsPage() {
   return (
     <div className="container mx-auto py-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Transactions</h1>
           <p className="text-muted-foreground">
             View and manage all your transactions
           </p>
         </div>
-        <Button>
+        <Button className="sm:w-auto">
           <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
           Add Transaction
         </Button>
@@ -276,7 +276,7 @@ export default function TransactionsPage() {
               />
             </div>
             <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent>
@@ -287,7 +287,7 @@ export default function TransactionsPage() {
               </SelectContent>
             </Select>
             <Select value={sortOrder} onValueChange={(val) => setSortOrder(val as 'asc' | 'desc')}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder="Order" />
               </SelectTrigger>
               <SelectContent>
@@ -300,7 +300,7 @@ export default function TransactionsPage() {
               onFiltersChange={handleAdvancedFiltersChange}
               onClearFilters={handleClearAdvancedFilters}
             />
-            <Button variant="outline" onClick={() => setExportDialogOpen(true)}>
+            <Button variant="outline" onClick={() => setExportDialogOpen(true)} className="w-full sm:w-auto">
               <Download className="mr-2 h-4 w-4" aria-hidden="true" />
               Export
             </Button>
@@ -430,8 +430,8 @@ export default function TransactionsPage() {
               <TableRow>
                 <TableHead scope="col">Date</TableHead>
                 <TableHead scope="col">Merchant</TableHead>
-                <TableHead scope="col">Account</TableHead>
-                <TableHead scope="col">Category</TableHead>
+                <TableHead scope="col" className="hidden lg:table-cell">Account</TableHead>
+                <TableHead scope="col" className="hidden md:table-cell">Category</TableHead>
                 <TableHead scope="col" className="text-right">Amount</TableHead>
                 <TableHead scope="col" className="text-right">Actions</TableHead>
               </TableRow>
@@ -470,9 +470,31 @@ export default function TransactionsPage() {
                         <div className="text-sm text-muted-foreground">
                           {transaction.description}
                         </div>
+                        {/* Show account and category inline on smaller screens */}
+                        <div className="flex flex-wrap gap-2 mt-2 md:hidden">
+                          <Badge
+                            variant="outline"
+                            style={{ borderColor: transaction.account.color }}
+                            className="text-xs"
+                          >
+                            {transaction.account.name}
+                          </Badge>
+                          {transaction.category && (
+                            <Badge
+                              variant="secondary"
+                              style={{
+                                backgroundColor: `${transaction.category.color}20`,
+                                color: transaction.category.color,
+                              }}
+                              className="text-xs"
+                            >
+                              {transaction.category.name}
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden lg:table-cell">
                       <Badge
                         variant="outline"
                         style={{ borderColor: transaction.account.color }}
@@ -480,7 +502,7 @@ export default function TransactionsPage() {
                         {transaction.account.name}
                       </Badge>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden md:table-cell">
                       {transaction.category ? (
                         <Badge
                           variant="secondary"
@@ -527,16 +549,17 @@ export default function TransactionsPage() {
 
         {/* Pagination */}
         {!loading && transactions.length > 0 && (
-          <div className="flex items-center justify-between px-4 py-4 border-t">
-            <div className="text-sm text-muted-foreground">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 py-4 border-t">
+            <div className="text-sm text-muted-foreground text-center sm:text-left">
               Showing {offset + 1} to {Math.min(offset + limit, total)} of {total}{' '}
               transactions
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 justify-center sm:justify-end">
               <Button
                 variant="outline"
                 onClick={handlePrevPage}
                 disabled={offset === 0}
+                className="flex-1 sm:flex-initial"
               >
                 Previous
               </Button>
@@ -544,6 +567,7 @@ export default function TransactionsPage() {
                 variant="outline"
                 onClick={handleNextPage}
                 disabled={offset + limit >= total}
+                className="flex-1 sm:flex-initial"
               >
                 Next
               </Button>
