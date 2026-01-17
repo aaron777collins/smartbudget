@@ -160,7 +160,7 @@ export function AdvancedFilters({
 
         <div className="grid gap-6 py-4">
           {/* Account Filter */}
-          <div className="grid gap-2">
+          <div className="grid gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
             <Label htmlFor="account">Account</Label>
             <Select
               value={localFilters.accountId || ''}
@@ -183,7 +183,7 @@ export function AdvancedFilters({
           </div>
 
           {/* Category Filter */}
-          <div className="grid gap-2">
+          <div className="grid gap-2 animate-in fade-in slide-in-from-top-2 duration-300 delay-75">
             <Label htmlFor="category">Category</Label>
             <Select
               value={localFilters.categoryId || ''}
@@ -212,7 +212,7 @@ export function AdvancedFilters({
           </div>
 
           {/* Tag Filter */}
-          <div className="grid gap-2">
+          <div className="grid gap-2 animate-in fade-in slide-in-from-top-2 duration-300 delay-150">
             <Label htmlFor="tag">Tag</Label>
             <Select
               value={localFilters.tagId || ''}
@@ -241,7 +241,7 @@ export function AdvancedFilters({
           </div>
 
           {/* Date Range Filter */}
-          <div className="grid gap-2">
+          <div className="grid gap-2 animate-in fade-in slide-in-from-top-2 duration-300 delay-200">
             <Label>Date Range</Label>
             <DateRangePicker
               dateRange={localFilters.dateRange}
@@ -263,7 +263,7 @@ export function AdvancedFilters({
           </div>
 
           {/* Amount Range */}
-          <div className="grid gap-2">
+          <div className="grid gap-2 animate-in fade-in slide-in-from-top-2 duration-300 delay-300">
             <Label>Amount Range</Label>
             <div className="flex gap-2 items-center">
               <Input
@@ -289,7 +289,7 @@ export function AdvancedFilters({
           </div>
 
           {/* Transaction Type */}
-          <div className="grid gap-2">
+          <div className="grid gap-2 animate-in fade-in slide-in-from-top-2 duration-300 delay-[350ms]">
             <Label htmlFor="type">Transaction Type</Label>
             <Select
               value={localFilters.type || ''}
@@ -310,7 +310,7 @@ export function AdvancedFilters({
           </div>
 
           {/* Reconciliation Status */}
-          <div className="grid gap-2">
+          <div className="grid gap-2 animate-in fade-in slide-in-from-top-2 duration-300 delay-[400ms]">
             <Label htmlFor="reconciled">Reconciliation Status</Label>
             <Select
               value={localFilters.isReconciled || ''}
@@ -330,7 +330,7 @@ export function AdvancedFilters({
           </div>
 
           {/* Recurring Status */}
-          <div className="grid gap-2">
+          <div className="grid gap-2 animate-in fade-in slide-in-from-top-2 duration-300 delay-[450ms]">
             <Label htmlFor="recurring">Recurring Status</Label>
             <Select
               value={localFilters.isRecurring || ''}
@@ -350,7 +350,7 @@ export function AdvancedFilters({
           </div>
         </div>
 
-        <DialogFooter className="flex gap-2">
+        <DialogFooter className="flex gap-2 animate-in fade-in slide-in-from-bottom-2 duration-300 delay-500">
           <Button variant="outline" onClick={handleClearAll}>
             Clear All
           </Button>
