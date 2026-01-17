@@ -28,9 +28,9 @@ Welcome to **SmartBudget** - your comprehensive personal finance management syst
 
 1. Visit the SmartBudget homepage
 2. Click "Sign Up" in the top navigation
-3. Enter your email address and create a secure password
-4. Verify your email address by clicking the link sent to your inbox
-5. Log in with your new credentials
+3. Choose a username and create a secure password
+4. Optionally enter your email address
+5. Log in with your new credentials (username and password)
 
 ### First-Time Setup
 

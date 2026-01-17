@@ -114,7 +114,7 @@ export function TimeframeSelector({
   return (
     <div className={cn("flex items-center gap-2", className)}>
       <Select value={value.period} onValueChange={(v) => handlePeriodChange(v as TimeframePeriod)}>
-        <SelectTrigger className="w-[200px]">
+        <SelectTrigger className="w-full sm:w-[200px]">
           <SelectValue placeholder="Select timeframe">
             {getDisplayLabel()}
           </SelectValue>

@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Shake, Pulse } from '@/components/ui/animated';
 import { Plus, X, AlertCircle, Check } from 'lucide-react';
 import {
   Select,
@@ -95,12 +96,12 @@ export function SplitTransactionEditor({
     setSplits(splits.filter((_, i) => i !== index));
   };
 
-  const updateSplit = (index: number, field: keyof Split, value: any) => {
+  const updateSplit = (index: number, field: keyof Split, value: string | number) => {
     const newSplits = [...splits];
     newSplits[index] = { ...newSplits[index], [field]: value };
 
     // Calculate percentage when amount changes
-    if (field === 'amount' && absTransactionAmount > 0) {
+    if (field === 'amount' && typeof value === 'number' && absTransactionAmount > 0) {
       newSplits[index].percentage = (value / absTransactionAmount) * 100;
     }
 
@@ -226,7 +227,7 @@ export function SplitTransactionEditor({
               <div className="flex-1 space-y-3">
                 {/* Category Selector */}
                 <div className="space-y-2">
-                  <Label className="text-xs">Category</Label>
+                  <Label className="text-sm font-medium">Category</Label>
                   <Select
                     value={split.categoryId}
                     onValueChange={(value) => {
@@ -270,7 +271,7 @@ export function SplitTransactionEditor({
                 {/* Amount and Percentage */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
-                    <Label className="text-xs">Amount</Label>
+                    <Label className="text-sm font-medium">Amount</Label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                         $
@@ -289,7 +290,7 @@ export function SplitTransactionEditor({
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-xs">Percentage</Label>
+                    <Label className="text-sm font-medium">Percentage</Label>
                     <div className="relative">
                       <Input
                         type="number"
@@ -313,7 +314,7 @@ export function SplitTransactionEditor({
 
                 {/* Notes (Optional) */}
                 <div className="space-y-2">
-                  <Label className="text-xs">Notes (Optional)</Label>
+                  <Label className="text-sm font-medium">Notes (Optional)</Label>
                   <Input
                     value={split.notes || ''}
                     onChange={(e) => updateSplit(index, 'notes', e.target.value)}
@@ -325,10 +326,11 @@ export function SplitTransactionEditor({
               {/* Remove Button */}
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon"
                 onClick={() => removeSplit(index)}
                 disabled={splits.length <= 1}
                 className="mt-6"
+                aria-label={`Remove split ${index + 1}`}
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -344,6 +346,7 @@ export function SplitTransactionEditor({
           size="sm"
           onClick={addSplit}
           className="flex-1"
+          aria-label="Add new split"
         >
           <Plus className="mr-2 h-4 w-4" />
           Add Split
@@ -353,6 +356,7 @@ export function SplitTransactionEditor({
           size="sm"
           onClick={handleDistributeEvenly}
           className="flex-1"
+          aria-label="Distribute amount evenly across splits"
         >
           Distribute Evenly
         </Button>
@@ -369,15 +373,15 @@ export function SplitTransactionEditor({
           <span
             className={`font-medium ${
               Math.abs(remaining) < 0.01
-                ? 'text-green-600 dark:text-green-400'
-                : 'text-red-600 dark:text-red-400'
+                ? 'text-success'
+                : 'text-error'
             }`}
           >
             ${remaining.toFixed(2)}
           </span>
         </div>
         {isValid && (
-          <div className="flex items-center gap-2 text-green-600 dark:text-green-400 text-sm pt-2">
+          <div className="flex items-center gap-2 text-success text-sm pt-2">
             <Check className="h-4 w-4" />
             <span>Split amounts match transaction total</span>
           </div>
@@ -386,18 +390,22 @@ export function SplitTransactionEditor({
 
       {/* Error Display */}
       {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
+        <Shake trigger={!!error} duration={0.5} intensity={10}>
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        </Shake>
       )}
 
       {/* Success Display */}
       {success && (
-        <Alert className="border-green-500 text-green-900 dark:text-green-100">
-          <Check className="h-4 w-4 text-green-600" />
-          <AlertDescription>Splits saved successfully!</AlertDescription>
-        </Alert>
+        <Pulse scale={1.02} duration={0.6}>
+          <Alert className="border-success/20 text-success">
+            <Check className="h-4 w-4 text-success" />
+            <AlertDescription>Splits saved successfully!</AlertDescription>
+          </Alert>
+        </Pulse>
       )}
 
       {/* Action Buttons */}

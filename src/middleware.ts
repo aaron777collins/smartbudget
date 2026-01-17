@@ -1,11 +1,7 @@
-import { auth } from "@/auth"
+import { auth } from "@/auth-middleware"
 import { NextResponse } from "next/server"
 
-// Force Node.js runtime instead of edge runtime
-// Required for bcryptjs and Prisma which don't work in edge runtime
-export const runtime = 'nodejs'
-
-export default auth((req) => {
+export default auth(async (req) => {
   const { pathname } = req.nextUrl
   const isAuthenticated = !!req.auth
 
@@ -19,6 +15,10 @@ export default auth((req) => {
     signInUrl.searchParams.set("callbackUrl", pathname)
     return NextResponse.redirect(signInUrl)
   }
+
+  // Note: Session validation (inactivity/expiration) is handled client-side
+  // and in API routes to avoid Edge Runtime limitations with Prisma.
+  // The JWT token expiration (maxAge) in auth.ts provides the primary session timeout.
 
   // If accessing auth pages while authenticated, redirect to dashboard
   if (

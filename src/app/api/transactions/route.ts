@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import type { TransactionType } from '@prisma/client';
-import { getTransactionsQuerySchema, validateQueryParams } from '@/lib/validation';
-import { invalidateDashboardCache } from '@/lib/redis-cache';
+import { createTransactionSchema, transactionQuerySchema } from '@/lib/validations';
+import { z } from 'zod';
+import { Prisma } from '@prisma/client';
 
 // GET /api/transactions - List transactions with filtering
 export async function GET(request: NextRequest) {
@@ -19,11 +20,26 @@ export async function GET(request: NextRequest) {
     const userId = session.user.id;
     const { searchParams } = new URL(request.url);
 
-    // Validate query parameters
-    const validation = validateQueryParams(getTransactionsQuerySchema, searchParams);
-    if (!validation.success || !validation.data) {
+    // Validate query parameters using Zod schema for security
+    const queryValidation = transactionQuerySchema.safeParse({
+      accountId: searchParams.get('accountId'),
+      categoryId: searchParams.get('categoryId'),
+      type: searchParams.get('type'),
+      startDate: searchParams.get('startDate'),
+      endDate: searchParams.get('endDate'),
+      search: searchParams.get('search'),
+      minAmount: searchParams.get('minAmount'),
+      maxAmount: searchParams.get('maxAmount'),
+      isReconciled: searchParams.get('isReconciled'),
+      sortBy: searchParams.get('sortBy'),
+      sortOrder: searchParams.get('sortOrder'),
+      page: searchParams.get('page'),
+      limit: searchParams.get('limit'),
+    });
+
+    if (!queryValidation.success) {
       return NextResponse.json(
-        { error: validation.error?.message, details: validation.error?.details },
+        { error: 'Invalid query parameters', issues: queryValidation.error.issues },
         { status: 400 }
       );
     }
@@ -31,27 +47,25 @@ export async function GET(request: NextRequest) {
     const {
       accountId,
       categoryId,
-      subcategoryId,
       type,
       startDate,
       endDate,
+      search,
       minAmount,
       maxAmount,
-      search,
-      tags,
-      excludeTags,
-      uncategorizedOnly,
+      isReconciled,
       sortBy,
       sortOrder,
-      page,
       limit,
-    } = validation.data;
+    } = queryValidation.data;
 
-    // Calculate offset from page
-    const offset = (page - 1) * limit;
+    // Additional parameters not in schema
+    const tagId = searchParams.get('tagId');
+    const isRecurring = searchParams.get('isRecurring');
+    const offset = parseInt(searchParams.get('offset') || '0');
 
     // Build where clause
-    const where: any = { userId };
+    const where: Prisma.TransactionWhereInput = { userId };
 
     if (accountId) {
       where.accountId = accountId;
@@ -109,22 +123,27 @@ export async function GET(request: NextRequest) {
     // Amount range filters
     if (minAmount !== undefined || maxAmount !== undefined) {
       where.amount = {};
-      if (minAmount !== undefined) {
+      if (minAmount) {
         where.amount.gte = minAmount;
       }
-      if (maxAmount !== undefined) {
+      if (maxAmount) {
         where.amount.lte = maxAmount;
       }
     }
 
     // Transaction type filter
     if (type) {
-      where.type = type as TransactionType;
+      where.type = type;
     }
 
-    // Subcategory filter
-    if (subcategoryId) {
-      where.subcategoryId = subcategoryId;
+    // Reconciliation status filter
+    if (isReconciled !== null && isReconciled !== undefined) {
+      where.isReconciled = isReconciled;
+    }
+
+    // Recurring status filter
+    if (isRecurring !== null && isRecurring !== undefined && isRecurring !== '') {
+      where.isRecurring = isRecurring === 'true';
     }
 
     // Fetch transactions
@@ -205,18 +224,13 @@ export async function POST(request: NextRequest) {
     const userId = session.user.id;
     const body = await request.json();
 
-    // Validate required fields
-    if (!body.accountId || !body.date || !body.description || body.amount === undefined) {
-      return NextResponse.json(
-        { error: 'Missing required fields: accountId, date, description, amount' },
-        { status: 400 }
-      );
-    }
+    // Validate request body
+    const validatedData = createTransactionSchema.parse(body);
 
     // Verify account belongs to user
     const account = await prisma.account.findFirst({
       where: {
-        id: body.accountId,
+        id: validatedData.accountId,
         userId
       }
     });
@@ -232,19 +246,21 @@ export async function POST(request: NextRequest) {
     const transaction = await prisma.transaction.create({
       data: {
         userId,
-        accountId: body.accountId,
-        date: new Date(body.date),
-        postedDate: body.postedDate ? new Date(body.postedDate) : undefined,
-        description: body.description,
-        merchantName: body.merchantName || body.description,
-        amount: body.amount,
-        type: body.type || (body.amount < 0 ? 'DEBIT' : 'CREDIT') as TransactionType,
-        categoryId: body.categoryId,
-        subcategoryId: body.subcategoryId,
-        notes: body.notes,
-        isReconciled: body.isReconciled || false,
-        isRecurring: body.isRecurring || false,
-        userCorrected: body.userCorrected || false
+        accountId: validatedData.accountId,
+        date: validatedData.date,
+        postedDate: validatedData.postedDate,
+        description: validatedData.description,
+        merchantName: validatedData.merchantName,
+        amount: validatedData.amount,
+        type: validatedData.type,
+        categoryId: validatedData.categoryId,
+        subcategoryId: validatedData.subcategoryId,
+        notes: validatedData.notes,
+        isReconciled: validatedData.isReconciled,
+        isRecurring: validatedData.isRecurring,
+        fitid: validatedData.fitid,
+        recurringRuleId: validatedData.recurringRuleId,
+        rawData: validatedData.rawData === null ? Prisma.JsonNull : (validatedData.rawData as Prisma.InputJsonValue | undefined),
       },
       include: {
         account: {
@@ -282,6 +298,14 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Transaction create error:', error);
+
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Invalid transaction data', issues: error.issues },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
       { error: 'Failed to create transaction', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }

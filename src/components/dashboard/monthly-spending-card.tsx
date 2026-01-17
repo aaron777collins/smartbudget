@@ -3,8 +3,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { CreditCard } from 'lucide-react';
-import { useCounterAnimation } from '@/hooks/use-counter-animation';
-import { COLORS, ELEVATION } from '@/lib/design-tokens';
+import { CountUp, HoverScale } from '@/components/ui/animated';
+import { getBudgetStatusColor } from '@/lib/design-tokens';
 
 interface MonthlySpendingCardProps {
   current: number;
@@ -29,57 +29,54 @@ export function MonthlySpendingCard({
     }).format(amount);
   };
 
-  const getStatusColor = () => {
-    if (!budgetUsedPercentage) return 'text-muted-foreground';
-    if (budgetUsedPercentage < 80) return COLORS.budget.safe.text;
-    if (budgetUsedPercentage < 100) return COLORS.budget.warning.text;
-    return COLORS.budget.danger.text;
-  };
-
-  const getProgressBarColor = () => {
-    if (!budgetUsedPercentage) return '[&>div]:bg-blue-500';
-    if (budgetUsedPercentage < 80) return `[&>div]:${COLORS.budget.safe.progress}`;
-    if (budgetUsedPercentage < 100) return `[&>div]:${COLORS.budget.warning.progress}`;
-    return `[&>div]:${COLORS.budget.danger.progress}`;
-  };
+  const statusColors = getBudgetStatusColor(budgetUsedPercentage);
 
   return (
-    <Card className={`${ELEVATION.medium} transition-all duration-300 hover:${ELEVATION.highest} hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 duration-300 delay-100 ${COLORS.gradient.orange}`}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">Monthly Spending</CardTitle>
-        <CreditCard className="h-4 w-4 text-muted-foreground transition-transform duration-300 group-hover:scale-110" />
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold tabular-nums">{formatCurrency(animatedCurrent)}</div>
+    <HoverScale scale={1.02} className="cursor-pointer">
+      <Card className="transition-shadow duration-300 hover:shadow-lg">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Monthly Spending</CardTitle>
+          <CreditCard className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold font-mono">
+            <CountUp
+              to={current}
+              duration={1.2}
+              decimals={2}
+              prefix="CA$"
+              className="font-mono"
+            />
+          </div>
 
-        {budget !== null && budgetUsedPercentage !== null ? (
-          <>
-            <div className="mt-3 animate-in fade-in slide-in-from-bottom-2 duration-300 delay-200">
-              <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-                <span>Budget Progress</span>
-                <span className={`${getStatusColor()} tabular-nums transition-colors duration-300`}>
-                  {animatedPercentage.toFixed(0)}%
-                </span>
+          {budget !== null && budgetUsedPercentage !== null ? (
+            <>
+              <div className="mt-3">
+                <div className="flex items-center justify-between text-sm font-medium text-muted-foreground mb-1">
+                  <span>Budget Progress</span>
+                  <span className={`${statusColors.text} font-mono`}>
+                    {budgetUsedPercentage.toFixed(0)}%
+                  </span>
+                </div>
+                <Progress
+                  value={Math.min(budgetUsedPercentage, 100)}
+                  className={`h-2 ${statusColors.progressBar}`}
+                />
+                <div className="flex items-center justify-between text-xs text-muted-foreground mt-1">
+                  <span className="font-mono">{formatCurrency(current)} of {formatCurrency(budget)}</span>
+                </div>
               </div>
-              <Progress
-                value={Math.min(animatedPercentage, 100)}
-                className={`h-2 ${getProgressBarColor()} transition-all duration-300`}
-                aria-label={`Monthly budget progress: ${animatedPercentage.toFixed(0)}% used, ${formatCurrency(animatedCurrent)} spent of ${formatCurrency(animatedBudget)} budget, ${daysRemaining} days remaining`}
-              />
-              <div className="flex items-center justify-between text-xs text-muted-foreground mt-1 tabular-nums">
-                <span>{formatCurrency(animatedCurrent)} of {formatCurrency(animatedBudget)}</span>
-              </div>
-            </div>
-            <p className="text-xs text-muted-foreground mt-2 animate-in fade-in duration-300 delay-300">
-              {daysRemaining} {daysRemaining === 1 ? 'day' : 'days'} remaining this month
+              <p className="text-xs text-muted-foreground mt-2">
+                {daysRemaining} {daysRemaining === 1 ? 'day' : 'days'} remaining this month
+              </p>
+            </>
+          ) : (
+            <p className="text-xs text-muted-foreground mt-1">
+              No active budget set
             </p>
-          </>
-        ) : (
-          <p className="text-xs text-muted-foreground mt-1 animate-in fade-in duration-500 delay-150">
-            No active budget set
-          </p>
-        )}
-      </CardContent>
-    </Card>
+          )}
+        </CardContent>
+      </Card>
+    </HoverScale>
   );
 }

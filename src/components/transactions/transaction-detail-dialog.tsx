@@ -11,12 +11,16 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Trash2 } from 'lucide-react';
-import { TransactionViewMode } from './transaction-view-mode';
-import { TransactionEditForm } from './transaction-edit-form';
-import { MerchantResearchPanel } from './merchant-research-panel';
-import { TransactionSplitsManager } from './transaction-splits-manager';
-import { TransactionTagsManager } from './transaction-tags-manager';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Shake, Pulse } from '@/components/ui/animated';
+import { Calendar, DollarSign, Store, FileText, Tag, Trash2, Search, Loader2, Split, CheckCircle, ArrowDown, ArrowUp } from 'lucide-react';
+import { CategorySelector } from './category-selector';
+import { SplitTransactionEditor } from './split-transaction-editor';
+import { TagSelector } from './tag-selector';
+import { getCategoryBadgeColors } from '@/lib/design-tokens';
 
 interface Transaction {
   id: string;
@@ -64,6 +68,21 @@ interface Transaction {
   userCorrected: boolean;
 }
 
+interface ResearchResult {
+  merchantName: string;
+  businessName?: string;
+  businessType?: string;
+  categorySlug?: string;
+  categoryName?: string;
+  subcategorySlug?: string;
+  subcategoryName?: string;
+  confidence?: number;
+  reasoning?: string;
+  website?: string;
+  location?: string;
+  sources?: string[];
+}
+
 interface TransactionDetailDialogProps {
   transactionId: string | null;
   open: boolean;
@@ -84,10 +103,11 @@ export function TransactionDetailDialog({
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState<Partial<Transaction>>({});
   const [researching, setResearching] = useState(false);
-  const [researchResult, setResearchResult] = useState<any>(null);
+  const [researchResult, setResearchResult] = useState<ResearchResult | null>(null);
   const [researchError, setResearchError] = useState<string | null>(null);
   const [showSplitEditor, setShowSplitEditor] = useState(false);
   const [updatingTags, setUpdatingTags] = useState(false);
+  const [success, setSuccess] = useState<string>('');
 
   useEffect(() => {
     if (transactionId && open) {
@@ -118,6 +138,7 @@ export function TransactionDetailDialog({
 
     try {
       setLoading(true);
+      setSuccess('');
       const response = await fetch(`/api/transactions/${transactionId}`, {
         method: 'PATCH',
         headers: {
@@ -138,11 +159,22 @@ export function TransactionDetailDialog({
       const updated = await response.json();
       setTransaction(updated);
       setEditing(false);
+      setSuccess('Transaction updated successfully!');
+      setTimeout(() => setSuccess(''), 3000);
       onUpdate?.();
     } catch (error) {
       console.error('Error updating transaction:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Handle keyboard shortcuts for form submission
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    // Ctrl/Cmd + Enter to save when editing
+    if ((event.ctrlKey || event.metaKey) && event.key === 'Enter' && editing && !loading) {
+      event.preventDefault();
+      handleSave();
     }
   };
 
@@ -155,12 +187,12 @@ export function TransactionDetailDialog({
         slug: prev.category?.slug || '',
         icon: prev.category?.icon || '',
         color: prev.category?.color || '',
-      } as any : undefined,
+      } : undefined,
       subcategory: subcategoryId ? {
         id: subcategoryId,
         name: prev.subcategory?.name || '',
         slug: prev.subcategory?.slug || '',
-      } as any : undefined,
+      } : undefined,
     }));
   };
 
@@ -168,6 +200,7 @@ export function TransactionDetailDialog({
     if (!transactionId) return;
 
     setUpdatingTags(true);
+    setSuccess('');
     try {
       const response = await fetch(`/api/transactions/${transactionId}/tags`, {
         method: 'PATCH',
@@ -184,6 +217,8 @@ export function TransactionDetailDialog({
       const updated = await response.json();
       setTransaction(updated);
       setFormData(updated);
+      setSuccess('Tags updated successfully!');
+      setTimeout(() => setSuccess(''), 3000);
       onUpdate?.();
     } catch (error) {
       console.error('Error updating tags:', error);
@@ -249,7 +284,7 @@ export function TransactionDetailDialog({
         const categoriesResponse = await fetch('/api/categories');
         if (categoriesResponse.ok) {
           const categories = await categoriesResponse.json();
-          const category = categories.find((c: any) => c.slug === result.categorySlug);
+          const category = categories.find((c: { slug: string; id: string; name: string; icon: string; color: string }) => c.slug === result.categorySlug);
 
           if (category) {
             setFormData((prev) => ({
@@ -306,7 +341,7 @@ export function TransactionDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl" onKeyDown={handleKeyDown}>
         <DialogHeader>
           <DialogTitle>Transaction Details</DialogTitle>
           <DialogDescription>
@@ -314,31 +349,396 @@ export function TransactionDetailDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <DialogBody>
-          {loading ? (
-            <div className="py-8 text-center">
-              <p className="text-muted-foreground">Loading transaction...</p>
+        {loading ? (
+          <div className="py-8 text-center">
+            <p className="text-muted-foreground">Loading transaction...</p>
+          </div>
+        ) : transaction ? (
+          <div className="space-y-6">
+            {success && (
+              <Pulse scale={1.02} duration={0.6}>
+                <Alert className="bg-success/10 border-success">
+                  <CheckCircle className="h-4 w-4 text-success" />
+                  <AlertDescription className="text-success">{success}</AlertDescription>
+                </Alert>
+              </Pulse>
+            )}
+
+            {/* Amount - Prominent Display */}
+            <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-background rounded-full">
+                  <DollarSign className="h-5 w-5" />
+                </div>
+                <div>
+                  <div className="text-sm text-muted-foreground">Amount</div>
+                  <div className="flex items-center gap-2">
+                    {transaction.type === 'DEBIT' ? (
+                      <ArrowDown className="h-5 w-5 text-error" aria-label="Debit" />
+                    ) : (
+                      <ArrowUp className="h-5 w-5 text-success" aria-label="Credit" />
+                    )}
+                    <div
+                      className={`text-2xl font-bold font-mono ${
+                        transaction.type === 'DEBIT'
+                          ? 'text-error'
+                          : 'text-success'
+                      }`}
+                    >
+                      {formatAmount(transaction.amount, transaction.type)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <Badge
+                variant={transaction.isReconciled ? 'default' : 'secondary'}
+                className="flex items-center gap-1"
+              >
+                {transaction.isReconciled && <CheckCircle className="h-3 w-3" aria-label="Reconciled" />}
+                {transaction.isReconciled ? 'Reconciled' : 'Unreconciled'}
+              </Badge>
             </div>
-          ) : transaction ? (
-            <div className="space-y-6">
-              {/* View Mode - Only show when not editing */}
-              {!editing && (
-                <TransactionViewMode
-                  transaction={transaction}
-                  formatAmount={formatAmount}
-                  formatDate={formatDate}
-                />
+
+            {/* Basic Info */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Date
+                </Label>
+                {editing ? (
+                  <Input
+                    type="date"
+                    value={formData.date?.split('T')[0]}
+                    onChange={(e) =>
+                      setFormData({ ...formData, date: e.target.value })
+                    }
+                  />
+                ) : (
+                  <div className="text-sm">{formatDate(transaction.date)}</div>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label>Account</Label>
+                <Badge
+                  variant="outline"
+                  style={{ borderColor: transaction.account.color }}
+                  className="text-sm"
+                >
+                  {transaction.account.name}
+                </Badge>
+              </div>
+            </div>
+
+            {/* Merchant and Description */}
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="flex items-center gap-2">
+                    <Store className="h-4 w-4" />
+                    Merchant Name
+                  </Label>
+                  {!editing && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleResearchMerchant}
+                      disabled={researching}
+                    >
+                      {researching ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Researching...
+                        </>
+                      ) : (
+                        <>
+                          <Search className="mr-2 h-4 w-4" />
+                          Research Merchant
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </div>
+                {editing ? (
+                  <Input
+                    value={formData.merchantName}
+                    onChange={(e) =>
+                      setFormData({ ...formData, merchantName: e.target.value })
+                    }
+                  />
+                ) : (
+                  <div className="text-sm font-medium">
+                    {transaction.merchantName}
+                  </div>
+                )}
+              </div>
+
+              {/* Research Results */}
+              {researchResult && (
+                <div className="p-4 bg-primary/10 border border-primary/20 rounded-lg space-y-3">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1">
+                      <h4 className="font-semibold text-primary">
+                        Research Results
+                      </h4>
+                      <p className="text-sm text-primary">
+                        Claude AI found information about this merchant
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 text-sm">
+                    {researchResult.businessName && (
+                      <div>
+                        <strong className="text-primary">Business Name:</strong>{' '}
+                        <span className="text-primary">{researchResult.businessName}</span>
+                      </div>
+                    )}
+                    {researchResult.businessType && (
+                      <div>
+                        <strong className="text-primary">Business Type:</strong>{' '}
+                        <span className="text-primary">{researchResult.businessType}</span>
+                      </div>
+                    )}
+                    {researchResult.categoryName && (
+                      <div>
+                        <strong className="text-primary">Suggested Category:</strong>{' '}
+                        <Badge
+                          variant="secondary"
+                          className="ml-1"
+                        >
+                          {researchResult.categoryName}
+                          {researchResult.subcategoryName && ` → ${researchResult.subcategoryName}`}
+                        </Badge>
+                      </div>
+                    )}
+                    {researchResult.confidence !== undefined && (
+                      <div>
+                        <strong className="text-primary">Confidence:</strong>{' '}
+                        <span className="text-primary">
+                          {Math.round(researchResult.confidence * 100)}%
+                        </span>
+                      </div>
+                    )}
+                    {researchResult.reasoning && (
+                      <div>
+                        <strong className="text-primary">Reasoning:</strong>{' '}
+                        <span className="text-primary">{researchResult.reasoning}</span>
+                      </div>
+                    )}
+                    {researchResult.website && (
+                      <div>
+                        <strong className="text-primary">Website:</strong>{' '}
+                        <a
+                          href={researchResult.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline"
+                        >
+                          {researchResult.website}
+                        </a>
+                      </div>
+                    )}
+                    {researchResult.location && (
+                      <div>
+                        <strong className="text-primary">Location:</strong>{' '}
+                        <span className="text-primary">{researchResult.location}</span>
+                      </div>
+                    )}
+                    {researchResult.sources && researchResult.sources.length > 0 && (
+                      <div>
+                        <strong className="text-primary">Sources:</strong>
+                        <ul className="mt-1 space-y-1">
+                          {researchResult.sources.map((source: string, idx: number) => (
+                            <li key={idx}>
+                              <a
+                                href={source}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-muted-foreground hover:underline"
+                              >
+                                {source}
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+
+                  {editing && researchResult.categorySlug && (
+                    <div className="pt-2 border-t border-primary/20">
+                      <p className="text-xs text-muted-foreground">
+                        The suggested category has been applied. Review and save when ready.
+                      </p>
+                    </div>
+                  )}
+                </div>
               )}
 
-              {/* Edit Form - Only show when editing */}
-              {editing && (
-                <TransactionEditForm
-                  formData={formData}
+              {/* Research Error */}
+              {researchError && (
+                <Shake trigger={!!researchError} duration={0.5} intensity={10}>
+                  <div className="p-4 bg-error/10 border border-error/20 rounded-lg">
+                    <p className="text-sm text-error">
+                      <strong>Research failed:</strong> {researchError}
+                    </p>
+                  </div>
+                </Shake>
+              )}
+
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  Description
+                </Label>
+                {editing ? (
+                  <Input
+                    value={formData.description}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
+                  />
+                ) : (
+                  <div className="text-sm text-muted-foreground">
+                    {transaction.description}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Split Transaction Section */}
+            {showSplitEditor ? (
+              <div className="border-t pt-4">
+                <SplitTransactionEditor
                   transactionId={transactionId || ''}
                   onFormChange={setFormData}
                   onCategoryChange={handleCategoryChange}
                   showCategorySelector={!transaction.splits || transaction.splits.length === 0}
                 />
+              </div>
+            ) : (
+              <>
+                {/* Split Status Display */}
+                {transaction.splits && transaction.splits.length > 0 && (
+                  <div className="space-y-2 p-4 bg-primary/10 border border-primary/20 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <Label className="flex items-center gap-2">
+                        <Split className="h-4 w-4" />
+                        Split Transaction
+                      </Label>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowSplitEditor(true)}
+                      >
+                        Edit Splits
+                      </Button>
+                    </div>
+                    <div className="space-y-1 text-sm">
+                      {transaction.splits.map((split, idx) => (
+                        <div key={split.id} className="flex justify-between items-center">
+                          <span className="text-muted-foreground">Split {idx + 1}</span>
+                          <Badge variant="secondary" className="font-mono">
+                            ${parseFloat(split.amount).toFixed(2)}
+                            {split.percentage && ` (${parseFloat(split.percentage).toFixed(1)}%)`}
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Category (only show if not split) */}
+                {(!transaction.splits || transaction.splits.length === 0) && (
+                  <>
+                    {editing ? (
+                      <CategorySelector
+                        categoryId={formData.category?.id}
+                        subcategoryId={formData.subcategory?.id}
+                        onCategoryChange={handleCategoryChange}
+                        transactionId={transactionId || undefined}
+                        transactionDescription={formData.description}
+                        transactionMerchant={formData.merchantName}
+                        transactionAmount={formData.amount ? parseFloat(formData.amount) : undefined}
+                        showAutoCategorize={true}
+                      />
+                    ) : transaction.category ? (
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label className="flex items-center gap-2">
+                            <Tag className="h-4 w-4" />
+                            Category
+                          </Label>
+                          {!editing && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setShowSplitEditor(true)}
+                            >
+                              <Split className="mr-2 h-4 w-4" />
+                              Split Transaction
+                            </Button>
+                          )}
+                        </div>
+                        <Badge
+                          variant="secondary"
+                          style={getCategoryBadgeColors(transaction.category.color)}
+                        >
+                          {transaction.category.name}
+                          {transaction.subcategory &&
+                            ` → ${transaction.subcategory.name}`}
+                        </Badge>
+                        {transaction.confidenceScore && (
+                          <div className="text-xs text-muted-foreground">
+                            Confidence: {Math.round(transaction.confidenceScore * 100)}%
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label className="flex items-center gap-2">
+                            <Tag className="h-4 w-4" />
+                            Category
+                          </Label>
+                          {!editing && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setShowSplitEditor(true)}
+                            >
+                              <Split className="mr-2 h-4 w-4" />
+                              Split Transaction
+                            </Button>
+                          )}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          No category assigned
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </>
+            )}
+
+            {/* Notes */}
+            <div className="space-y-2">
+              <Label>Notes</Label>
+              {editing ? (
+                <Input
+                  value={formData.notes || ''}
+                  onChange={(e) =>
+                    setFormData({ ...formData, notes: e.target.value })
+                  }
+                  placeholder="Add notes..."
+                />
+              ) : (
+                <div className="text-sm text-muted-foreground">
+                  {transaction.notes || 'No notes'}
+                </div>
               )}
 
               {/* Merchant Research Panel - Show in both modes */}

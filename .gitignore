@@ -31,6 +31,9 @@ yarn-error.log*
 .env*.local
 .env
 
+# credential rotation logs (timestamps only, no passwords)
+credential-rotation.log
+
 # vercel
 .vercel
 

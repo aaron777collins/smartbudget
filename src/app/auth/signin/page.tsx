@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, Suspense } from "react"
+import { Suspense, useState } from "react"
 import { signIn } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
@@ -9,11 +9,13 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Shake } from "@/components/ui/animated"
 
 function SignInForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard"
+  const sessionExpired = searchParams.get("session_expired") === "true"
 
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
@@ -60,12 +62,12 @@ function SignInForm() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 dark:bg-gray-900">
+    <div className="flex min-h-screen items-center justify-center bg-muted px-4 py-12 bg-background">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">Sign in</CardTitle>
           <CardDescription>
-            Choose your preferred sign in method
+            Enter your username and password to sign in to your account
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -102,16 +104,29 @@ function SignInForm() {
         </CardContent>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
+            {sessionExpired && (
+              <div className="rounded-md bg-warning/10 p-3 text-sm text-warning">
+                Your session has expired due to inactivity. Please sign in again.
+              </div>
+            )}
+            {error && (
+              <Shake trigger={!!error} duration={0.5} intensity={10}>
+                <div className="rounded-md bg-error/10 p-3 text-sm text-error ">
+                  {error}
+                </div>
+              </Shake>
+            )}
             <div className="space-y-2">
               <Label htmlFor="username">Username</Label>
               <Input
                 id="username"
                 type="text"
-                placeholder="your_username"
+                placeholder="Enter your username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
                 disabled={isLoading}
+                autoComplete="username"
               />
             </div>
             <div className="space-y-2">
@@ -119,10 +134,12 @@ function SignInForm() {
               <Input
                 id="password"
                 type="password"
+                placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={isLoading}
+                autoComplete="current-password"
               />
             </div>
           </CardContent>
@@ -134,11 +151,11 @@ function SignInForm() {
             >
               {isLoading ? "Signing in..." : "Sign in"}
             </Button>
-            <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-center text-sm text-muted-foreground">
               Don&apos;t have an account?{" "}
               <Link
                 href="/auth/signup"
-                className="font-semibold text-blue-600 hover:underline dark:text-blue-400"
+                className="font-semibold text-primary hover:underline "
               >
                 Sign up
               </Link>
@@ -152,15 +169,7 @@ function SignInForm() {
 
 export default function SignInPage() {
   return (
-    <Suspense fallback={
-      <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 dark:bg-gray-900">
-        <Card className="w-full max-w-md">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold">Loading...</CardTitle>
-          </CardHeader>
-        </Card>
-      </div>
-    }>
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center">Loading...</div>}>
       <SignInForm />
     </Suspense>
   )

@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Shake, FadeIn } from '@/components/ui/animated';
 import {
   ArrowLeft,
   ArrowRight,
@@ -215,10 +216,10 @@ export default function BudgetWizard() {
     setAllocations(allocations.filter(a => a.categoryId !== categoryId));
   }
 
-  function updateAllocation(categoryId: string, field: 'categoryId' | 'amount', value: any) {
+  function updateAllocation(categoryId: string, field: 'categoryId' | 'amount', value: string | number) {
     setAllocations(allocations.map(a => {
       if (a.categoryId === categoryId) {
-        if (field === 'categoryId') {
+        if (field === 'categoryId' && typeof value === 'string') {
           const category = categories.find(c => c.id === value);
           return {
             ...a,
@@ -294,15 +295,18 @@ export default function BudgetWizard() {
 
       <CardContent className="space-y-6">
         {error && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
+          <Shake trigger={!!error} duration={0.5} intensity={10}>
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          </Shake>
         )}
 
         {/* Step 1: Basic Info */}
         {step === 1 && (
-          <div className="space-y-6">
+          <FadeIn key="step-1" duration={0.4} direction="up">
+            <div className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="name">Budget Name *</Label>
               <Input
@@ -379,12 +383,14 @@ export default function BudgetWizard() {
                 </Popover>
               </div>
             </div>
-          </div>
+            </div>
+          </FadeIn>
         )}
 
         {/* Step 2: Template Selection */}
         {step === 2 && (
-          <div className="space-y-6">
+          <FadeIn key="step-2" duration={0.4} direction="up">
+            <div className="space-y-6">
             <div>
               <Label>Choose a Starting Point</Label>
               <p className="text-sm text-muted-foreground mt-1">
@@ -403,7 +409,7 @@ export default function BudgetWizard() {
               >
                 <CardContent className="p-4">
                   <div className="flex items-start gap-3">
-                    <Sparkles className="h-5 w-5 text-amber-500 mt-0.5" />
+                    <Sparkles className="h-5 w-5 text-warning mt-0.5" />
                     <div>
                       <h4 className="font-semibold">Suggested (AI)</h4>
                       <p className="text-sm text-muted-foreground">
@@ -424,7 +430,7 @@ export default function BudgetWizard() {
               >
                 <CardContent className="p-4">
                   <div className="flex items-start gap-3">
-                    <Target className="h-5 w-5 text-blue-500 mt-0.5" />
+                    <Target className="h-5 w-5 text-primary mt-0.5" />
                     <div>
                       <h4 className="font-semibold">50/30/20 Rule</h4>
                       <p className="text-sm text-muted-foreground">
@@ -445,7 +451,7 @@ export default function BudgetWizard() {
               >
                 <CardContent className="p-4">
                   <div className="flex items-start gap-3">
-                    <CalendarIcon className="h-5 w-5 text-purple-500 mt-0.5" />
+                    <CalendarIcon className="h-5 w-5 text-primary mt-0.5" />
                     <div>
                       <h4 className="font-semibold">Copy Previous</h4>
                       <p className="text-sm text-muted-foreground">
@@ -466,7 +472,7 @@ export default function BudgetWizard() {
               >
                 <CardContent className="p-4">
                   <div className="flex items-start gap-3">
-                    <Plus className="h-5 w-5 text-green-500 mt-0.5" />
+                    <Plus className="h-5 w-5 text-success mt-0.5" />
                     <div>
                       <h4 className="font-semibold">Start from Scratch</h4>
                       <p className="text-sm text-muted-foreground">
@@ -481,7 +487,7 @@ export default function BudgetWizard() {
             {loadingTemplate && (
               <Card>
                 <CardContent className="pt-6">
-                  <Skeleton className="h-20 w-full" />
+                  <Skeleton className="h-32 w-full" />
                 </CardContent>
               </Card>
             )}
@@ -499,22 +505,24 @@ export default function BudgetWizard() {
                         <strong>Based on:</strong> {templateData.analysis.periodsAnalyzed} months, {templateData.analysis.transactionCount} transactions
                       </p>
                       <p>
-                        <strong>Monthly Average:</strong> ${templateData.analysis.monthlyAverage.toLocaleString()}
+                        <strong>Monthly Average:</strong> <span className="font-mono">${templateData.analysis.monthlyAverage.toLocaleString()}</span>
                       </p>
                     </div>
                   )}
                   <p className="text-sm text-muted-foreground">
-                    {templateData.categories.length} categories • ${templateData.totalAmount?.toLocaleString() || 0} total
+                    {templateData.categories.length} categories • <span className="font-mono">${templateData.totalAmount?.toLocaleString() || 0}</span> total
                   </p>
                 </CardContent>
               </Card>
             )}
-          </div>
+            </div>
+          </FadeIn>
         )}
 
         {/* Step 3: Category Allocation */}
         {step === 3 && (
-          <div className="space-y-6">
+          <FadeIn key="step-3" duration={0.4} direction="up">
+            <div className="space-y-6">
             <div className="flex justify-between items-center">
               <div>
                 <Label>Category Allocations</Label>
@@ -571,8 +579,7 @@ export default function BudgetWizard() {
                         variant="ghost"
                         size="icon"
                         onClick={() => removeCategory(allocation.categoryId)}
-                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                        aria-label="Remove category"
+                        className="text-error "
                       >
                         <Minus className="h-4 w-4" />
                       </Button>
@@ -586,51 +593,53 @@ export default function BudgetWizard() {
               <CardContent className="p-4">
                 <div className="flex justify-between items-center">
                   <span className="font-semibold">Total Budget:</span>
-                  <span className="text-2xl font-bold text-primary">
+                  <span className="text-2xl font-bold font-mono text-primary">
                     ${allocations.reduce((sum, a) => sum + (a.amount || 0), 0).toLocaleString()}
                   </span>
                 </div>
               </CardContent>
             </Card>
-          </div>
+            </div>
+          </FadeIn>
         )}
 
         {/* Step 4: Review and Create */}
         {step === 4 && (
-          <div className="space-y-6">
+          <FadeIn key="step-4" duration={0.4} direction="up">
+            <div className="space-y-6">
             <div>
               <h3 className="text-lg font-semibold mb-4">Review Your Budget</h3>
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <Label className="text-muted-foreground">Name</Label>
+                    <Label className="text-sm font-medium text-muted-foreground">Name</Label>
                     <p className="font-semibold">{name}</p>
                   </div>
                   <div>
-                    <Label className="text-muted-foreground">Type</Label>
+                    <Label className="text-sm font-medium text-muted-foreground">Type</Label>
                     <p className="font-semibold">
                       {budgetTypes.find(bt => bt.value === type)?.label}
                     </p>
                   </div>
                   <div>
-                    <Label className="text-muted-foreground">Period</Label>
+                    <Label className="text-sm font-medium text-muted-foreground">Period</Label>
                     <p className="font-semibold">
                       {budgetPeriods.find(bp => bp.value === period)?.label}
                     </p>
                   </div>
                   <div>
-                    <Label className="text-muted-foreground">Start Date</Label>
+                    <Label className="text-sm font-medium text-muted-foreground">Start Date</Label>
                     <p className="font-semibold">{format(startDate, 'PPP')}</p>
                   </div>
                 </div>
 
                 <div>
-                  <Label className="text-muted-foreground">Categories ({allocations.length})</Label>
+                  <Label className="text-sm font-medium text-muted-foreground">Categories ({allocations.length})</Label>
                   <div className="mt-2 space-y-2">
                     {allocations.map((allocation) => (
                       <div key={allocation.categoryId} className="flex justify-between items-center p-2 bg-muted rounded">
                         <span>{allocation.categoryName}</span>
-                        <span className="font-semibold">${(allocation.amount || 0).toLocaleString()}</span>
+                        <span className="font-semibold font-mono">${(allocation.amount || 0).toLocaleString()}</span>
                       </div>
                     ))}
                   </div>
@@ -640,7 +649,7 @@ export default function BudgetWizard() {
                   <CardContent className="p-4">
                     <div className="flex justify-between items-center">
                       <span className="font-semibold text-lg">Total Budget:</span>
-                      <span className="text-3xl font-bold text-primary">
+                      <span className="text-3xl font-bold font-mono text-primary">
                         ${totalAmount.toLocaleString()}
                       </span>
                     </div>
@@ -648,7 +657,8 @@ export default function BudgetWizard() {
                 </Card>
               </div>
             </div>
-          </div>
+            </div>
+          </FadeIn>
         )}
 
         {/* Navigation Buttons */}

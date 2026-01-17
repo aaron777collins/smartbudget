@@ -1,34 +1,18 @@
 import { NextResponse } from "next/server"
 import { hash } from "bcryptjs"
 import { prisma } from "@/lib/prisma"
-import { logUserCreated, getIpFromRequest } from "@/lib/audit-log"
-import { checkRateLimit } from "@/lib/rate-limit"
+import { signupLimiter, getClientIdentifier, checkRateLimit } from "@/lib/rate-limit"
 
 export async function POST(req: Request) {
   try {
-    // Check rate limit
-    const ip = getIpFromRequest(req) || "unknown"
-    const rateLimitResult = checkRateLimit(ip)
-
-    if (!rateLimitResult.success) {
-      return NextResponse.json(
-        {
-          error: "Too many signup attempts. Please try again later.",
-          retryAfter: rateLimitResult.retryAfter
-        },
-        {
-          status: 429,
-          headers: {
-            "Retry-After": rateLimitResult.retryAfter?.toString() || "900",
-            "X-RateLimit-Limit": rateLimitResult.limit.toString(),
-            "X-RateLimit-Remaining": rateLimitResult.remaining.toString(),
-            "X-RateLimit-Reset": new Date(rateLimitResult.reset).toISOString(),
-          }
-        }
-      )
+    // Apply rate limiting
+    const identifier = getClientIdentifier(req)
+    const rateLimitResult = await checkRateLimit(signupLimiter, identifier)
+    if (rateLimitResult) {
+      return rateLimitResult
     }
 
-    const { username, password, name } = await req.json()
+    const { username, email, password, name } = await req.json()
 
     // Validate input
     if (!username || !password) {
@@ -38,10 +22,10 @@ export async function POST(req: Request) {
       )
     }
 
-    // Validate username format (alphanumeric, 3-20 characters)
+    // Validate username format
     if (username.length < 3 || username.length > 20) {
       return NextResponse.json(
-        { error: "Username must be between 3 and 20 characters" },
+        { error: "Username must be 3-20 characters" },
         { status: 400 }
       )
     }
@@ -60,26 +44,41 @@ export async function POST(req: Request) {
       )
     }
 
-    // Check if user already exists
+    // Check if username already exists
     const existingUser = await prisma.user.findUnique({
       where: { username },
     })
 
     if (existingUser) {
       return NextResponse.json(
-        { error: "User with this username already exists" },
+        { error: "Username already taken" },
         { status: 400 }
       )
     }
 
+    // Check if email already exists (if provided)
+    if (email) {
+      const existingEmail = await prisma.user.findUnique({
+        where: { email },
+      })
+
+      if (existingEmail) {
+        return NextResponse.json(
+          { error: "Email already in use" },
+          { status: 400 }
+        )
+      }
+    }
+
     // Hash password
-    const passwordHash = await hash(password, 12)
+    const hashedPassword = await hash(password, 12)
 
     // Create user
     const user = await prisma.user.create({
       data: {
         username,
-        passwordHash,
+        email: email || null,
+        password: hashedPassword,
         name: name || null,
       },
     })
@@ -92,6 +91,7 @@ export async function POST(req: Request) {
         user: {
           id: user.id,
           username: user.username,
+          email: user.email,
           name: user.name,
         },
       },

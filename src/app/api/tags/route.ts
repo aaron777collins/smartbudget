@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { createTagSchema } from '@/lib/validations';
+import { z } from 'zod';
 import { Prisma } from '@prisma/client';
 
 // GET /api/tags - List user's tags
@@ -17,7 +19,7 @@ export async function GET(request: NextRequest) {
     // Query parameters
     const search = searchParams.get('search');
     const sortBy = searchParams.get('sortBy') || 'name';
-    const sortOrder = (searchParams.get('sortOrder') || 'asc') as 'asc' | 'desc';
+    const sortOrder = (searchParams.get('sortOrder') || 'asc') as Prisma.SortOrder;
 
     // Build where clause
     const where: Prisma.TagWhereInput = { userId };
@@ -66,23 +68,15 @@ export async function POST(request: NextRequest) {
     const userId = session.user.id;
     const body = await request.json();
 
-    // Validate required fields
-    if (!body.name) {
-      return NextResponse.json({ error: 'Tag name is required' }, { status: 400 });
-    }
-
-    // Normalize tag name (trim and lowercase for uniqueness check)
-    const normalizedName = body.name.trim();
-    if (!normalizedName) {
-      return NextResponse.json({ error: 'Tag name cannot be empty' }, { status: 400 });
-    }
+    // Validate request body
+    const validatedData = createTagSchema.parse(body);
 
     // Check for duplicate tag (case-insensitive)
     const existingTag = await prisma.tag.findFirst({
       where: {
         userId,
         name: {
-          equals: normalizedName,
+          equals: validatedData.name,
           mode: 'insensitive',
         },
       },
@@ -99,8 +93,8 @@ export async function POST(request: NextRequest) {
     const tag = await prisma.tag.create({
       data: {
         userId,
-        name: normalizedName,
-        color: body.color || '#6B7280',
+        name: validatedData.name,
+        color: validatedData.color,
       },
       include: {
         _count: {
@@ -112,6 +106,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(tag, { status: 201 });
   } catch (error) {
     console.error('Error creating tag:', error);
+
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Invalid data', issues: error.issues },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
       { error: 'Failed to create tag' },
       { status: 500 }

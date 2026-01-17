@@ -8,7 +8,11 @@ import { ErrorBoundary } from "@/components/error-boundary";
 import { SentryUserContext } from "@/components/sentry-user-context";
 import { Toaster } from "sonner";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({
+  subsets: ["latin"],
+  display: 'swap',
+  variable: '--font-inter',
+});
 
 export const metadata: Metadata = {
   title: "SmartBudget - Personal Finance Management",
@@ -33,32 +37,20 @@ export default function RootLayout({
         <ErrorBoundary>
           <SessionProvider>
             <SentryUserContext />
-            <QueryProvider>
-              <ThemeProvider
-                attribute="class"
-                defaultTheme="system"
-                enableSystem
-                disableTransitionOnChange
-              >
-                {children}
-                <Toaster
-                  position="top-right"
-                  richColors
-                  expand={false}
-                  duration={3000}
-                  closeButton
-                  toastOptions={{
-                    className: 'animate-in slide-in-from-top-5 duration-300',
-                    classNames: {
-                      success: 'bg-success text-success-foreground border-success',
-                      error: 'bg-destructive text-destructive-foreground border-destructive',
-                      warning: 'bg-warning text-warning-foreground border-warning',
-                      info: 'bg-info text-info-foreground border-info',
-                    }
-                  }}
-                />
-              </ThemeProvider>
-            </QueryProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+            >
+              {children}
+              <Toaster
+                position="top-right"
+                richColors
+                closeButton
+                expand={true}
+                duration={4000}
+              />
+            </ThemeProvider>
           </SessionProvider>
         </ErrorBoundary>
       </body>

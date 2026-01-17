@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useSession, signOut } from "next-auth/react"
 import { usePathname } from "next/navigation"
+import { useState, useEffect } from "react"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { MobileMenu } from "@/components/mobile-menu"
 import { Button } from "@/components/ui/button"
@@ -16,31 +17,40 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Wallet, LogOut, Settings, User } from "lucide-react"
+import { MobileNav } from "@/components/mobile-nav"
 
 export function Header() {
   const { data: session, status } = useSession()
   const pathname = usePathname()
+  const [isScrolled, setIsScrolled] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY
+      setIsScrolled(scrollPosition > 10)
+    }
+
+    // Check initial scroll position
+    handleScroll()
+
+    // Add scroll event listener
+    window.addEventListener("scroll", handleScroll, { passive: true })
+
+    // Cleanup
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header
+      className={`sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-shadow duration-200 ${
+        isScrolled ? "shadow-md" : ""
+      }`}
+    >
       <div className="container flex h-16 items-center">
-        {/* Mobile hamburger menu - only visible on mobile when authenticated */}
-        {status === "authenticated" && (
-          <div className="mr-4 md:hidden">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-11 w-11"
-              aria-label="Open menu"
-            >
-              <MobileMenu />
-            </Button>
-          </div>
-        )}
-
-        <div className="mr-4 flex">
-          <Link href="/" className="mr-6 flex items-center space-x-2 group transition-all duration-200 hover:scale-105 active:scale-95" aria-label="SmartBudget home">
-            <Wallet className="h-6 w-6 text-primary transition-transform duration-200 group-hover:rotate-12 group-hover:scale-110" aria-hidden="true" />
+        <div className="mr-4 flex items-center">
+          {status === "authenticated" && <MobileNav />}
+          <Link href="/" className="mr-6 flex items-center space-x-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:rounded-md" aria-label="SmartBudget home">
+            <Wallet className="h-6 w-6 text-primary" aria-hidden="true" />
             <span className="font-bold text-xl">SmartBudget</span>
           </Link>
           {/* Desktop navigation - hidden on mobile */}
@@ -48,28 +58,28 @@ export function Header() {
             <nav className="hidden md:flex items-center space-x-6 text-sm font-medium" aria-label="Primary navigation">
               <Link
                 href="/dashboard"
-                className="relative transition-all duration-200 hover:text-foreground/80 text-foreground/60 hover:scale-105 active:scale-95 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all after:duration-200 hover:after:w-full"
+                className="transition-colors hover:text-foreground/80 text-foreground/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:rounded-sm"
                 aria-current={pathname === "/dashboard" ? "page" : undefined}
               >
                 Dashboard
               </Link>
               <Link
                 href="/transactions"
-                className="relative transition-all duration-200 hover:text-foreground/80 text-foreground/60 hover:scale-105 active:scale-95 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all after:duration-200 hover:after:w-full"
+                className="transition-colors hover:text-foreground/80 text-foreground/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:rounded-sm"
                 aria-current={pathname === "/transactions" ? "page" : undefined}
               >
                 Transactions
               </Link>
               <Link
                 href="/budgets"
-                className="relative transition-all duration-200 hover:text-foreground/80 text-foreground/60 hover:scale-105 active:scale-95 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all after:duration-200 hover:after:w-full"
+                className="transition-colors hover:text-foreground/80 text-foreground/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:rounded-sm"
                 aria-current={pathname === "/budgets" ? "page" : undefined}
               >
                 Budgets
               </Link>
               <Link
                 href="/accounts"
-                className="relative transition-all duration-200 hover:text-foreground/80 text-foreground/60 hover:scale-105 active:scale-95 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all after:duration-200 hover:after:w-full"
+                className="transition-colors hover:text-foreground/80 text-foreground/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:rounded-sm"
                 aria-current={pathname === "/accounts" ? "page" : undefined}
               >
                 Accounts
@@ -85,7 +95,8 @@ export function Header() {
                 <Button variant="ghost" size="icon" className="h-11 w-11" aria-label="User menu">
                   <Avatar>
                     <AvatarFallback>
-                      {session?.user?.name?.charAt(0).toUpperCase() ||
+                      {session?.user?.username?.charAt(0).toUpperCase() ||
+                       session?.user?.name?.charAt(0).toUpperCase() ||
                        session?.user?.email?.charAt(0).toUpperCase() ||
                        "U"}
                     </AvatarFallback>
@@ -96,7 +107,7 @@ export function Header() {
                 <DropdownMenuLabel>
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">
-                      {session?.user?.name || "User"}
+                      {session?.user?.username || session?.user?.name || "User"}
                     </p>
                     <p className="text-xs leading-none text-muted-foreground">
                       {session?.user?.email}
@@ -119,7 +130,7 @@ export function Header() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => signOut({ callbackUrl: "/" })}
-                  className="cursor-pointer text-red-600 focus:text-red-600 group"
+                  className="cursor-pointer text-error focus:text-error"
                 >
                   <LogOut className="mr-2 h-4 w-4 transition-transform duration-200 group-hover:scale-110 group-hover:-translate-x-0.5" />
                   Sign out

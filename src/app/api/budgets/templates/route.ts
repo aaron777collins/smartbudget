@@ -154,6 +154,21 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    // Define type for category info
+    interface CategoryInfo {
+      id: string;
+      name: string;
+      slug: string;
+      color: string;
+      icon: string;
+    }
+
+    interface SpendingByCategory {
+      total: number;
+      count: number;
+      category: CategoryInfo;
+    }
+
     // Calculate average monthly spending per category
     const spendingByCategory = transactions.reduce((acc, t) => {
       if (!t.categoryId) return acc;
@@ -170,7 +185,7 @@ export async function GET(request: NextRequest) {
       acc[t.categoryId].count += 1;
 
       return acc;
-    }, {} as Record<string, { total: number; count: number; category: any }>);
+    }, {} as Record<string, SpendingByCategory>);
 
     // Calculate monthly average (divide by 3 months)
     const suggestedCategories = Object.entries(spendingByCategory)

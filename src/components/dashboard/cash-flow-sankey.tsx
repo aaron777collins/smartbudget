@@ -8,7 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { formatCurrency } from '@/lib/utils';
 import type { TimeframeValue } from './timeframe-selector';
 import { getMonthsFromTimeframe } from '@/lib/timeframe';
-import { ChartExportButton } from '@/components/charts/chart-export-button';
+import { getCurrentTheme, getChartColors, getChartColorByIndex } from '@/lib/design-tokens';
 
 interface SankeyData {
   nodes: Array<{ id: string; name: string; color?: string }>;
@@ -33,6 +33,15 @@ interface ExtendedSankeyNode extends SankeyNode<{}, {}> {
 
 interface ExtendedSankeyLink extends SankeyLink<ExtendedSankeyNode, {}> {
   value: number;
+  width?: number;
+  source: ExtendedSankeyNode;
+  target: ExtendedSankeyNode;
+}
+
+// Type for the computed sankey graph
+interface SankeyGraph {
+  nodes: ExtendedSankeyNode[];
+  links: ExtendedSankeyLink[];
 }
 
 interface CashFlowSankeyProps {
@@ -77,11 +86,29 @@ export function CashFlowSankey({ timeframe }: CashFlowSankeyProps) {
     // Clear previous content
     d3.select(svgRef.current).selectAll('*').remove();
 
+    // Get theme colors
+    const theme = getCurrentTheme();
+    const colors = getChartColors(theme);
+
+    // Create a mapping of node index to AICEO color
+    const nodeColorMap = new Map<number, string>();
+    data.nodes.forEach((node, index) => {
+      nodeColorMap.set(index, getChartColorByIndex(index, theme));
+    });
+
     // Get container dimensions
     const container = containerRef.current;
     const width = container.clientWidth;
     const height = 500;
-    const margin = { top: 20, right: 150, bottom: 20, left: 150 };
+
+    // Responsive margins - smaller margins on mobile
+    const isMobile = width < 640;
+    const margin = {
+      top: 20,
+      right: isMobile ? 60 : 150,
+      bottom: 20,
+      left: isMobile ? 60 : 150
+    };
 
     const svg = d3
       .select(svgRef.current)
@@ -106,7 +133,8 @@ export function CashFlowSankey({ timeframe }: CashFlowSankeyProps) {
         [width - margin.right, height - margin.bottom],
       ]);
 
-    const { nodes, links } = sankeyGenerator(sankeyData as any);
+    const graph = sankeyGenerator(sankeyData as SankeyGraph) as SankeyGraph;
+    const { nodes, links } = graph;
 
     // Add links
     g.append('g')
@@ -115,12 +143,13 @@ export function CashFlowSankey({ timeframe }: CashFlowSankeyProps) {
       .join('path')
       .attr('d', sankeyLinkHorizontal())
       .attr('fill', 'none')
-      .attr('stroke', (d: any) => {
-        // Use source node color or default
-        const sourceNode = d.source as ExtendedSankeyNode;
-        return sourceNode.color || '#6B7280';
+      .attr('stroke', (d: ExtendedSankeyLink) => {
+        // Find source node index and use AICEO color
+        const sourceNode = d.source;
+        const sourceIndex = nodes.findIndex((n) => n === sourceNode);
+        return nodeColorMap.get(sourceIndex) || colors.linkDefault;
       })
-      .attr('stroke-width', (d: any) => Math.max(1, d.width || 0))
+      .attr('stroke-width', (d: ExtendedSankeyLink) => Math.max(1, d.width || 0))
       .attr('opacity', 0.4)
       .on('mouseover', function () {
         d3.select(this).attr('opacity', 0.7);
@@ -129,7 +158,7 @@ export function CashFlowSankey({ timeframe }: CashFlowSankeyProps) {
         d3.select(this).attr('opacity', 0.4);
       })
       .append('title')
-      .text((d: any) => `${formatCurrency(d.value)}`);
+      .text((d: ExtendedSankeyLink) => `${formatCurrency(d.value)}`);
 
     // Add nodes
     const node = g
@@ -140,11 +169,14 @@ export function CashFlowSankey({ timeframe }: CashFlowSankeyProps) {
 
     node
       .append('rect')
-      .attr('x', (d: any) => d.x0)
-      .attr('y', (d: any) => d.y0)
-      .attr('height', (d: any) => Math.max(0, d.y1 - d.y0))
-      .attr('width', (d: any) => d.x1 - d.x0)
-      .attr('fill', (d: ExtendedSankeyNode) => d.color || '#2563EB')
+      .attr('x', (d: ExtendedSankeyNode) => d.x0 ?? 0)
+      .attr('y', (d: ExtendedSankeyNode) => d.y0 ?? 0)
+      .attr('height', (d: ExtendedSankeyNode) => Math.max(0, (d.y1 ?? 0) - (d.y0 ?? 0)))
+      .attr('width', (d: ExtendedSankeyNode) => (d.x1 ?? 0) - (d.x0 ?? 0))
+      .attr('fill', (d: ExtendedSankeyNode, i: number) => {
+        // Use AICEO color palette based on node index
+        return nodeColorMap.get(i) || colors.primary;
+      })
       .attr('opacity', 0.8)
       .on('mouseover', function () {
         d3.select(this).attr('opacity', 1);
@@ -153,7 +185,7 @@ export function CashFlowSankey({ timeframe }: CashFlowSankeyProps) {
         d3.select(this).attr('opacity', 0.8);
       })
       .append('title')
-      .text((d: any) => {
+      .text((d: ExtendedSankeyNode) => {
         const value = d.value || 0;
         return `${d.name}\n${formatCurrency(value)}`;
       });
@@ -161,29 +193,33 @@ export function CashFlowSankey({ timeframe }: CashFlowSankeyProps) {
     // Add labels
     node
       .append('text')
-      .attr('x', (d: any) => {
+      .attr('x', (d: ExtendedSankeyNode) => {
         // Position labels to the left or right based on position
-        return d.x0 < width / 2 ? d.x0 - 6 : d.x1 + 6;
+        const x0 = d.x0 ?? 0;
+        const x1 = d.x1 ?? 0;
+        return x0 < width / 2 ? x0 - 6 : x1 + 6;
       })
-      .attr('y', (d: any) => (d.y0 + d.y1) / 2)
+      .attr('y', (d: ExtendedSankeyNode) => ((d.y0 ?? 0) + (d.y1 ?? 0)) / 2)
       .attr('dy', '0.35em')
-      .attr('text-anchor', (d: any) => (d.x0 < width / 2 ? 'end' : 'start'))
+      .attr('text-anchor', (d: ExtendedSankeyNode) => ((d.x0 ?? 0) < width / 2 ? 'end' : 'start'))
       .attr('font-size', '12px')
-      .attr('fill', '#374151')
+      .attr('fill', colors.text)
       .text((d: ExtendedSankeyNode) => d.name || '');
 
     // Add value labels on nodes
     node
       .append('text')
-      .attr('x', (d: any) => {
-        return d.x0 < width / 2 ? d.x0 - 6 : d.x1 + 6;
+      .attr('x', (d: ExtendedSankeyNode) => {
+        const x0 = d.x0 ?? 0;
+        const x1 = d.x1 ?? 0;
+        return x0 < width / 2 ? x0 - 6 : x1 + 6;
       })
-      .attr('y', (d: any) => (d.y0 + d.y1) / 2 + 16)
+      .attr('y', (d: ExtendedSankeyNode) => ((d.y0 ?? 0) + (d.y1 ?? 0)) / 2 + 16)
       .attr('dy', '0.35em')
-      .attr('text-anchor', (d: any) => (d.x0 < width / 2 ? 'end' : 'start'))
+      .attr('text-anchor', (d: ExtendedSankeyNode) => ((d.x0 ?? 0) < width / 2 ? 'end' : 'start'))
       .attr('font-size', '10px')
-      .attr('fill', '#6B7280')
-      .text((d: any) => formatCurrency(d.value || 0));
+      .attr('fill', colors.textMuted)
+      .text((d: ExtendedSankeyNode) => formatCurrency(d.value || 0));
   }, [data]);
 
   if (loading) {
@@ -221,36 +257,32 @@ export function CashFlowSankey({ timeframe }: CashFlowSankeyProps) {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <CardTitle>Cash Flow</CardTitle>
-            <CardDescription>
-              Income sources flowing to expenses (Current Month)
-            </CardDescription>
-            <div className="flex gap-4 mt-2 text-sm">
-              <div>
-                <span className="text-muted-foreground">Total Income: </span>
-                <span className="font-semibold text-green-600">
-                  {formatCurrency(data.summary.totalIncome)}
-                </span>
-              </div>
-              <div>
-                <span className="text-muted-foreground">Total Expenses: </span>
-                <span className="font-semibold text-red-600">
-                  {formatCurrency(data.summary.totalExpenses)}
-                </span>
-              </div>
-              <div>
-                <span className="text-muted-foreground">Net: </span>
-                <span
-                  className={`font-semibold ${
-                    data.summary.netCashFlow >= 0 ? 'text-green-600' : 'text-red-600'
-                  }`}
-                >
-                  {formatCurrency(data.summary.netCashFlow)}
-                </span>
-              </div>
-            </div>
+        <CardTitle>Cash Flow</CardTitle>
+        <CardDescription>
+          Income sources flowing to expenses (Current Month)
+        </CardDescription>
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mt-2 text-sm">
+          <div>
+            <span className="text-muted-foreground">Total Income: </span>
+            <span className="font-semibold text-success">
+              {formatCurrency(data.summary.totalIncome)}
+            </span>
+          </div>
+          <div>
+            <span className="text-muted-foreground">Total Expenses: </span>
+            <span className="font-semibold text-error">
+              {formatCurrency(data.summary.totalExpenses)}
+            </span>
+          </div>
+          <div>
+            <span className="text-muted-foreground">Net: </span>
+            <span
+              className={`font-semibold ${
+                data.summary.netCashFlow >= 0 ? 'text-success' : 'text-error'
+              }`}
+            >
+              {formatCurrency(data.summary.netCashFlow)}
+            </span>
           </div>
           <ChartExportButton
             chartRef={chartWrapperRef}

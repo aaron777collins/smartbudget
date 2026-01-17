@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Skeleton } from '@/components/ui/skeleton';
 import type { TimeframeValue } from './timeframe-selector';
 import { getMonthsFromTimeframe } from '@/lib/timeframe';
-import { ChartExportButton } from '@/components/charts/chart-export-button';
+import { getCurrentTheme, getExtendedChartColors } from '@/lib/design-tokens';
 
 interface CorrelationData {
   categories: Array<{
@@ -77,9 +77,11 @@ export function CategoryCorrelationMatrix({ timeframe }: CategoryCorrelationMatr
     const container = containerRef.current;
     const containerWidth = container.clientWidth;
 
-    // Calculate dimensions
-    const cellSize = 70;
-    const labelSize = 150;
+    // Calculate responsive dimensions based on viewport
+    const isMobile = containerWidth < 640;
+    const isTablet = containerWidth >= 640 && containerWidth < 1024;
+    const cellSize = isMobile ? 50 : isTablet ? 60 : 70;
+    const labelSize = isMobile ? 100 : 150;
     const margin = { top: labelSize, right: 20, bottom: 20, left: labelSize };
 
     const categories = data.categories;
@@ -96,10 +98,27 @@ export function CategoryCorrelationMatrix({ timeframe }: CategoryCorrelationMatr
 
     const g = svg.append('g');
 
-    // Create color scale for correlation (0 = white, 1 = dark blue)
+    // Get theme colors for AICEO palette
+    const theme = getCurrentTheme();
+    const aiceoColors = getExtendedChartColors(theme);
+
+    // Create a custom interpolator using AICEO colors
+    // We'll use a gradient from a light base color to primary blue for correlation strength
+    // 0% correlation = very light/transparent, 100% correlation = strong primary blue
+    const baseColor = theme === 'dark' ? 'hsl(217, 20%, 25%)' : 'hsl(217, 20%, 95%)';
+    const primaryColor = aiceoColors[0]; // Primary blue
+
+    const customInterpolator = (t: number): string => {
+      return d3.interpolateHsl(baseColor, primaryColor)(t);
+    };
+
+    // Create color scale for correlation (0 = light, 1 = strong primary)
     const colorScale = d3
-      .scaleSequential(d3.interpolateBlues)
+      .scaleSequential(customInterpolator)
       .domain([0, 1]);
+
+    // Get theme-aware text color
+    const textColor = theme === 'dark' ? '#D1D5DB' : '#374151';
 
     // Draw column labels (top)
     g.selectAll('.col-label')
@@ -115,7 +134,7 @@ export function CategoryCorrelationMatrix({ timeframe }: CategoryCorrelationMatr
         return `rotate(-45, ${x}, ${y})`;
       })
       .attr('font-size', '11px')
-      .attr('fill', '#374151')
+      .attr('fill', textColor)
       .text(d => d.name);
 
     // Draw row labels (left)
@@ -128,7 +147,7 @@ export function CategoryCorrelationMatrix({ timeframe }: CategoryCorrelationMatr
       .attr('dy', '0.35em')
       .attr('text-anchor', 'end')
       .attr('font-size', '11px')
-      .attr('fill', '#374151')
+      .attr('fill', textColor)
       .text(d => d.name);
 
     // Create matrix cells
@@ -157,6 +176,11 @@ export function CategoryCorrelationMatrix({ timeframe }: CategoryCorrelationMatr
       });
     });
 
+    // Get theme-aware cell colors
+    const emptyCellColor = theme === 'dark' ? '#1F2937' : '#F3F4F6';
+    const strokeColor = theme === 'dark' ? '#374151' : '#fff';
+    const hoverStrokeColor = primaryColor;
+
     // Draw cells
     g.selectAll('.matrix-cell')
       .data(cells)
@@ -167,25 +191,28 @@ export function CategoryCorrelationMatrix({ timeframe }: CategoryCorrelationMatr
       .attr('width', cellSize - 2)
       .attr('height', cellSize - 2)
       .attr('fill', d => {
-        if (d.correlation === 0) return '#F3F4F6';
+        if (d.correlation === 0) return emptyCellColor;
         return colorScale(d.correlation);
       })
-      .attr('stroke', '#fff')
+      .attr('stroke', strokeColor)
       .attr('stroke-width', 2)
       .attr('rx', 4)
       .style('cursor', 'pointer')
       .on('mouseover', function(event, d) {
         d3.select(this)
-          .attr('stroke', '#2563EB')
+          .attr('stroke', hoverStrokeColor)
           .attr('stroke-width', 3);
 
-        // Show tooltip
+        // Show tooltip with theme-aware colors
+        const tooltipBg = theme === 'dark' ? 'rgba(31, 41, 55, 0.95)' : 'rgba(0, 0, 0, 0.8)';
+        const tooltipText = theme === 'dark' ? '#D1D5DB' : 'white';
+
         const tooltip = d3.select('body')
           .append('div')
           .attr('class', 'correlation-tooltip')
           .style('position', 'absolute')
-          .style('background', 'rgba(0, 0, 0, 0.8)')
-          .style('color', 'white')
+          .style('background', tooltipBg)
+          .style('color', tooltipText)
           .style('padding', '8px 12px')
           .style('border-radius', '6px')
           .style('font-size', '12px')
@@ -201,7 +228,7 @@ export function CategoryCorrelationMatrix({ timeframe }: CategoryCorrelationMatr
       })
       .on('mouseout', function() {
         d3.select(this)
-          .attr('stroke', '#fff')
+          .attr('stroke', strokeColor)
           .attr('stroke-width', 2);
 
         // Remove tooltip
@@ -209,6 +236,9 @@ export function CategoryCorrelationMatrix({ timeframe }: CategoryCorrelationMatr
       });
 
     // Add correlation value text for higher correlations
+    // Use theme-aware contrasting text for high correlations (darker cells)
+    const lightTextColor = theme === 'dark' ? '#F3F4F6' : '#fff';
+
     g.selectAll('.cell-text')
       .data(cells.filter(d => d.correlation > 0.3))
       .join('text')
@@ -219,15 +249,15 @@ export function CategoryCorrelationMatrix({ timeframe }: CategoryCorrelationMatr
       .attr('text-anchor', 'middle')
       .attr('font-size', '11px')
       .attr('font-weight', 'bold')
-      .attr('fill', d => d.correlation > 0.6 ? '#fff' : '#374151')
+      .attr('fill', d => d.correlation > 0.6 ? lightTextColor : textColor)
       .attr('pointer-events', 'none')
       .text(d => (d.correlation * 100).toFixed(0) + '%');
 
-    // Add legend
-    const legendWidth = 200;
+    // Add legend (responsive sizing)
+    const legendWidth = isMobile ? 150 : 200;
     const legendHeight = 20;
-    const legendX = width - legendWidth - margin.right;
-    const legendY = 20;
+    const legendX = isMobile ? margin.left : (width - legendWidth - margin.right);
+    const legendY = isMobile ? (height - margin.bottom - 50) : 20;
 
     const legendScale = d3.scaleLinear()
       .domain([0, 100])
@@ -240,7 +270,7 @@ export function CategoryCorrelationMatrix({ timeframe }: CategoryCorrelationMatr
     const legend = svg.append('g')
       .attr('transform', `translate(${legendX}, ${legendY})`);
 
-    // Draw gradient
+    // Draw gradient using AICEO colors
     const defs = svg.append('defs');
     const gradient = defs.append('linearGradient')
       .attr('id', 'correlation-gradient')
@@ -249,11 +279,11 @@ export function CategoryCorrelationMatrix({ timeframe }: CategoryCorrelationMatr
 
     gradient.append('stop')
       .attr('offset', '0%')
-      .attr('stop-color', d3.interpolateBlues(0));
+      .attr('stop-color', baseColor);
 
     gradient.append('stop')
       .attr('offset', '100%')
-      .attr('stop-color', d3.interpolateBlues(1));
+      .attr('stop-color', primaryColor);
 
     legend.append('rect')
       .attr('width', legendWidth)
@@ -271,7 +301,7 @@ export function CategoryCorrelationMatrix({ timeframe }: CategoryCorrelationMatr
       .attr('y', -5)
       .attr('text-anchor', 'middle')
       .attr('font-size', '11px')
-      .attr('fill', '#374151')
+      .attr('fill', textColor)
       .text('Co-occurrence Strength');
 
   }, [data]);

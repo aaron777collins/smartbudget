@@ -32,7 +32,10 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { TYPOGRAPHY } from '@/lib/design-tokens';
+import { FadeIn } from '@/components/ui/animated';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { getChartColors, getCurrentTheme } from '@/lib/design-tokens';
+import { useTheme } from 'next-themes';
 
 interface HistoricalPerformance {
   month: string;
@@ -88,11 +91,16 @@ interface AnalyticsData {
 
 export default function BudgetAnalyticsClient() {
   const router = useRouter();
+  const { theme, resolvedTheme } = useTheme();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [months, setMonths] = useState(6);
+
+  // Get theme-aware chart colors
+  const currentTheme = (resolvedTheme || theme || 'light') as 'light' | 'dark';
+  const colors = getChartColors(currentTheme);
 
   const fetchAnalytics = async (showLoading = true) => {
     try {
@@ -132,13 +140,9 @@ export default function BudgetAnalyticsClient() {
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div className="space-y-2">
-            <Skeleton className="h-9 w-[250px]" />
-            <Skeleton className="h-5 w-[400px]" />
-          </div>
-          <div className="flex gap-2">
-            <Skeleton className="h-10 w-[100px]" />
-            <Skeleton className="h-10 w-[100px]" />
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Budget Analytics</h1>
+            <p className="text-muted-foreground">Historical performance and spending trends</p>
           </div>
         </div>
 
@@ -186,7 +190,7 @@ export default function BudgetAnalyticsClient() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className={TYPOGRAPHY.pageTitle}>Budget Analytics</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Budget Analytics</h1>
             <p className="text-muted-foreground">Historical performance and spending trends</p>
           </div>
         </div>
@@ -238,20 +242,21 @@ export default function BudgetAnalyticsClient() {
             </Link>
           </Button>
           <div>
-            <h1 className={TYPOGRAPHY.pageTitle}>Budget Analytics</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Budget Analytics</h1>
             <p className="text-muted-foreground">Historical performance and spending trends</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <select
-            value={months}
-            onChange={(e) => setMonths(parseInt(e.target.value, 10))}
-            className="border rounded-md px-3 py-2 text-sm"
-          >
-            <option value={3}>Last 3 months</option>
-            <option value={6}>Last 6 months</option>
-            <option value={12}>Last 12 months</option>
-          </select>
+          <Select value={months.toString()} onValueChange={(value) => setMonths(parseInt(value, 10))}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select period" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="3">Last 3 months</SelectItem>
+              <SelectItem value="6">Last 6 months</SelectItem>
+              <SelectItem value="12">Last 12 months</SelectItem>
+            </SelectContent>
+          </Select>
           <Button
             variant="outline"
             size="icon"
@@ -273,7 +278,7 @@ export default function BudgetAnalyticsClient() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalMonths}</div>
+            <div className="text-2xl font-bold font-mono">{totalMonths}</div>
             <p className="text-xs text-muted-foreground mt-1">
               {underBudgetMonths} under budget
             </p>
@@ -287,7 +292,7 @@ export default function BudgetAnalyticsClient() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{avgUtilization.toFixed(1)}%</div>
+            <div className="text-2xl font-bold font-mono">{avgUtilization.toFixed(1)}%</div>
             <p className="text-xs text-muted-foreground mt-1">
               {avgUtilization < 100 ? 'Under budget avg.' : 'Over budget avg.'}
             </p>
@@ -301,7 +306,7 @@ export default function BudgetAnalyticsClient() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
+            <div className="text-2xl font-bold font-mono text-success">
               ${totalSaved.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
@@ -317,7 +322,7 @@ export default function BudgetAnalyticsClient() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">
+            <div className="text-2xl font-bold font-mono text-error">
               ${totalOverspent.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
@@ -330,7 +335,7 @@ export default function BudgetAnalyticsClient() {
       {/* Insights */}
       {insights.length > 0 && (
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Insights & Recommendations</h2>
+          <h2 className="text-lg font-semibold">Insights & Recommendations</h2>
           <div className="grid gap-4 md:grid-cols-2">
             {insights.map((insight, index) => (
               <Alert
@@ -370,33 +375,41 @@ export default function BudgetAnalyticsClient() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={400}>
-                <AreaChart data={performanceChartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip
-                    formatter={(value: number | undefined) => value ? `$${value.toFixed(2)}` : '$0.00'}
-                  />
-                  <Legend />
-                  <Area
-                    type="monotone"
-                    dataKey="Budgeted"
-                    stackId="1"
-                    stroke="#8884d8"
-                    fill="#8884d8"
-                    fillOpacity={0.6}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="Spent"
-                    stackId="2"
-                    stroke="#ef4444"
-                    fill="#ef4444"
-                    fillOpacity={0.6}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+              <FadeIn duration={0.5} delay={0.1}>
+                <ResponsiveContainer width="100%" height={400}>
+                  <AreaChart data={performanceChartData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={colors.grid} />
+                    <XAxis dataKey="month" stroke={colors.textMuted} />
+                    <YAxis stroke={colors.textMuted} />
+                    <Tooltip
+                      formatter={(value: number | undefined) => value ? `$${value.toFixed(2)}` : '$0.00'}
+                    />
+                    <Legend />
+                    <Area
+                      type="monotone"
+                      dataKey="Budgeted"
+                      stackId="1"
+                      stroke={colors.primary}
+                      fill={colors.primary}
+                      fillOpacity={0.6}
+                      animationBegin={0}
+                      animationDuration={800}
+                      animationEasing="ease-out"
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="Spent"
+                      stackId="2"
+                      stroke={colors.secondary}
+                      fill={colors.secondary}
+                      fillOpacity={0.6}
+                      animationBegin={100}
+                      animationDuration={800}
+                      animationEasing="ease-out"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </FadeIn>
             </CardContent>
           </Card>
 
@@ -435,7 +448,7 @@ export default function BudgetAnalyticsClient() {
                       </span>
                       <div
                         className={`flex items-center gap-1 font-medium ${
-                          perf.underBudget ? 'text-green-600' : 'text-red-600'
+                          perf.underBudget ? 'text-success' : 'text-error'
                         }`}
                       >
                         {perf.underBudget ? (
@@ -462,18 +475,26 @@ export default function BudgetAnalyticsClient() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={utilizationChartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip
-                    formatter={(value: number | undefined) => value ? `${value.toFixed(1)}%` : '0.0%'}
-                  />
-                  <Legend />
-                  <Bar dataKey="Budget Used (%)" fill="#8884d8" />
-                </BarChart>
-              </ResponsiveContainer>
+              <FadeIn duration={0.5} delay={0.1}>
+                <ResponsiveContainer width="100%" height={400}>
+                  <BarChart data={utilizationChartData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={colors.grid} />
+                    <XAxis dataKey="month" stroke={colors.textMuted} />
+                    <YAxis stroke={colors.textMuted} />
+                    <Tooltip
+                      formatter={(value: number | undefined) => value ? `${value.toFixed(1)}%` : '0.0%'}
+                    />
+                    <Legend />
+                    <Bar
+                      dataKey="Budget Used (%)"
+                      fill={colors.primary}
+                      animationBegin={0}
+                      animationDuration={800}
+                      animationEasing="ease-out"
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </FadeIn>
             </CardContent>
           </Card>
         </TabsContent>
@@ -501,31 +522,39 @@ export default function BudgetAnalyticsClient() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ResponsiveContainer width="100%" height={200}>
-                    <LineChart data={trend.data}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="month" />
-                      <YAxis />
-                      <Tooltip
-                        formatter={(value: number | undefined) => value ? `$${value.toFixed(2)}` : '$0.00'}
-                      />
-                      <Legend />
-                      <Line
-                        type="monotone"
-                        dataKey="budgeted"
-                        stroke={trend.categoryInfo.color}
-                        strokeDasharray="5 5"
-                        name="Budgeted"
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="spent"
-                        stroke={trend.categoryInfo.color}
-                        strokeWidth={2}
-                        name="Spent"
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
+                  <FadeIn duration={0.5} delay={0.1}>
+                    <ResponsiveContainer width="100%" height={200}>
+                      <LineChart data={trend.data}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={colors.grid} />
+                        <XAxis dataKey="month" stroke={colors.textMuted} />
+                        <YAxis stroke={colors.textMuted} />
+                        <Tooltip
+                          formatter={(value: number | undefined) => value ? `$${value.toFixed(2)}` : '$0.00'}
+                        />
+                        <Legend />
+                        <Line
+                          type="monotone"
+                          dataKey="budgeted"
+                          stroke={trend.categoryInfo.color}
+                          strokeDasharray="5 5"
+                          name="Budgeted"
+                          animationBegin={0}
+                          animationDuration={800}
+                          animationEasing="ease-out"
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="spent"
+                          stroke={trend.categoryInfo.color}
+                          strokeWidth={2}
+                          name="Spent"
+                          animationBegin={100}
+                          animationDuration={800}
+                          animationEasing="ease-out"
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </FadeIn>
                 </CardContent>
               </Card>
             ))

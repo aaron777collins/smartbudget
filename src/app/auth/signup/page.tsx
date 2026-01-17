@@ -8,12 +8,14 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Shake } from "@/components/ui/animated"
 
 export default function SignUpPage() {
   const router = useRouter()
 
-  const [name, setName] = useState("")
   const [username, setUsername] = useState("")
+  const [email, setEmail] = useState("")
+  const [name, setName] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [error, setError] = useState("")
@@ -22,6 +24,17 @@ export default function SignUpPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
+
+    // Validate username
+    if (username.length < 3 || username.length > 20) {
+      setError("Username must be 3-20 characters")
+      return
+    }
+
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+      setError("Username can only contain letters, numbers, and underscores")
+      return
+    }
 
     // Validate passwords match
     if (password !== confirmPassword) {
@@ -44,7 +57,7 @@ export default function SignUpPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ name, username, password }),
+        body: JSON.stringify({ username, email: email || undefined, name, password }),
       })
 
       const data = await response.json()
@@ -77,7 +90,7 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 dark:bg-gray-900">
+    <div className="flex min-h-screen items-center justify-center bg-muted px-4 py-12 bg-background">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
@@ -88,17 +101,42 @@ export default function SignUpPage() {
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             {error && (
-              <div className="animate-in fade-in slide-in-from-top-2 duration-300 rounded-md bg-red-50 border border-red-200 p-3 text-sm text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400">
-                <div className="flex items-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 flex-shrink-0">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
-                  </svg>
-                  <span>{error}</span>
+              <Shake trigger={!!error} duration={0.5} intensity={10}>
+                <div className="rounded-md bg-error/10 p-3 text-sm text-error ">
+                  {error}
                 </div>
-              </div>
+              </Shake>
             )}
             <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="username">Username</Label>
+              <Input
+                id="username"
+                type="text"
+                placeholder="Choose a username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                disabled={isLoading}
+                autoComplete="username"
+              />
+              <p className="text-xs text-muted-foreground dark:text-muted-foreground">
+                3-20 characters, letters, numbers, and underscores only
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email (optional)</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="name@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={isLoading}
+                autoComplete="email"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="name">Name (optional)</Label>
               <Input
                 id="name"
                 type="text"
@@ -106,18 +144,7 @@ export default function SignUpPage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 disabled={isLoading}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
-              <Input
-                id="username"
-                type="text"
-                placeholder="your_username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-                disabled={isLoading}
+                autoComplete="name"
               />
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 3-20 characters, alphanumeric and underscores only
@@ -128,12 +155,14 @@ export default function SignUpPage() {
               <Input
                 id="password"
                 type="password"
+                placeholder="Create a password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={isLoading}
+                autoComplete="new-password"
               />
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <p className="text-xs text-muted-foreground dark:text-muted-foreground">
                 Must be at least 8 characters
               </p>
             </div>
@@ -142,10 +171,12 @@ export default function SignUpPage() {
               <Input
                 id="confirmPassword"
                 type="password"
+                placeholder="Confirm your password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 disabled={isLoading}
+                autoComplete="new-password"
               />
             </div>
           </CardContent>
@@ -157,11 +188,11 @@ export default function SignUpPage() {
             >
               {isLoading ? "Creating account..." : "Create account"}
             </Button>
-            <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-center text-sm text-muted-foreground">
               Already have an account?{" "}
               <Link
                 href="/auth/signin"
-                className="font-semibold text-blue-600 hover:underline dark:text-blue-400"
+                className="font-semibold text-primary hover:underline "
               >
                 Sign in
               </Link>

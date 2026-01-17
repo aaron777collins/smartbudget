@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Shake, Pulse } from "@/components/ui/animated"
 import { Loader2, Check, AlertCircle, Bug } from "lucide-react"
 
 interface BugReportFormProps {
@@ -104,8 +105,8 @@ export function BugReportForm({ onSuccess }: BugReportFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="flex items-center gap-3 pb-4 border-b">
-        <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-          <Bug className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+        <div className="p-2 bg-primary/10 rounded-lg">
+          <Bug className="h-6 w-6 text-primary" />
         </div>
         <div>
           <h2 className="text-2xl font-bold">Report an Issue or Share Feedback</h2>
@@ -116,19 +117,23 @@ export function BugReportForm({ onSuccess }: BugReportFormProps) {
       </div>
 
       {submitStatus === "success" && (
-        <Alert className="animate-in fade-in slide-in-from-top-2 duration-300 bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
-          <Check className="h-4 w-4 text-green-600 dark:text-green-400 animate-in zoom-in duration-300" />
-          <AlertDescription className="text-green-800 dark:text-green-200">
-            Thank you! Your feedback has been submitted successfully.
-          </AlertDescription>
-        </Alert>
+        <Pulse scale={1.02} duration={0.6}>
+          <Alert className="bg-success/10 border-success/20">
+            <Check className="h-4 w-4 text-success" />
+            <AlertDescription className="text-success">
+              Thank you! Your feedback has been submitted successfully.
+            </AlertDescription>
+          </Alert>
+        </Pulse>
       )}
 
       {submitStatus === "error" && (
-        <Alert variant="destructive" className="animate-in fade-in slide-in-from-top-2 duration-300">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{errorMessage}</AlertDescription>
-        </Alert>
+        <Shake trigger={submitStatus === "error"} duration={0.5} intensity={10}>
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{errorMessage}</AlertDescription>
+          </Alert>
+        </Shake>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

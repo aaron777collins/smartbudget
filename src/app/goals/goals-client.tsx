@@ -13,9 +13,8 @@ import {
   Circle,
   AlertCircle,
 } from 'lucide-react';
-import { Progress } from '@/components/ui/progress';
-import { Skeleton } from '@/components/ui/skeleton';
-import { TYPOGRAPHY } from '@/lib/design-tokens';
+import { Shake, Pulse } from '@/components/ui/animated';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 // Types
 type GoalType = 'SAVINGS' | 'DEBT_PAYOFF' | 'NET_WORTH' | 'INVESTMENT';
@@ -71,6 +70,8 @@ export function GoalsClient() {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string>('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
@@ -105,8 +106,10 @@ export function GoalsClient() {
     }
   };
 
-  const handleCreateGoal = async (goalData: any) => {
+  const handleCreateGoal = async (goalData: Partial<Goal>) => {
     try {
+      setActionError(null);
+      setSuccess('');
       const response = await fetch('/api/goals', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -120,13 +123,18 @@ export function GoalsClient() {
 
       await fetchGoals();
       setShowCreateModal(false);
+      setSuccess('Goal created successfully!');
+      setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to create goal');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create goal';
+      setActionError(errorMessage);
     }
   };
 
-  const handleUpdateGoal = async (goalId: string, updates: any) => {
+  const handleUpdateGoal = async (goalId: string, updates: Partial<Goal>) => {
     try {
+      setActionError(null);
+      setSuccess('');
       const response = await fetch(`/api/goals/${goalId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -141,8 +149,11 @@ export function GoalsClient() {
       await fetchGoals();
       setEditingGoal(null);
       setSelectedGoal(null);
+      setSuccess('Goal updated successfully!');
+      setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to update goal');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update goal';
+      setActionError(errorMessage);
     }
   };
 
@@ -150,6 +161,8 @@ export function GoalsClient() {
     if (!confirm('Are you sure you want to delete this goal?')) return;
 
     try {
+      setActionError(null);
+      setSuccess('');
       const response = await fetch(`/api/goals/${goalId}`, {
         method: 'DELETE',
       });
@@ -161,13 +174,18 @@ export function GoalsClient() {
 
       await fetchGoals();
       setSelectedGoal(null);
+      setSuccess('Goal deleted successfully!');
+      setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to delete goal');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete goal';
+      setActionError(errorMessage);
     }
   };
 
   const handleAddProgress = async (goalId: string, amount: number) => {
     try {
+      setActionError(null);
+      setSuccess('');
       const response = await fetch(`/api/goals/${goalId}/progress`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -183,19 +201,23 @@ export function GoalsClient() {
       if (selectedGoal?.id === goalId) {
         await fetchGoalProgress(goalId);
       }
+      setSuccess('Progress updated successfully!');
+      setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to update progress');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update progress';
+      setActionError(errorMessage);
     }
   };
 
   if (loading) {
     return (
-      <div className="p-8 space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="space-y-2">
-            <Skeleton className="h-9 w-[180px]" />
-            <Skeleton className="h-5 w-[300px]" />
+      <div className="p-8">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-muted rounded w-1/4"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-48 bg-muted rounded"></div>
+            ))}
           </div>
           <Skeleton className="h-10 w-[130px]" />
         </div>
@@ -229,10 +251,15 @@ export function GoalsClient() {
   if (error) {
     return (
       <div className="p-8">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-800">
-          <p className="font-semibold">Error loading goals</p>
-          <p className="text-sm">{error}</p>
-        </div>
+        <Shake trigger={!!error} duration={0.5} intensity={10}>
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              <p className="font-semibold">Error loading goals</p>
+              <p className="text-sm">{error}</p>
+            </AlertDescription>
+          </Alert>
+        </Shake>
       </div>
     );
   }
@@ -242,17 +269,35 @@ export function GoalsClient() {
 
   return (
     <div className="p-8 space-y-6">
+      {success && (
+        <Pulse scale={1.02} duration={0.6}>
+          <Alert className="bg-success/10 border-success">
+            <CheckCircle2 className="h-4 w-4 text-success" />
+            <AlertDescription className="text-success">{success}</AlertDescription>
+          </Alert>
+        </Pulse>
+      )}
+
+      {actionError && (
+        <Shake trigger={!!actionError} duration={0.5} intensity={10}>
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{actionError}</AlertDescription>
+          </Alert>
+        </Shake>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className={TYPOGRAPHY.pageTitle}>Financial Goals</h1>
-          <p className="text-gray-600 mt-1">
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Financial Goals</h1>
+          <p className="text-muted-foreground mt-1">
             Track your progress toward your financial objectives
           </p>
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-all duration-200 hover:shadow-lg hover:scale-105"
         >
           <Plus className="w-4 h-4" />
           New Goal
@@ -261,35 +306,35 @@ export function GoalsClient() {
 
       {/* Summary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center gap-2 text-gray-600 mb-2">
+        <div className="bg-card rounded-lg border border-border p-4 hover:shadow-lg transition-all duration-200 hover:scale-[1.02]">
+          <div className="flex items-center gap-2 text-muted-foreground mb-2">
             <Target className="w-4 h-4" />
             <span className="text-sm font-medium">Total Goals</span>
           </div>
-          <p className="text-2xl font-bold text-gray-900">{goals.length}</p>
+          <p className="text-2xl font-bold font-mono text-foreground">{goals.length}</p>
         </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center gap-2 text-blue-600 mb-2">
+        <div className="bg-card rounded-lg border border-border p-4 hover:shadow-lg transition-all duration-200 hover:scale-[1.02]">
+          <div className="flex items-center gap-2 text-primary mb-2">
             <TrendingUp className="w-4 h-4" />
             <span className="text-sm font-medium">Active</span>
           </div>
-          <p className="text-2xl font-bold text-blue-600">{activeGoals.length}</p>
+          <p className="text-2xl font-bold font-mono text-primary">{activeGoals.length}</p>
         </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center gap-2 text-green-600 mb-2">
+        <div className="bg-card rounded-lg border border-border p-4 hover:shadow-lg transition-all duration-200 hover:scale-[1.02]">
+          <div className="flex items-center gap-2 text-success mb-2">
             <CheckCircle2 className="w-4 h-4" />
             <span className="text-sm font-medium">Completed</span>
           </div>
-          <p className="text-2xl font-bold text-green-600">
+          <p className="text-2xl font-bold font-mono text-success">
             {completedGoals.length}
           </p>
         </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center gap-2 text-purple-600 mb-2">
+        <div className="bg-card rounded-lg border border-border p-4 hover:shadow-lg transition-all duration-200 hover:scale-[1.02]">
+          <div className="flex items-center gap-2 text-primary mb-2">
             <DollarSign className="w-4 h-4" />
             <span className="text-sm font-medium">Total Target</span>
           </div>
-          <p className="text-2xl font-bold text-purple-600">
+          <p className="text-2xl font-bold font-mono text-primary">
             ${goals.reduce((sum, g) => sum + Number(g.targetAmount), 0).toLocaleString()}
           </p>
         </div>
@@ -298,7 +343,7 @@ export function GoalsClient() {
       {/* Active Goals */}
       {activeGoals.length > 0 && (
         <div>
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Active Goals</h2>
+          <h2 className="text-lg font-semibold text-foreground mb-4">Active Goals</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {activeGoals.map((goal) => (
               <GoalCard
@@ -319,7 +364,7 @@ export function GoalsClient() {
       {/* Completed Goals */}
       {completedGoals.length > 0 && (
         <div>
-          <h2 className="text-xl font-bold text-gray-900 mb-4">
+          <h2 className="text-lg font-semibold text-foreground mb-4">
             Completed Goals
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -342,16 +387,16 @@ export function GoalsClient() {
       {/* Empty State */}
       {goals.length === 0 && (
         <div className="text-center py-12">
-          <Target className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+          <Target className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-foreground mb-2">
             No goals yet
           </h3>
-          <p className="text-gray-600 mb-6">
+          <p className="text-muted-foreground mb-6">
             Create your first financial goal to start tracking your progress
           </p>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-all duration-200 hover:shadow-lg hover:scale-105"
           >
             <Plus className="w-5 h-5" />
             Create Your First Goal
@@ -414,15 +459,15 @@ function GoalCard({
 
   return (
     <div
-      className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow cursor-pointer"
+      className="bg-card rounded-lg border border-border p-4 hover:shadow-lg transition-all duration-200 cursor-pointer hover:scale-[1.02]"
       onClick={() => onSelect(goal)}
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
           {goal.isCompleted ? (
-            <CheckCircle2 className="w-5 h-5 text-green-600" />
+            <CheckCircle2 className="w-5 h-5 text-success" />
           ) : (
-            <Circle className="w-5 h-5 text-gray-400" />
+            <Circle className="w-5 h-5 text-muted-foreground" />
           )}
           <span
             className="px-2 py-1 text-xs font-medium rounded"
@@ -440,36 +485,40 @@ function GoalCard({
               e.stopPropagation();
               onEdit(goal);
             }}
-            className="p-1 hover:bg-gray-100 rounded"
+            className="p-1 hover:bg-muted rounded transition-colors duration-200"
           >
-            <Edit className="w-4 h-4 text-gray-600" />
+            <Edit className="w-4 h-4 text-muted-foreground" />
           </button>
           <button
             onClick={(e) => {
               e.stopPropagation();
               onDelete(goal.id);
             }}
-            className="p-1 hover:bg-gray-100 rounded"
+            className="p-1 hover:bg-muted rounded transition-colors duration-200"
           >
-            <Trash2 className="w-4 h-4 text-red-600" />
+            <Trash2 className="w-4 h-4 text-error" />
           </button>
         </div>
       </div>
 
-      <h3 className="text-lg font-semibold text-gray-900 mb-3">{goal.name}</h3>
+      <h3 className="text-lg font-semibold text-foreground mb-3">{goal.name}</h3>
 
       {/* Progress Bar */}
       <div className="mb-3">
-        <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-1">
+        <div className="flex justify-between text-sm text-muted-foreground mb-1">
           <span>${Number(goal.currentAmount).toLocaleString()}</span>
           <span>${Number(goal.targetAmount).toLocaleString()}</span>
         </div>
-        <Progress
-          value={progressPercentage}
-          className="h-2"
-          aria-label={`${goal.name} progress: ${progressPercentage.toFixed(1)}% complete, $${Number(goal.currentAmount).toLocaleString()} of $${Number(goal.targetAmount).toLocaleString()}`}
-        />
-        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+        <div className="h-2 bg-muted rounded-full overflow-hidden">
+          <div
+            className="h-full transition-all duration-300"
+            style={{
+              width: `${progressPercentage}%`,
+              backgroundColor: goal.color,
+            }}
+          />
+        </div>
+        <p className="text-sm text-muted-foreground mt-1">
           {progressPercentage.toFixed(1)}% complete
           {!goal.isCompleted && ` · $${remaining.toLocaleString()} remaining`}
         </p>
@@ -477,7 +526,7 @@ function GoalCard({
 
       {/* Target Date */}
       {goal.targetDate && (
-        <div className="flex items-center gap-2 text-sm text-gray-600">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Calendar className="w-4 h-4" />
           <span>
             Target: {new Date(goal.targetDate).toLocaleDateString()}
@@ -496,7 +545,7 @@ function GoalFormModal({
 }: {
   goal: Goal | null;
   onClose: () => void;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: Partial<Goal>) => void;
 }) {
   const [formData, setFormData] = useState({
     name: goal?.name || '',
@@ -518,14 +567,14 @@ function GoalFormModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="bg-card rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+        <h2 className="text-2xl font-bold text-foreground mb-4">
           {goal ? 'Edit Goal' : 'Create New Goal'}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-foreground mb-1">
               Goal Name
             </label>
             <input
@@ -534,14 +583,14 @@ function GoalFormModal({
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
               placeholder="e.g., Emergency Fund"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-foreground mb-1">
               Goal Type
             </label>
             <select
@@ -553,7 +602,7 @@ function GoalFormModal({
                   color: goalTypeColors[e.target.value as GoalType],
                 })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
             >
               {Object.entries(goalTypeLabels).map(([value, label]) => (
                 <option key={value} value={value}>
@@ -564,7 +613,7 @@ function GoalFormModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-foreground mb-1">
               Target Amount
             </label>
             <input
@@ -578,13 +627,13 @@ function GoalFormModal({
                   targetAmount: parseFloat(e.target.value) || 0,
                 })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-foreground mb-1">
               Current Amount
             </label>
             <input
@@ -598,12 +647,12 @@ function GoalFormModal({
                   currentAmount: parseFloat(e.target.value) || 0,
                 })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-foreground mb-1">
               Target Date (Optional)
             </label>
             <input
@@ -612,7 +661,7 @@ function GoalFormModal({
               onChange={(e) =>
                 setFormData({ ...formData, targetDate: e.target.value })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
 
@@ -620,13 +669,13 @@ function GoalFormModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+              className="flex-1 px-4 py-2 border border-border text-foreground rounded-lg hover:bg-muted transition-all duration-200"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-all duration-200 hover:shadow-lg"
             >
               {goal ? 'Update Goal' : 'Create Goal'}
             </button>
@@ -662,12 +711,11 @@ function GoalDetailModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-950 rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] flex flex-col">
-        {/* Header - Fixed */}
-        <div className="flex items-start justify-between p-6 pb-4 border-b border-gray-200 dark:border-gray-800">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="bg-card rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto shadow-xl">
+        <div className="flex items-start justify-between mb-4">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">{goal.name}</h2>
+            <h2 className="text-2xl font-bold text-foreground">{goal.name}</h2>
             <span
               className="inline-block mt-2 px-2 py-1 text-xs font-medium rounded"
               style={{
@@ -680,36 +728,38 @@ function GoalDetailModal({
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-400"
+            className="text-muted-foreground hover:text-muted-foreground"
           >
             ✕
           </button>
         </div>
 
-        {/* Body - Scrollable */}
-        <div className="flex-1 overflow-y-auto min-h-0 p-6">
-          {/* Progress Overview */}
-          <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 mb-6">
+        {/* Progress Overview */}
+        <div className="bg-muted rounded-lg p-4 mb-6">
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
-              <p className="text-sm text-gray-600">Current Amount</p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-sm text-muted-foreground">Current Amount</p>
+              <p className="text-2xl font-bold font-mono text-foreground">
                 ${Number(goal.currentAmount).toLocaleString()}
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-600">Target Amount</p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-sm text-muted-foreground">Target Amount</p>
+              <p className="text-2xl font-bold font-mono text-foreground">
                 ${Number(goal.targetAmount).toLocaleString()}
               </p>
             </div>
           </div>
-          <Progress
-            value={Math.min(goal.progress, 100)}
-            className="h-3 mb-2"
-            aria-label={`${goal.name} progress: ${goal.progress.toFixed(1)}% complete, $${Number(goal.currentAmount).toLocaleString()} of $${Number(goal.targetAmount).toLocaleString()}, $${(Number(goal.targetAmount) - Number(goal.currentAmount)).toLocaleString()} remaining`}
-          />
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <div className="h-3 bg-muted rounded-full overflow-hidden mb-2">
+            <div
+              className="h-full transition-all duration-300"
+              style={{
+                width: `${Math.min(goal.progress, 100)}%`,
+                backgroundColor: goal.color,
+              }}
+            />
+          </div>
+          <p className="text-sm text-muted-foreground">
             {goal.progress.toFixed(1)}% complete
             {!goal.isCompleted &&
               ` · $${(Number(goal.targetAmount) - Number(goal.currentAmount)).toLocaleString()} remaining`}
@@ -721,16 +771,16 @@ function GoalDetailModal({
           <div className="space-y-4 mb-6">
             {progress.targetDate && (
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-white border border-gray-200 rounded-lg p-3">
-                  <div className="flex items-center gap-2 text-gray-600 mb-1">
+                <div className="bg-card border border-border rounded-lg p-3">
+                  <div className="flex items-center gap-2 text-muted-foreground mb-1">
                     <Calendar className="w-4 h-4" />
                     <span className="text-sm font-medium">Target Date</span>
                   </div>
-                  <p className="text-lg font-semibold text-gray-900">
+                  <p className="text-lg font-semibold text-foreground">
                     {new Date(progress.targetDate).toLocaleDateString()}
                   </p>
                   {progress.daysRemaining !== null && (
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className="text-sm text-muted-foreground mt-1">
                       {progress.daysRemaining > 0
                         ? `${progress.daysRemaining} days remaining`
                         : 'Overdue'}
@@ -739,44 +789,51 @@ function GoalDetailModal({
                 </div>
 
                 {progress.onTrack !== null && (
-                  <div className="bg-white border border-gray-200 rounded-lg p-3">
-                    <div className="flex items-center gap-2 text-gray-600 mb-1">
+                  <div className="bg-card border border-border rounded-lg p-3">
+                    <div className="flex items-center gap-2 text-muted-foreground mb-1">
                       <TrendingUp className="w-4 h-4" />
                       <span className="text-sm font-medium">Status</span>
                     </div>
-                    <p
-                      className={`text-lg font-semibold ${
-                        progress.onTrack ? 'text-green-600' : 'text-red-600'
-                      }`}
-                    >
-                      {progress.onTrack ? 'On Track' : 'Behind Schedule'}
-                    </p>
+                    <div className="flex items-center gap-2">
+                      {progress.onTrack ? (
+                        <CheckCircle2 className="w-4 h-4 text-success" aria-label="On track" />
+                      ) : (
+                        <AlertCircle className="w-4 h-4 text-error" aria-label="Behind schedule" />
+                      )}
+                      <p
+                        className={`text-lg font-semibold ${
+                          progress.onTrack ? 'text-success' : 'text-error'
+                        }`}
+                      >
+                        {progress.onTrack ? 'On Track' : 'Behind Schedule'}
+                      </p>
+                    </div>
                   </div>
                 )}
               </div>
             )}
 
             {progress.dailyRequiredAmount !== null && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p className="text-sm font-medium text-blue-900 mb-2">
+              <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
+                <p className="text-sm font-medium text-primary mb-2">
                   Required Contribution Rates
                 </p>
                 <div className="grid grid-cols-3 gap-3">
                   <div>
-                    <p className="text-xs text-blue-700">Daily</p>
-                    <p className="text-lg font-semibold text-blue-900">
+                    <p className="text-xs text-muted-foreground">Daily</p>
+                    <p className="text-lg font-semibold text-primary">
                       ${progress.dailyRequiredAmount.toFixed(2)}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-blue-700">Weekly</p>
-                    <p className="text-lg font-semibold text-blue-900">
+                    <p className="text-xs text-muted-foreground">Weekly</p>
+                    <p className="text-lg font-semibold text-primary">
                       ${progress.weeklyRequiredAmount?.toFixed(2)}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-blue-700">Monthly</p>
-                    <p className="text-lg font-semibold text-blue-900">
+                    <p className="text-xs text-muted-foreground">Monthly</p>
+                    <p className="text-lg font-semibold text-primary">
                       ${progress.monthlyRequiredAmount?.toFixed(2)}
                     </p>
                   </div>
@@ -785,14 +842,14 @@ function GoalDetailModal({
             )}
 
             {progress.projectedCompletionDate && (
-              <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                <p className="text-sm font-medium text-purple-900 mb-1">
+              <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
+                <p className="text-sm font-medium text-primary mb-1">
                   Projected Completion
                 </p>
-                <p className="text-lg font-semibold text-purple-900">
+                <p className="text-lg font-semibold text-primary">
                   {new Date(progress.projectedCompletionDate).toLocaleDateString()}
                 </p>
-                <p className="text-xs text-purple-700 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   Based on your current progress rate
                 </p>
               </div>
@@ -800,47 +857,46 @@ function GoalDetailModal({
           </div>
         )}
 
-          {/* Add Progress */}
-          {!goal.isCompleted && (
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-4 mb-4">
-              <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Update Progress
-              </p>
-              <div className="flex gap-2">
-                <input
-                  type="number"
-                  step="0.01"
-                  value={addAmount}
-                  onChange={(e) => setAddAmount(e.target.value)}
-                  placeholder="Enter amount"
-                  className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <button
-                  onClick={handleAddProgress}
-                  disabled={!addAmount || parseFloat(addAmount) === 0}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
-                >
-                  Add
-                </button>
-              </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Enter positive amount to add, negative to subtract
-              </p>
+        {/* Add Progress */}
+        {!goal.isCompleted && (
+          <div className="bg-card border border-border rounded-lg p-4 mb-4">
+            <p className="text-sm font-medium text-foreground mb-2">
+              Update Progress
+            </p>
+            <div className="flex gap-2">
+              <input
+                type="number"
+                step="0.01"
+                value={addAmount}
+                onChange={(e) => setAddAmount(e.target.value)}
+                placeholder="Enter amount"
+                className="flex-1 px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+              <button
+                onClick={handleAddProgress}
+                disabled={!addAmount || parseFloat(addAmount) === 0}
+                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-all duration-200 hover:shadow-lg disabled:bg-muted disabled:cursor-not-allowed disabled:hover:shadow-none"
+              >
+                Add
+              </button>
             </div>
-          )}
-        </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Enter positive amount to add, negative to subtract
+            </p>
+          </div>
+        )}
 
         {/* Footer - Fixed */}
         <div className="flex gap-2 p-6 pt-4 border-t border-gray-200 dark:border-gray-800">
           <button
             onClick={onEdit}
-            className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-900"
+            className="flex-1 px-4 py-2 border border-border text-foreground rounded-lg hover:bg-muted transition-all duration-200"
           >
             Edit Goal
           </button>
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-all duration-200 hover:shadow-lg"
           >
             Close
           </button>

@@ -2,8 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
-import { COLORS, ELEVATION } from '@/lib/design-tokens';
-import { useCounterAnimation } from '@/hooks/use-counter-animation';
+import { CountUp, HoverScale } from '@/components/ui/animated';
 
 interface NetWorthCardProps {
   current: number;
@@ -42,56 +41,66 @@ export function NetWorthCard({
   };
 
   return (
-    <Card className={`${ELEVATION.medium} transition-all duration-300 hover:${ELEVATION.highest} hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4 duration-300 ${COLORS.gradient.blue}`}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">Net Worth</CardTitle>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="2"
-          className="h-4 w-4 text-muted-foreground transition-transform duration-300 group-hover:scale-110"
-        >
-          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-        </svg>
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold tabular-nums">{formatCurrency(animatedCurrent)}</div>
-        <div className="flex items-center text-xs text-muted-foreground mt-1 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-150">
-          {isPositive && (
-            <>
-              <TrendingUp className={`mr-1 h-4 w-4 ${COLORS.trend.up} animate-in zoom-in duration-300 delay-300`} />
-              <span className={`${COLORS.trend.up} tabular-nums`}>
-                +{formatCurrency(animatedChange)} ({formatPercentage(animatedPercentage)})
-              </span>
-            </>
-          )}
-          {isNegative && (
-            <>
-              <TrendingDown className={`mr-1 h-4 w-4 ${COLORS.trend.down} animate-in zoom-in duration-300 delay-300`} />
-              <span className={`${COLORS.trend.down} tabular-nums`}>
-                {formatCurrency(animatedChange)} ({formatPercentage(animatedPercentage)})
-              </span>
-            </>
-          )}
-          {isNeutral && (
-            <>
-              <Minus className={`mr-1 h-4 w-4 ${COLORS.trend.neutral} animate-in zoom-in duration-300 delay-300`} />
-              <span className={COLORS.trend.neutral}>No change</span>
-            </>
-          )}
-          <span className="ml-1">from last month</span>
-        </div>
-        {sparklineData.length > 0 && (
-          <div className="mt-4">
-            <SimplifiedSparkline data={sparklineData} />
+    <HoverScale scale={1.02} className="cursor-pointer">
+      <Card className="transition-shadow duration-300 hover:shadow-lg">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Net Worth</CardTitle>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            className="h-4 w-4 text-muted-foreground"
+          >
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+          </svg>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold font-mono">
+            <CountUp
+              to={current}
+              duration={1.2}
+              decimals={2}
+              prefix="CA$"
+              className="font-mono"
+            />
           </div>
-        )}
-      </CardContent>
-    </Card>
+          <div className="flex items-center text-xs text-muted-foreground mt-1">
+            {isPositive && (
+              <>
+                <TrendingUp className="mr-1 h-4 w-4 text-success" />
+                <span className="text-success font-mono">
+                  +{formatCurrency(change)} ({formatPercentage(changePercentage)})
+                </span>
+              </>
+            )}
+            {isNegative && (
+              <>
+                <TrendingDown className="mr-1 h-4 w-4 text-error" />
+                <span className="text-error font-mono">
+                  {formatCurrency(change)} ({formatPercentage(changePercentage)})
+                </span>
+              </>
+            )}
+            {isNeutral && (
+              <>
+                <Minus className="mr-1 h-4 w-4 text-muted-foreground" />
+                <span className="text-muted-foreground">No change</span>
+              </>
+            )}
+            <span className="ml-1">from last month</span>
+          </div>
+          {sparklineData.length > 0 && (
+            <div className="mt-4">
+              <SimplifiedSparkline data={sparklineData} />
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </HoverScale>
   );
 }
 
@@ -120,7 +129,7 @@ function SimplifiedSparkline({ data }: { data: Array<{ month: string; value: num
       width="100%"
       height={height}
       viewBox={`0 0 ${width} ${height}`}
-      className="text-blue-500"
+      className="text-primary"
     >
       <polyline
         fill="none"

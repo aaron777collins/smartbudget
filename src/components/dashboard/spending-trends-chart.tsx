@@ -16,7 +16,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { formatCurrency } from '@/lib/utils';
 import type { TimeframeValue } from './timeframe-selector';
 import { getMonthsFromTimeframe, buildTimeframeParams } from '@/lib/timeframe';
-import { ChartExportButton } from '@/components/charts/chart-export-button';
+import { FadeIn } from '@/components/ui/animated';
+import { getCurrentTheme, getChartColorByIndex } from '@/lib/design-tokens';
 
 interface CategoryMetadata {
   id: string;
@@ -24,8 +25,13 @@ interface CategoryMetadata {
   color: string;
 }
 
+interface ChartDataPoint {
+  month: string;
+  [categoryName: string]: string | number;
+}
+
 interface SpendingTrendsData {
-  chartData: any[];
+  chartData: ChartDataPoint[];
   categories: CategoryMetadata[];
   summary: {
     totalMonths: number;
@@ -35,9 +41,15 @@ interface SpendingTrendsData {
   };
 }
 
+interface TooltipPayload {
+  name: string;
+  value: number;
+  color: string;
+}
+
 interface CustomTooltipProps {
   active?: boolean;
-  payload?: any[];
+  payload?: TooltipPayload[];
   label?: string;
 }
 
@@ -49,7 +61,7 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
     return (
       <div className="rounded-lg border bg-background p-3 shadow-md">
         <p className="font-semibold mb-2">{label}</p>
-        <p className="text-sm font-bold mb-2">
+        <p className="text-sm font-bold font-mono mb-2">
           Total: {formatCurrency(total)}
         </p>
         <div className="space-y-1">
@@ -57,13 +69,13 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
             .filter(entry => entry.value > 0)
             .sort((a, b) => b.value - a.value)
             .map((entry, index) => (
-              <div key={index} className="flex items-center gap-2 text-xs">
+              <div key={index} className="flex items-center gap-2 text-xs text-muted-foreground">
                 <div
                   className="h-2 w-2 rounded-full"
                   style={{ backgroundColor: entry.color }}
                 />
                 <span className="flex-1">{entry.name}:</span>
-                <span className="font-semibold">{formatCurrency(entry.value)}</span>
+                <span className="font-semibold font-mono">{formatCurrency(entry.value)}</span>
               </div>
             ))}
         </div>
@@ -83,6 +95,7 @@ export function SpendingTrendsChart({ timeframe }: SpendingTrendsChartProps) {
   const [data, setData] = useState<SpendingTrendsData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const theme = getCurrentTheme();
 
   useEffect(() => {
     async function fetchData() {
@@ -143,26 +156,23 @@ export function SpendingTrendsChart({ timeframe }: SpendingTrendsChartProps) {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <CardTitle>Spending Trends</CardTitle>
-            <CardDescription>
-              Monthly spending by category (Last {data.summary.totalMonths} months)
-            </CardDescription>
-            <div className="mt-2 grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="text-muted-foreground">Average Monthly: </span>
-                <span className="font-semibold">
-                  {formatCurrency(data.summary.averageMonthlySpending)}
-                </span>
-              </div>
-              <div>
-                <span className="text-muted-foreground">Highest: </span>
-                <span className="font-semibold">
-                  {formatCurrency(data.summary.highestMonth.total)} ({data.summary.highestMonth.month})
-                </span>
-              </div>
-            </div>
+        <CardTitle>Spending Trends</CardTitle>
+        <CardDescription>
+          Monthly spending by category (Last {data.summary.totalMonths} months)
+        </CardDescription>
+        <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+          <div>
+            <span className="text-muted-foreground">Average Monthly: </span>
+            <span className="font-semibold font-mono">
+              {formatCurrency(data.summary.averageMonthlySpending)}
+            </span>
+          </div>
+          <div>
+            <span className="text-muted-foreground">Highest: </span>
+            <span className="font-semibold font-mono">
+              {formatCurrency(data.summary.highestMonth.total)}
+            </span>
+            <span className="hidden sm:inline"> ({data.summary.highestMonth.month})</span>
           </div>
           <ChartExportButton
             chartRef={chartRef}
@@ -178,58 +188,68 @@ export function SpendingTrendsChart({ timeframe }: SpendingTrendsChartProps) {
         </div>
       </CardHeader>
       <CardContent>
-        <div ref={chartRef} role="img" aria-label={`Spending trends chart showing monthly spending by category. Average monthly spending is ${formatCurrency(data.summary.averageMonthlySpending)}. Highest spending month was ${data.summary.highestMonth.month} with ${formatCurrency(data.summary.highestMonth.total)}.`}>
-          <ResponsiveContainer width="100%" height={400}>
-            <AreaChart
-              data={data.chartData}
-              margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-            >
-            <defs>
-              {data.categories.map((category) => (
-                <linearGradient
-                  key={category.id}
-                  id={`color-${category.id}`}
-                  x1="0"
-                  y1="0"
-                  x2="0"
-                  y2="1"
-                >
-                  <stop offset="0%" stopColor={category.color} stopOpacity={0.9} />
-                  <stop offset="50%" stopColor={category.color} stopOpacity={0.5} />
-                  <stop offset="100%" stopColor={category.color} stopOpacity={0.05} />
-                </linearGradient>
-              ))}
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-            <XAxis
-              dataKey="month"
-              className="text-xs"
-              tick={{ fill: 'hsl(var(--muted-foreground))' }}
-            />
-            <YAxis
-              className="text-xs"
-              tick={{ fill: 'hsl(var(--muted-foreground))' }}
-              tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
-            />
-            <Tooltip content={<CustomTooltip />} />
-            <Legend
-              wrapperStyle={{ paddingTop: '20px' }}
-              iconType="circle"
-            />
-            {data.categories.map((category) => (
-              <Area
-                key={category.id}
-                type="monotone"
-                dataKey={category.name}
-                stackId="1"
-                stroke={category.color}
-                fill={`url(#color-${category.id})`}
-                fillOpacity={1}
+        <FadeIn duration={0.5} delay={0.1}>
+          <div role="img" aria-label={`Spending trends chart showing monthly spending by category. Average monthly spending is ${formatCurrency(data.summary.averageMonthlySpending)}. Highest spending month was ${data.summary.highestMonth.month} with ${formatCurrency(data.summary.highestMonth.total)}.`}>
+            <ResponsiveContainer width="100%" height={400}>
+              <AreaChart
+                data={data.chartData}
+                margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+              >
+              <defs>
+                {data.categories.map((category, index) => {
+                  const color = getChartColorByIndex(index, theme);
+                  return (
+                    <linearGradient
+                      key={category.id}
+                      id={`color-${category.id}`}
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop offset="5%" stopColor={color} stopOpacity={0.8} />
+                      <stop offset="95%" stopColor={color} stopOpacity={0.1} />
+                    </linearGradient>
+                  );
+                })}
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+              <XAxis
+                dataKey="month"
+                className="text-xs text-muted-foreground"
+                tick={{ fill: 'hsl(var(--muted-foreground))' }}
               />
-            ))}
-          </AreaChart>
-        </ResponsiveContainer>
-        </div>
+              <YAxis
+                className="text-xs text-muted-foreground"
+                tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend
+                wrapperStyle={{ paddingTop: '20px' }}
+                iconType="circle"
+              />
+              {data.categories.map((category, index) => {
+                const color = getChartColorByIndex(index, theme);
+                return (
+                  <Area
+                    key={category.id}
+                    type="monotone"
+                    dataKey={category.name}
+                    stackId="1"
+                    stroke={color}
+                    fill={`url(#color-${category.id})`}
+                    fillOpacity={1}
+                    animationBegin={index * 100}
+                    animationDuration={800}
+                    animationEasing="ease-out"
+                  />
+                );
+              })}
+            </AreaChart>
+          </ResponsiveContainer>
+          </div>
+        </FadeIn>
       </CardContent>
     </Card>
   );

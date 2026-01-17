@@ -22,7 +22,7 @@ interface Insight {
   title: string;
   description: string;
   impact: 'high' | 'medium' | 'low';
-  data?: any;
+  data?: Record<string, unknown>;
 }
 
 interface Anomaly {
@@ -33,7 +33,7 @@ interface Anomaly {
   amount?: number;
   category?: string;
   merchant?: string;
-  data?: any;
+  data?: Record<string, unknown>;
 }
 
 interface SavingsOpportunity {
@@ -42,7 +42,7 @@ interface SavingsOpportunity {
   description: string;
   impact: 'high' | 'medium' | 'low';
   potentialSavings: number;
-  data?: any;
+  data?: Record<string, unknown>;
 }
 
 interface Subscription {
@@ -157,8 +157,8 @@ export function InsightsClient() {
         <div className="flex items-center justify-between space-y-2">
           <h1 className={TYPOGRAPHY.pageTitle}>Financial Insights</h1>
         </div>
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
-          <p className="text-sm text-red-800">
+        <div className="rounded-lg border border-error/20 bg-error/10 p-4">
+          <p className="text-sm text-error">
             Error loading insights: {error}
           </p>
         </div>
@@ -177,9 +177,9 @@ export function InsightsClient() {
 
   const getSeverityIcon = (severity: string) => {
     switch (severity) {
-      case 'high': return <AlertTriangle className="h-5 w-5 text-red-500" />;
-      case 'medium': return <Info className="h-5 w-5 text-yellow-500" />;
-      case 'low': return <CheckCircle2 className="h-5 w-5 text-blue-500" />;
+      case 'high': return <AlertTriangle className="h-5 w-5 text-error" />;
+      case 'medium': return <Info className="h-5 w-5 text-warning" />;
+      case 'low': return <CheckCircle2 className="h-5 w-5 text-primary" />;
       default: return <Info className="h-5 w-5" />;
     }
   };
@@ -193,10 +193,10 @@ export function InsightsClient() {
 
       {/* Weekly Digest */}
       {weeklyDigest && (
-        <Card>
+        <Card className="hover:shadow-lg transition-all duration-200 hover:scale-[1.02]">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-blue-600" />
+              <Calendar className="h-5 w-5 text-primary" />
               <CardTitle>Weekly Digest</CardTitle>
             </div>
             <CardDescription>{weeklyDigest.period.label}</CardDescription>
@@ -205,25 +205,25 @@ export function InsightsClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Income</p>
-                <p className="text-2xl font-bold text-green-600">
+                <p className="text-2xl font-bold font-mono text-success">
                   ${weeklyDigest.summary.income.toLocaleString()}
                 </p>
               </div>
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Expenses</p>
-                <p className="text-2xl font-bold text-red-600">
+                <p className="text-2xl font-bold font-mono text-error">
                   ${weeklyDigest.summary.expenses.toLocaleString()}
                 </p>
               </div>
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Net Cash Flow</p>
-                <p className={`text-2xl font-bold ${weeklyDigest.summary.netCashFlow >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                <p className={`text-2xl font-bold font-mono ${weeklyDigest.summary.netCashFlow >= 0 ? 'text-success' : 'text-error'}`}>
                   ${weeklyDigest.summary.netCashFlow.toLocaleString()}
                 </p>
               </div>
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Transactions</p>
-                <p className="text-2xl font-bold">{weeklyDigest.summary.transactionCount}</p>
+                <p className="text-2xl font-bold font-mono">{weeklyDigest.summary.transactionCount}</p>
               </div>
             </div>
 
@@ -231,9 +231,9 @@ export function InsightsClient() {
               <div className="space-y-2 pt-4 border-t">
                 {weeklyDigest.insights.map((insight, idx) => (
                   <div key={idx} className="flex items-start gap-2">
-                    {insight.type === 'positive' && <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />}
-                    {insight.type === 'warning' && <AlertTriangle className="h-5 w-5 text-yellow-500 mt-0.5" />}
-                    {insight.type === 'info' && <Info className="h-5 w-5 text-blue-500 mt-0.5" />}
+                    {insight.type === 'positive' && <CheckCircle2 className="h-5 w-5 text-success mt-0.5" />}
+                    {insight.type === 'warning' && <AlertTriangle className="h-5 w-5 text-warning mt-0.5" />}
+                    {insight.type === 'info' && <Info className="h-5 w-5 text-primary mt-0.5" />}
                     <p className="text-sm">{insight.message}</p>
                   </div>
                 ))}
@@ -245,10 +245,10 @@ export function InsightsClient() {
 
       {/* Spending Patterns */}
       {patterns && patterns.insights && patterns.insights.length > 0 && (
-        <Card>
+        <Card className="hover:shadow-lg transition-all duration-200 hover:scale-[1.02]">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-purple-600" />
+              <TrendingUp className="h-5 w-5 text-primary" />
               <CardTitle>Spending Patterns</CardTitle>
             </div>
             <CardDescription>Insights from your transaction history</CardDescription>
@@ -256,7 +256,7 @@ export function InsightsClient() {
           <CardContent>
             <div className="space-y-3">
               {patterns.insights.map((insight: Insight, idx: number) => (
-                <div key={idx} className="flex items-start justify-between gap-4 p-3 rounded-lg bg-muted/50">
+                <div key={idx} className="flex items-start justify-between gap-4 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors duration-200">
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center gap-2">
                       <p className="font-medium">{insight.title}</p>
@@ -275,10 +275,10 @@ export function InsightsClient() {
 
       {/* Savings Opportunities */}
       {savings.length > 0 && (
-        <Card>
+        <Card className="hover:shadow-lg transition-all duration-200 hover:scale-[1.02]">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Lightbulb className="h-5 w-5 text-yellow-600" />
+              <Lightbulb className="h-5 w-5 text-warning" />
               <CardTitle>Savings Opportunities</CardTitle>
             </div>
             <CardDescription>
@@ -288,7 +288,7 @@ export function InsightsClient() {
           <CardContent>
             <div className="space-y-3">
               {savings.map((opportunity, idx) => (
-                <div key={idx} className="flex items-start justify-between gap-4 p-3 rounded-lg bg-muted/50">
+                <div key={idx} className="flex items-start justify-between gap-4 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors duration-200">
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center gap-2">
                       <p className="font-medium">{opportunity.title}</p>
@@ -300,7 +300,7 @@ export function InsightsClient() {
                   </div>
                   <div className="text-right">
                     <p className="text-sm text-muted-foreground">Potential Savings</p>
-                    <p className="text-lg font-bold text-green-600">
+                    <p className="text-lg font-bold font-mono text-success">
                       ${opportunity.potentialSavings.toFixed(2)}/mo
                     </p>
                   </div>
@@ -313,10 +313,10 @@ export function InsightsClient() {
 
       {/* Anomalies */}
       {anomalies.length > 0 && (
-        <Card>
+        <Card className="hover:shadow-lg transition-all duration-200 hover:scale-[1.02]">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-red-600" />
+              <AlertTriangle className="h-5 w-5 text-error" />
               <CardTitle>Unusual Activity Detected</CardTitle>
             </div>
             <CardDescription>Transactions that differ from your usual patterns</CardDescription>
@@ -324,7 +324,7 @@ export function InsightsClient() {
           <CardContent>
             <div className="space-y-3">
               {anomalies.slice(0, 5).map((anomaly, idx) => (
-                <div key={idx} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                <div key={idx} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors duration-200">
                   {getSeverityIcon(anomaly.severity)}
                   <div className="flex-1 space-y-1">
                     <p className="font-medium">{anomaly.title}</p>
@@ -339,10 +339,10 @@ export function InsightsClient() {
 
       {/* Subscriptions */}
       {subscriptions.length > 0 && (
-        <Card>
+        <Card className="hover:shadow-lg transition-all duration-200 hover:scale-[1.02]">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Repeat className="h-5 w-5 text-indigo-600" />
+              <Repeat className="h-5 w-5 text-primary" />
               <CardTitle>Subscription Audit</CardTitle>
             </div>
             <CardDescription>
@@ -353,7 +353,7 @@ export function InsightsClient() {
           <CardContent>
             <div className="space-y-3">
               {subscriptions.slice(0, 10).map((sub, idx) => (
-                <div key={idx} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                <div key={idx} className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors duration-200">
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center gap-2">
                       <p className="font-medium">{sub.merchant}</p>
@@ -367,7 +367,7 @@ export function InsightsClient() {
                     <p className="text-sm text-muted-foreground">{sub.category}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-lg font-bold">${sub.amount.toFixed(2)}</p>
+                    <p className="text-lg font-bold font-mono">${sub.amount.toFixed(2)}</p>
                     <p className="text-xs text-muted-foreground">
                       ${sub.monthlyEquivalent.toFixed(2)}/mo
                     </p>

@@ -44,7 +44,7 @@ export default function Home() {
       <AppLayout>
         <div className="space-y-8">
           <div className="text-center space-y-4">
-            <h1 className="text-4xl font-bold tracking-tight">
+            <h1 className="text-3xl font-bold tracking-tight">
               Loading...
             </h1>
           </div>
@@ -63,7 +63,7 @@ export default function Home() {
 
       <div className="space-y-8">
         <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold tracking-tight">
+          <h1 className="text-3xl font-bold tracking-tight">
             Welcome to SmartBudget
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">

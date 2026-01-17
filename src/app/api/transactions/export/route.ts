@@ -4,18 +4,6 @@ import { RateLimitTier } from '@/lib/rate-limiter';
 import { prisma } from '@/lib/prisma';
 import type { TransactionType, Prisma } from '@prisma/client';
 
-/**
- * Transaction with relations for export
- */
-type ExportTransaction = Prisma.TransactionGetPayload<{
-  include: {
-    account: { select: { name: true; institution: true } };
-    category: { select: { name: true } };
-    subcategory: { select: { name: true } };
-    tags: { select: { name: true; color: true } };
-  };
-}>;
-
 // GET /api/transactions/export - Export transactions to CSV or JSON
 // Rate limited (MODERATE tier): 100 requests per 15 minutes
 export const GET = withAuth(async (req, context) => {
@@ -150,8 +138,18 @@ export const GET = withAuth(async (req, context) => {
 
 });
 
+// Define type for transaction with includes
+type TransactionWithIncludes = Prisma.TransactionGetPayload<{
+  include: {
+    account: { select: { name: true; institution: true } };
+    category: { select: { name: true } };
+    subcategory: { select: { name: true } };
+    tags: { select: { name: true; color: true } };
+  };
+}>;
+
 // Helper function to generate CSV from transactions
-function generateCSV(transactions: ExportTransaction[]): string {
+function generateCSV(transactions: TransactionWithIncludes[]): string {
   // CSV headers
   const headers = [
     'Date',
@@ -171,7 +169,7 @@ function generateCSV(transactions: ExportTransaction[]): string {
 
   // Build CSV rows
   const rows = transactions.map(t => {
-    const tags = t.tags.map((tag) => tag.name).join('; ');
+    const tags = t.tags.map(tag => tag.name).join('; ');
 
     return [
       new Date(t.date).toISOString().split('T')[0],

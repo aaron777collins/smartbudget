@@ -1,6 +1,63 @@
 import Ofx from 'node-ofx-parser';
 import { preprocessMerchantName } from './merchant-normalizer';
 
+// OFX data structure types
+interface OFXTransaction {
+  TRNTYPE?: string;
+  DTPOSTED?: string;
+  DTUSER?: string;
+  TRNAMT?: string;
+  FITID?: string;
+  NAME?: string;
+  MEMO?: string;
+}
+
+interface OFXAccount {
+  BANKID?: string;
+  ACCTID?: string;
+  ACCTTYPE?: string;
+}
+
+interface OFXBalance {
+  BALAMT?: string;
+  DTASOF?: string;
+}
+
+interface OFXTransactionList {
+  STMTTRN?: OFXTransaction | OFXTransaction[];
+}
+
+interface OFXStatement {
+  BANKACCTFROM?: OFXAccount;
+  CCACCTFROM?: OFXAccount;
+  LEDGERBAL?: OFXBalance;
+  BANKTRANLIST?: OFXTransactionList;
+  CCSTMTRS?: {
+    BANKTRANLIST?: OFXTransactionList;
+  };
+}
+
+interface OFXStatementResponse {
+  STMTRS?: OFXStatement;
+  CCSTMTRS?: OFXStatement;
+}
+
+interface OFXMessages {
+  STMTTRNRS?: OFXStatementResponse;
+  CCSTMTTRNRS?: OFXStatementResponse;
+}
+
+interface OFXBody {
+  OFX?: {
+    BANKMSGSRSV1?: OFXMessages;
+    CREDITCARDMSGSRSV1?: OFXMessages;
+  };
+}
+
+interface OFXData {
+  body?: OFXBody;
+}
+
 export interface ParsedTransaction {
   date: Date;
   postedDate?: Date;
@@ -128,7 +185,7 @@ export async function parseOFX(fileContent: string): Promise<OFXParseResult> {
   return new Promise((resolve) => {
     try {
       // Parse OFX using node-ofx-parser
-      Ofx.parse(fileContent, (error: Error | null, ofxData: any) => {
+      Ofx.parse(fileContent, (error: Error | null, ofxData: OFXData) => {
         if (error) {
           resolve({
             success: false,
@@ -179,7 +236,7 @@ export async function parseOFX(fileContent: string): Promise<OFXParseResult> {
 
                 // Extract balance
                 const ledgerBal = statement.LEDGERBAL;
-                if (ledgerBal) {
+                if (ledgerBal && ledgerBal.BALAMT) {
                   const balAmount = parseFloat(ledgerBal.BALAMT);
                   const balDate = parseOFXDate(ledgerBal.DTASOF);
 
@@ -206,7 +263,7 @@ export async function parseOFX(fileContent: string): Promise<OFXParseResult> {
                       const userDate = parseOFXDate(txn.DTUSER);
 
                       // Parse amount
-                      const amount = parseFloat(txn.TRNAMT);
+                      const amount = parseFloat(txn.TRNAMT ?? '0');
 
                       if (!date || isNaN(amount)) {
                         errors.push(`Skipping transaction with invalid date or amount: ${txn.FITID || 'unknown'}`);
@@ -214,10 +271,10 @@ export async function parseOFX(fileContent: string): Promise<OFXParseResult> {
                       }
 
                       // Extract merchant name from NAME and MEMO
-                      const merchantName = extractMerchantName(txn.NAME, txn.MEMO);
+                      const merchantName = extractMerchantName(txn.NAME ?? '', txn.MEMO ?? '');
 
                       // Build description (prefer MEMO, fallback to NAME)
-                      const description = (txn.MEMO || txn.NAME || 'Unknown Transaction').trim();
+                      const description = (txn.MEMO ?? txn.NAME ?? 'Unknown Transaction').trim();
 
                       // Determine transaction type
                       const type = determineTransactionType(amount, txn.TRNTYPE);

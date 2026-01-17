@@ -6,7 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { PlusCircle, Calendar, DollarSign, Target, Trash2, BarChart3 } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { HoverScale, Pulse } from '@/components/ui/animated';
+import { PlusCircle, Calendar, DollarSign, Target, Trash2, BarChart3, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import { TYPOGRAPHY } from '@/lib/design-tokens';
 
@@ -58,6 +60,7 @@ export default function BudgetsClient() {
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string>('');
   const router = useRouter();
 
   useEffect(() => {
@@ -86,6 +89,7 @@ export default function BudgetsClient() {
     }
 
     try {
+      setSuccess('');
       const response = await fetch(`/api/budgets/${id}`, {
         method: 'DELETE',
       });
@@ -96,6 +100,8 @@ export default function BudgetsClient() {
 
       // Refresh budgets list
       fetchBudgets();
+      setSuccess('Budget deleted successfully!');
+      setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to delete budget');
     }
@@ -125,7 +131,7 @@ export default function BudgetsClient() {
       <div className="container mx-auto p-6">
         <Card>
           <CardContent className="pt-6">
-            <p className="text-red-500">Error: {error}</p>
+            <p className="text-error">Error: {error}</p>
             <Button onClick={fetchBudgets} className="mt-4">
               Try Again
             </Button>
@@ -136,10 +142,19 @@ export default function BudgetsClient() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="container mx-auto p-4 md:p-6 space-y-6">
+      {success && (
+        <Pulse scale={1.02} duration={0.6}>
+          <Alert className="bg-success/10 border-success">
+            <CheckCircle className="h-4 w-4 text-success" />
+            <AlertDescription className="text-success">{success}</AlertDescription>
+          </Alert>
+        </Pulse>
+      )}
+
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className={TYPOGRAPHY.pageTitle}>Budgets</h1>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Budgets</h1>
           <p className="text-muted-foreground mt-1">
             Create and manage your budgets to track spending
           </p>
@@ -164,7 +179,7 @@ export default function BudgetsClient() {
         <Card>
           <CardContent className="pt-6 text-center py-12">
             <Target className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-xl font-semibold mb-2">No budgets yet</h3>
+            <h3 className="text-lg font-semibold mb-2">No budgets yet</h3>
             <p className="text-muted-foreground mb-6">
               Get started by creating your first budget to track and manage your spending
             </p>
@@ -179,73 +194,74 @@ export default function BudgetsClient() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {budgets.map((budget) => (
-            <Card key={budget.id} className="relative">
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div className="space-y-1">
-                    <CardTitle>{budget.name}</CardTitle>
-                    <CardDescription>
-                      {budgetTypeLabels[budget.type]} · {budgetPeriodLabels[budget.period]}
-                    </CardDescription>
-                  </div>
-                  {budget.isActive && (
-                    <Badge variant="default">Active</Badge>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex items-center text-sm">
-                    <DollarSign className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span className="font-semibold">
-                      ${Number(budget.totalAmount).toLocaleString()}
-                    </span>
-                    <span className="text-muted-foreground ml-1">total</span>
-                  </div>
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    <span>
-                      Started {new Date(budget.startDate).toLocaleDateString()}
-                    </span>
-                  </div>
-                </div>
-
-                <div>
-                  <p className="text-sm text-muted-foreground mb-2">
-                    {budget.categories.length} categories
-                  </p>
-                  <div className="flex flex-wrap gap-1">
-                    {budget.categories.slice(0, 5).map((bc) => (
-                      <Badge key={bc.id} variant="outline" className="text-xs">
-                        {bc.category.name}
-                      </Badge>
-                    ))}
-                    {budget.categories.length > 5 && (
-                      <Badge variant="outline" className="text-xs">
-                        +{budget.categories.length - 5} more
-                      </Badge>
+            <HoverScale key={budget.id} scale={1.02}>
+              <Card className="relative h-full">
+                <CardHeader>
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-1">
+                      <CardTitle>{budget.name}</CardTitle>
+                      <CardDescription>
+                        {budgetTypeLabels[budget.type]} · {budgetPeriodLabels[budget.period]}
+                      </CardDescription>
+                    </div>
+                    {budget.isActive && (
+                      <Badge variant="default">Active</Badge>
                     )}
                   </div>
-                </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center text-sm">
+                      <DollarSign className="h-4 w-4 mr-2 text-muted-foreground" />
+                      <span className="font-semibold font-mono">
+                        ${Number(budget.totalAmount).toLocaleString()}
+                      </span>
+                      <span className="text-muted-foreground ml-1">total</span>
+                    </div>
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <Calendar className="h-4 w-4 mr-2" />
+                      <span>
+                        Started {new Date(budget.startDate).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
 
-                <div className="flex gap-2 pt-2">
-                  <Link href={`/budgets/${budget.id}`} className="flex-1">
-                    <Button variant="outline" className="w-full">
-                      View Details
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      {budget.categories.length} categories
+                    </p>
+                    <div className="flex flex-wrap gap-1">
+                      {budget.categories.slice(0, 5).map((bc) => (
+                        <Badge key={bc.id} variant="outline" className="text-xs">
+                          {bc.category.name}
+                        </Badge>
+                      ))}
+                      {budget.categories.length > 5 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{budget.categories.length - 5} more
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 pt-2">
+                    <Link href={`/budgets/${budget.id}`} className="flex-1">
+                      <Button variant="outline" className="w-full">
+                        View Details
+                      </Button>
+                    </Link>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => deleteBudget(budget.id)}
+                      className="text-error "
+                    >
+                      <Trash2 className="h-4 w-4" />
                     </Button>
-                  </Link>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => deleteBudget(budget.id)}
-                    className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                    aria-label="Delete budget"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                  </div>
+                </CardContent>
+              </Card>
+            </HoverScale>
           ))}
         </div>
       )}

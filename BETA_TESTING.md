@@ -67,8 +67,8 @@ Before you begin, ensure you have:
 ### Initial Setup (5-10 minutes)
 
 1. **Create Your Account**
-   - Sign up with email/password or OAuth (Google)
-   - Verify your email address
+   - Sign up with username/password
+   - Email is optional
 
 2. **Complete Onboarding**
    - Follow the guided onboarding tour

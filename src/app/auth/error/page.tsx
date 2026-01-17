@@ -1,12 +1,13 @@
 "use client"
 
+import { Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Suspense } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 
-function AuthErrorContent() {
+function ErrorContent() {
   const searchParams = useSearchParams()
   const error = searchParams.get("error")
 
@@ -20,10 +21,10 @@ function AuthErrorContent() {
   const errorMessage = error ? errorMessages[error] || errorMessages.Default : errorMessages.Default
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 dark:bg-gray-900">
+    <div className="flex min-h-screen items-center justify-center bg-muted px-4 py-12 bg-background">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-red-600 dark:text-red-400">
+          <CardTitle className="text-2xl font-bold text-error">
             Authentication Error
           </CardTitle>
           <CardDescription>
@@ -31,7 +32,7 @@ function AuthErrorContent() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-muted-foreground">
             Please try signing in again. If the problem persists, contact support.
           </p>
         </CardContent>
@@ -49,16 +50,8 @@ function AuthErrorContent() {
 
 export default function AuthErrorPage() {
   return (
-    <Suspense fallback={
-      <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 dark:bg-gray-900">
-        <Card className="w-full max-w-md">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold">Loading...</CardTitle>
-          </CardHeader>
-        </Card>
-      </div>
-    }>
-      <AuthErrorContent />
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center">Loading...</div>}>
+      <ErrorContent />
     </Suspense>
   )
 }

@@ -23,67 +23,67 @@ const routes = [
     label: "Dashboard",
     icon: LayoutDashboard,
     href: "/dashboard",
-    color: COLORS.nav.dashboard,
+    color: "text-primary",
   },
   {
     label: "Transactions",
     icon: CreditCard,
     href: "/transactions",
-    color: COLORS.nav.transactions,
+    color: "text-primary",
   },
   {
     label: "Accounts",
     icon: Wallet,
     href: "/accounts",
-    color: COLORS.nav.accounts,
+    color: "text-primary",
   },
   {
     label: "Budgets",
     icon: PieChart,
     href: "/budgets",
-    color: COLORS.nav.budgets,
+    color: "text-warning",
   },
   {
     label: "Recurring",
     icon: Repeat,
     href: "/recurring",
-    color: COLORS.nav.recurring,
+    color: "text-primary",
   },
   {
     label: "Tags",
     icon: Hash,
     href: "/tags",
-    color: COLORS.nav.tags,
+    color: "text-info",
   },
   {
     label: "Goals",
     icon: Target,
     href: "/goals",
-    color: COLORS.nav.goals,
+    color: "text-success",
   },
   {
     label: "Insights",
     icon: TrendingUp,
     href: "/insights",
-    color: COLORS.nav.insights,
+    color: "text-success",
   },
   {
     label: "Import",
     icon: Upload,
     href: "/import",
-    color: COLORS.nav.import,
+    color: "text-primary",
   },
   {
     label: "Jobs",
     icon: ListTodo,
     href: "/jobs",
-    color: COLORS.nav.jobs,
+    color: "text-primary",
   },
   {
     label: "Settings",
     icon: Settings,
     href: "/settings",
-    color: COLORS.nav.settings,
+    color: "text-foreground",
   },
 ]
 
@@ -99,7 +99,7 @@ export function Sidebar() {
               key={route.href}
               href={route.href}
               className={cn(
-                "text-sm group flex p-3 w-full justify-start font-medium cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-lg transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]",
+                "text-sm group flex p-3 w-full justify-start font-medium cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-lg transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                 pathname === route.href
                   ? "bg-accent text-accent-foreground"
                   : "text-muted-foreground"

@@ -188,7 +188,7 @@ export default function AccountsPage() {
     <div className="space-y-6 animate-in fade-in duration-300">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className={TYPOGRAPHY.pageTitle}>Accounts</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Accounts</h1>
           <p className="text-muted-foreground">
             Manage your bank accounts, credit cards, and investments
           </p>
@@ -201,39 +201,39 @@ export default function AccountsPage() {
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Card>
+        <Card className="hover:shadow-lg transition-all duration-200 hover:scale-[1.02]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Balance</CardTitle>
             <Wallet className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totalBalance)}</div>
+            <div className="text-2xl font-bold font-mono">{formatCurrency(totalBalance)}</div>
             <p className="text-xs text-muted-foreground">
               Across {activeAccounts} active account{activeAccounts !== 1 ? 's' : ''}
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover:shadow-lg transition-all duration-200 hover:scale-[1.02]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Available Balance</CardTitle>
             <CreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totalAvailable)}</div>
+            <div className="text-2xl font-bold font-mono">{formatCurrency(totalAvailable)}</div>
             <p className="text-xs text-muted-foreground">
               Available to spend
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover:shadow-lg transition-all duration-200 hover:scale-[1.02]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Transactions</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalTransactions}</div>
+            <div className="text-2xl font-bold font-mono">{totalTransactions}</div>
             <p className="text-xs text-muted-foreground">
               Across all accounts
             </p>
@@ -242,7 +242,7 @@ export default function AccountsPage() {
       </div>
 
       {/* Search and Filter */}
-      <Card>
+      <Card className="hover:shadow-lg transition-all duration-200">
         <CardHeader>
           <CardTitle>Your Accounts</CardTitle>
           <CardDescription>
@@ -296,7 +296,7 @@ export default function AccountsPage() {
                 </TableHeader>
                 <TableBody>
                   {accounts.map((account) => (
-                    <TableRow key={account.id}>
+                    <TableRow key={account.id} className="hover:bg-accent transition-colors duration-200">
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <div
@@ -341,15 +341,17 @@ export default function AccountsPage() {
                         <div className="flex items-center justify-end gap-2">
                           <Button
                             variant="ghost"
-                            size="sm"
+                            size="icon"
                             onClick={() => handleViewTransactions(account.id)}
+                            aria-label={`View transactions for ${account.name}`}
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
                           <Button
                             variant="ghost"
-                            size="sm"
+                            size="icon"
                             onClick={() => handleEditAccount(account)}
+                            aria-label={`Edit ${account.name}`}
                           >
                             <Edit className="h-4 w-4" />
                           </Button>

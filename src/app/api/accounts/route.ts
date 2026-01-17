@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
-import {
-  getAccountsQuerySchema,
-  createAccountSchema,
-  validateQueryParams
-} from '@/lib/validation';
+import { createAccountSchema, accountQuerySchema } from '@/lib/validations';
+import { z } from 'zod';
+import { logCreate, getAuditContext } from '@/lib/audit-logger';
 import { Prisma } from '@prisma/client';
 
 // GET /api/accounts - List user's accounts
@@ -20,16 +18,21 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
 
     // Validate query parameters
-    const validation = validateQueryParams(getAccountsQuerySchema, searchParams);
-    if (!validation.success || !validation.data) {
+    const queryValidation = accountQuerySchema.safeParse({
+      active: searchParams.get('active'),
+      search: searchParams.get('search'),
+      sortBy: searchParams.get('sortBy'),
+      sortOrder: searchParams.get('sortOrder'),
+    });
+
+    if (!queryValidation.success) {
       return NextResponse.json(
-        { error: validation.error?.message, details: validation.error?.details },
+        { error: 'Invalid query parameters', issues: queryValidation.error.issues },
         { status: 400 }
       );
     }
 
-    const { active, sortBy, sortOrder } = validation.data;
-    const search = searchParams.get('search');
+    const { active, search, sortBy, sortOrder } = queryValidation.data;
 
     // Build where clause
     const where: Prisma.AccountWhereInput = { userId };
@@ -46,7 +49,12 @@ export async function GET(request: NextRequest) {
     }
 
     // Build orderBy clause
-    const orderBy: Prisma.AccountOrderByWithRelationInput = { [sortBy]: sortOrder };
+    const orderBy: Prisma.AccountOrderByWithRelationInput = {};
+    if (sortBy === 'name' || sortBy === 'institution' || sortBy === 'accountType' || sortBy === 'currentBalance') {
+      orderBy[sortBy] = sortOrder;
+    } else {
+      orderBy.name = 'asc';
+    }
 
     // Fetch accounts with transaction count
     const accounts = await prisma.account.findMany({
@@ -81,13 +89,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     // Validate request body
-    const result = createAccountSchema.safeParse(body);
-    if (!result.success) {
-      return NextResponse.json(
-        { error: 'Validation failed', details: result.error.flatten() },
-        { status: 400 }
-      );
-    }
+    const validatedData = createAccountSchema.parse(body);
 
     const validatedData = result.data;
 
@@ -113,21 +115,35 @@ export async function POST(request: NextRequest) {
     const account = await prisma.account.create({
       data: {
         userId,
-        name: validatedData.name,
-        institution: validatedData.institution || '',
-        accountType: validatedData.accountType,
-        accountNumber: validatedData.accountNumber || null,
-        currentBalance: validatedData.currentBalance,
-        color: validatedData.color || '#2563EB',
-        icon: validatedData.icon || 'wallet',
-        isActive: validatedData.isActive,
-        currency: 'CAD',
+        ...validatedData,
       },
     });
+
+    // Log account creation
+    const context = getAuditContext(request);
+    await logCreate(
+      userId,
+      'account',
+      account.id,
+      {
+        name: account.name,
+        institution: account.institution,
+        accountType: account.accountType,
+      },
+      context
+    );
 
     return NextResponse.json(account, { status: 201 });
   } catch (error) {
     console.error('Error creating account:', error);
+
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Invalid account data', issues: error.issues },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
       { error: 'Failed to create account' },
       { status: 500 }

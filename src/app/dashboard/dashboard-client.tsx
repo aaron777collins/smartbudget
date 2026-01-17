@@ -10,16 +10,12 @@ import { CashFlowCard } from '@/components/dashboard/cash-flow-card';
 import { TimeframeSelector, type TimeframeValue } from '@/components/dashboard/timeframe-selector';
 import { UpcomingExpenses } from '@/components/dashboard/upcoming-expenses';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
-import { SPACING, TYPOGRAPHY } from '@/lib/design-tokens';
+import { Stagger } from '@/components/ui/animated';
+import { ScreenReaderAnnouncer } from '@/components/ui/screen-reader-announcer';
 
-// Lazy load Recharts components for bundle optimization (~60-70KB gzipped)
+// Lazy load ALL chart components for bundle optimization
 const SpendingTrendsChart = lazy(() => import('@/components/dashboard/spending-trends-chart').then(m => ({ default: m.SpendingTrendsChart })));
 const CategoryBreakdownChart = lazy(() => import('@/components/dashboard/category-breakdown-chart').then(m => ({ default: m.CategoryBreakdownChart })));
-
-// Lazy load D3-based visualization components for bundle optimization (~90KB gzipped)
 const CashFlowSankey = lazy(() => import('@/components/dashboard/cash-flow-sankey').then(m => ({ default: m.CashFlowSankey })));
 const CategoryHeatmap = lazy(() => import('@/components/dashboard/category-heatmap').then(m => ({ default: m.CategoryHeatmap })));
 const CategoryCorrelationMatrix = lazy(() => import('@/components/dashboard/category-correlation-matrix').then(m => ({ default: m.CategoryCorrelationMatrix })));
@@ -74,7 +70,8 @@ export function DashboardClient() {
 
   if (isLoading) {
     return (
-      <div className={`flex-1 ${SPACING.section.default} ${SPACING.page.containerResponsive}`}>
+      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+        <ScreenReaderAnnouncer message="Loading dashboard data..." />
         <div className="flex items-center justify-between space-y-2">
           <h1 className={TYPOGRAPHY.pageTitle}>Dashboard</h1>
         </div>
@@ -89,9 +86,18 @@ export function DashboardClient() {
 
   if (error) {
     return (
-      <div className={`flex-1 ${SPACING.section.default} ${SPACING.page.containerResponsive}`}>
+      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+        <ScreenReaderAnnouncer
+          message={`Error loading dashboard: ${error}`}
+          politeness="assertive"
+        />
         <div className="flex items-center justify-between space-y-2">
-          <h1 className={TYPOGRAPHY.pageTitle}>Dashboard</h1>
+          <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+        </div>
+        <div className="rounded-lg border border-error/20 bg-error/10 p-4">
+          <p className="text-sm text-error">
+            Error loading dashboard: {error}
+          </p>
         </div>
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
@@ -108,8 +114,9 @@ export function DashboardClient() {
   }
 
   return (
-    <div className={`flex-1 ${SPACING.section.default} ${SPACING.page.containerResponsive}`}>
-      <div className="flex items-center justify-between">
+    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+      <ScreenReaderAnnouncer message="Dashboard data loaded successfully" />
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
         <TimeframeSelector value={timeframe} onChange={setTimeframe} />
       </div>
@@ -142,88 +149,40 @@ export function DashboardClient() {
       </div>
 
       {/* Recharts Visualizations Section - Lazy loaded for performance */}
-      <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
-        <Suspense fallback={
-          <Card className="animate-in fade-in duration-300">
-            <CardHeader>
-              <Skeleton className="h-6 w-40 mb-2" />
-              <Skeleton className="h-4 w-64" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-[400px] w-full" />
-            </CardContent>
-          </Card>
-        }>
-          <SpendingTrendsChart timeframe={timeframe} />
-        </Suspense>
-        <Suspense fallback={
-          <Card className="animate-in fade-in duration-300">
-            <CardHeader>
-              <Skeleton className="h-6 w-40 mb-2" />
-              <Skeleton className="h-4 w-64" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-[300px] w-full" />
-            </CardContent>
-          </Card>
-        }>
-          <CategoryBreakdownChart timeframe={timeframe} />
-        </Suspense>
-      </div>
+      <Stagger staggerDelay={0.1} initialDelay={0.2} duration={0.4}>
+        <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
+          <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
+            <SpendingTrendsChart timeframe={timeframe} />
+          </Suspense>
+          <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
+            <CategoryBreakdownChart timeframe={timeframe} />
+          </Suspense>
+        </div>
 
-      {/* D3.js Custom Visualizations Section - Lazy loaded for performance */}
-      <div className="grid gap-4 md:grid-cols-1">
-        <Suspense fallback={
-          <Card className="animate-in fade-in duration-300">
-            <CardHeader>
-              <Skeleton className="h-6 w-40 mb-2" />
-              <Skeleton className="h-4 w-64" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-[500px] w-full" />
-            </CardContent>
-          </Card>
-        }>
-          <CashFlowSankey timeframe={timeframe} />
-        </Suspense>
-      </div>
+        {/* D3.js Custom Visualizations Section - Lazy loaded for performance */}
+        <div className="grid gap-4 md:grid-cols-1">
+          <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
+            <CashFlowSankey timeframe={timeframe} />
+          </Suspense>
+        </div>
 
-      <div className="grid gap-4 md:grid-cols-1">
-        <Suspense fallback={
-          <Card className="animate-in fade-in duration-300">
-            <CardHeader>
-              <Skeleton className="h-6 w-40 mb-2" />
-              <Skeleton className="h-4 w-64" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-[400px] w-full" />
-            </CardContent>
-          </Card>
-        }>
-          <CategoryHeatmap timeframe={timeframe} />
-        </Suspense>
-      </div>
+        <div className="grid gap-4 md:grid-cols-1">
+          <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
+            <CategoryHeatmap timeframe={timeframe} />
+          </Suspense>
+        </div>
 
-      <div className="grid gap-4 md:grid-cols-1">
-        <Suspense fallback={
-          <Card className="animate-in fade-in duration-300">
-            <CardHeader>
-              <Skeleton className="h-6 w-40 mb-2" />
-              <Skeleton className="h-4 w-64" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-[500px] w-full" />
-            </CardContent>
-          </Card>
-        }>
-          <CategoryCorrelationMatrix timeframe={timeframe} />
-        </Suspense>
-      </div>
+        <div className="grid gap-4 md:grid-cols-1">
+          <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
+            <CategoryCorrelationMatrix timeframe={timeframe} />
+          </Suspense>
+        </div>
 
-      {/* Upcoming Recurring Expenses */}
-      <div className="grid gap-4 md:grid-cols-1">
-        <UpcomingExpenses />
-      </div>
+        {/* Upcoming Recurring Expenses */}
+        <div className="grid gap-4 md:grid-cols-1">
+          <UpcomingExpenses />
+        </div>
+      </Stagger>
 
       {/* Future sections:
           - Recent Transactions

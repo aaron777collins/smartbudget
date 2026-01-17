@@ -5,13 +5,36 @@ import { useDropzone } from "react-dropzone";
 import { Upload, File, X, CheckCircle2, AlertCircle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Shake } from "@/components/ui/animated";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+
+export interface AccountInfo {
+  accountName?: string;
+  bankName?: string;
+  accountType?: string;
+  accountNumber?: string;
+  currency?: string;
+}
+
+export interface FilePreviewData {
+  transactionCount?: number;
+  fileName?: string;
+  fileSize?: number;
+  format?: string;
+  transactions?: unknown[];
+  validRows?: number;
+  totalRows?: number;
+  accountInfo?: AccountInfo;
+  balance?: number;
+  [key: string]: unknown;
+}
 
 export interface UploadedFile {
   file: File;
   id: string;
   status: "pending" | "processing" | "success" | "error";
   error?: string;
-  previewData?: any;
+  previewData?: FilePreviewData;
 }
 
 interface FileUploadProps {
@@ -32,18 +55,41 @@ export function FileUpload({
   maxSize = 10 * 1024 * 1024, // 10MB default
 }: FileUploadProps) {
   const [dragActive, setDragActive] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const onDrop = useCallback(
-    (acceptedFiles: File[]) => {
+    (acceptedFiles: File[], rejectedFiles: any[]) => {
+      setUploadError(null);
+
+      if (rejectedFiles.length > 0) {
+        const errors = rejectedFiles.map(f => {
+          if (f.errors[0]?.code === 'file-too-large') {
+            return `${f.file.name}: File too large (max ${formatFileSize(maxSize)})`;
+          } else if (f.errors[0]?.code === 'file-invalid-type') {
+            return `${f.file.name}: Invalid file type`;
+          }
+          return `${f.file.name}: ${f.errors[0]?.message || 'Upload failed'}`;
+        });
+        setUploadError(errors.join(', '));
+      }
+
       if (acceptedFiles.length > 0) {
         onFilesSelected(acceptedFiles);
       }
       setDragActive(false);
     },
-    [onFilesSelected]
+    [onFilesSelected, maxSize]
   );
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + " " + sizes[i];
+  };
+
+  const { getRootProps, getInputProps, isDragActive, open: openFileDialog } = useDropzone({
     onDrop,
     accept: {
       "text/csv": [".csv"],
@@ -54,33 +100,36 @@ export function FileUpload({
     maxSize,
     onDragEnter: () => setDragActive(true),
     onDragLeave: () => setDragActive(false),
+    noClick: false,
+    noKeyboard: false,
   });
-
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + " " + sizes[i];
-  };
 
   const getStatusIcon = (status: UploadedFile["status"]) => {
     switch (status) {
       case "success":
-        return <CheckCircle2 className="h-5 w-5 text-green-600" />;
+        return <CheckCircle2 className="h-5 w-5 text-success" />;
       case "error":
-        return <AlertCircle className="h-5 w-5 text-red-600" />;
+        return <AlertCircle className="h-5 w-5 text-error" />;
       case "processing":
         return (
-          <div className="h-5 w-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          <div className="h-5 w-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
         );
       default:
-        return <File className="h-5 w-5 text-gray-400" />;
+        return <File className="h-5 w-5 text-muted-foreground" />;
     }
   };
 
   return (
     <div className="space-y-4">
+      {uploadError && (
+        <Shake trigger={!!uploadError} duration={0.5} intensity={10}>
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{uploadError}</AlertDescription>
+          </Alert>
+        </Shake>
+      )}
+
       {/* Drop Zone */}
       <Card
         {...getRootProps()}
@@ -88,8 +137,8 @@ export function FileUpload({
           border-2 border-dashed cursor-pointer transition-all
           ${
             isDragActive || dragActive
-              ? "border-blue-500 bg-blue-50 dark:bg-blue-950"
-              : "border-gray-300 dark:border-gray-700 hover:border-gray-400"
+              ? "border-primary/20 bg-primary/10 dark:bg-primary/10"
+              : "border-border hover:border-border"
           }
         `}
       >
@@ -98,8 +147,8 @@ export function FileUpload({
           <Upload
             className={`mx-auto h-12 w-12 mb-4 ${
               isDragActive || dragActive
-                ? "text-blue-500"
-                : "text-gray-400"
+                ? "text-primary"
+                : "text-muted-foreground"
             }`}
           />
           <div className="space-y-2">
@@ -108,10 +157,10 @@ export function FileUpload({
                 ? "Drop files here..."
                 : "Drag & drop files here"}
             </p>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-muted-foreground">
               or click to browse your computer
             </p>
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-muted-foreground">
               Supported formats: {acceptedFileTypes.join(", ")} (max {formatFileSize(maxSize)})
             </p>
           </div>
@@ -134,18 +183,18 @@ export function FileUpload({
                       <p className="text-sm font-medium truncate">
                         {uploadedFile.file.name}
                       </p>
-                      <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <span>{formatFileSize(uploadedFile.file.size)}</span>
                         {uploadedFile.status === "error" && uploadedFile.error && (
                           <>
                             <span>•</span>
-                            <span className="text-red-600">{uploadedFile.error}</span>
+                            <span className="text-error">{uploadedFile.error}</span>
                           </>
                         )}
                         {uploadedFile.status === "success" && uploadedFile.previewData && (
                           <>
                             <span>•</span>
-                            <span className="text-green-600">
+                            <span className="text-success">
                               {uploadedFile.previewData.transactionCount || 0} transactions
                             </span>
                           </>

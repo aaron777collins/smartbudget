@@ -231,8 +231,8 @@ export default function OnboardingFlow({ open, onComplete, currentStep = 0 }: On
             <div className="flex flex-col items-center gap-4 mt-8">
               {accountCreated ? (
                 <div className="text-center space-y-4">
-                  <div className="inline-flex items-center justify-center w-12 h-12 bg-green-100 dark:bg-green-900/20 rounded-full">
-                    <Check className="w-6 h-6 text-green-600 dark:text-green-400" />
+                  <div className="inline-flex items-center justify-center w-12 h-12 bg-success/10 rounded-full">
+                    <Check className="w-6 h-6 text-success" />
                   </div>
                   <p className="text-sm text-muted-foreground">Account created successfully!</p>
                   <Button onClick={() => setShowAccountDialog(true)} variant="outline" size="sm">
@@ -280,8 +280,8 @@ export default function OnboardingFlow({ open, onComplete, currentStep = 0 }: On
             <div className="flex flex-col items-center gap-4 mt-8">
               {transactionsImported ? (
                 <div className="text-center space-y-4">
-                  <div className="inline-flex items-center justify-center w-12 h-12 bg-green-100 dark:bg-green-900/20 rounded-full">
-                    <Check className="w-6 h-6 text-green-600 dark:text-green-400" />
+                  <div className="inline-flex items-center justify-center w-12 h-12 bg-success/10 rounded-full">
+                    <Check className="w-6 h-6 text-success" />
                   </div>
                   <p className="text-sm text-muted-foreground">Transactions imported successfully!</p>
                   <Button onClick={() => router.push('/transactions/import')} variant="outline" size="sm">
@@ -354,8 +354,8 @@ export default function OnboardingFlow({ open, onComplete, currentStep = 0 }: On
         return (
           <div className="space-y-6 py-8">
             <div className="text-center space-y-4">
-              <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 dark:bg-green-900/20 rounded-full">
-                <Check className="w-10 h-10 text-green-600 dark:text-green-400" />
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-success/10 rounded-full">
+                <Check className="w-10 h-10 text-success" />
               </div>
               <div className="space-y-2">
                 <h2 className="text-3xl font-bold">You're All Set!</h2>

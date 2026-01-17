@@ -27,7 +27,8 @@ import { AdvancedFilters, TransactionFilters } from '@/components/transactions/a
 import { ExportDialog } from '@/components/transactions/export-dialog';
 import { Search, Filter, Download, Plus, Pencil, Trash2, Repeat, X } from 'lucide-react';
 import { Badge as FilterBadge } from '@/components/ui/badge';
-import { SPACING, TYPOGRAPHY } from '@/lib/design-tokens';
+import { ScreenReaderAnnouncer } from '@/components/ui/screen-reader-announcer';
+import { getCategoryBadgeColors } from '@/lib/design-tokens';
 
 interface Transaction {
   id: string;
@@ -87,6 +88,7 @@ export default function TransactionsPage() {
   const [availableTags, setAvailableTags] = useState<Array<{ id: string; name: string; color: string }>>([]);
   const [advancedFilters, setAdvancedFilters] = useState<TransactionFilters>({});
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const [srMessage, setSrMessage] = useState<string>('');
   const limit = 50;
 
   useEffect(() => {
@@ -116,6 +118,7 @@ export default function TransactionsPage() {
   const fetchTransactions = async () => {
     try {
       setLoading(true);
+      setSrMessage('Loading transactions...');
       const params = new URLSearchParams({
         limit: limit.toString(),
         offset: offset.toString(),
@@ -169,8 +172,10 @@ export default function TransactionsPage() {
       const data: TransactionResponse = await response.json();
       setTransactions(data.transactions);
       setTotal(data.total);
+      setSrMessage(`Loaded ${data.transactions.length} transactions. Total ${data.total} transactions found.`);
     } catch (error) {
       console.error('Error fetching transactions:', error);
+      setSrMessage('Error loading transactions. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -286,16 +291,17 @@ export default function TransactionsPage() {
   }
 
   return (
-    <div className={`${SPACING.page.container} ${SPACING.section.relaxed}`}>
+    <div className="container mx-auto py-6 space-y-6">
+      {srMessage && <ScreenReaderAnnouncer message={srMessage} />}
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className={TYPOGRAPHY.pageTitle}>Transactions</h1>
-          <p className={TYPOGRAPHY.muted}>
+          <h1 className="text-3xl font-bold tracking-tight">Transactions</h1>
+          <p className="text-muted-foreground">
             View and manage all your transactions
           </p>
         </div>
-        <Button>
+        <Button className="sm:w-auto">
           <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
           Add Transaction
         </Button>
@@ -317,7 +323,7 @@ export default function TransactionsPage() {
               />
             </div>
             <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent>
@@ -328,7 +334,7 @@ export default function TransactionsPage() {
               </SelectContent>
             </Select>
             <Select value={sortOrder} onValueChange={(val) => setSortOrder(val as 'asc' | 'desc')}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder="Order" />
               </SelectTrigger>
               <SelectContent>
@@ -341,7 +347,7 @@ export default function TransactionsPage() {
               onFiltersChange={handleAdvancedFiltersChange}
               onClearFilters={handleClearAdvancedFilters}
             />
-            <Button variant="outline" onClick={() => setExportDialogOpen(true)}>
+            <Button variant="outline" onClick={() => setExportDialogOpen(true)} className="w-full sm:w-auto">
               <Download className="mr-2 h-4 w-4" aria-hidden="true" />
               Export
             </Button>
@@ -356,9 +362,10 @@ export default function TransactionsPage() {
                   Tag: {availableTags.find(t => t.id === selectedTagId)?.name}
                   <button
                     onClick={() => handleTagFilter('')}
-                    className="ml-1 hover:bg-black/20 rounded-full p-0.5"
+                    className="ml-1 hover:bg-background/80 rounded-full p-2 transition-colors duration-200"
+                    aria-label="Remove tag filter"
                   >
-                    <X className="h-3 w-3" />
+                    <X className="h-4 w-4" />
                   </button>
                 </FilterBadge>
               )}
@@ -367,9 +374,10 @@ export default function TransactionsPage() {
                   Account
                   <button
                     onClick={() => handleAdvancedFiltersChange({ ...advancedFilters, accountId: undefined })}
-                    className="ml-1 hover:bg-black/20 rounded-full p-0.5"
+                    className="ml-1 hover:bg-background/80 rounded-full p-2 transition-colors duration-200"
+                    aria-label="Remove account filter"
                   >
-                    <X className="h-3 w-3" />
+                    <X className="h-4 w-4" />
                   </button>
                 </FilterBadge>
               )}
@@ -378,9 +386,10 @@ export default function TransactionsPage() {
                   Category
                   <button
                     onClick={() => handleAdvancedFiltersChange({ ...advancedFilters, categoryId: undefined })}
-                    className="ml-1 hover:bg-black/20 rounded-full p-0.5"
+                    className="ml-1 hover:bg-background/80 rounded-full p-2 transition-colors duration-200"
+                    aria-label="Remove category filter"
                   >
-                    <X className="h-3 w-3" />
+                    <X className="h-4 w-4" />
                   </button>
                 </FilterBadge>
               )}
@@ -389,9 +398,10 @@ export default function TransactionsPage() {
                   Date Range
                   <button
                     onClick={() => handleAdvancedFiltersChange({ ...advancedFilters, dateRange: undefined })}
-                    className="ml-1 hover:bg-black/20 rounded-full p-0.5"
+                    className="ml-1 hover:bg-background/80 rounded-full p-2 transition-colors duration-200"
+                    aria-label="Remove date range filter"
                   >
-                    <X className="h-3 w-3" />
+                    <X className="h-4 w-4" />
                   </button>
                 </FilterBadge>
               )}
@@ -400,9 +410,10 @@ export default function TransactionsPage() {
                   Amount Range
                   <button
                     onClick={() => handleAdvancedFiltersChange({ ...advancedFilters, minAmount: undefined, maxAmount: undefined })}
-                    className="ml-1 hover:bg-black/20 rounded-full p-0.5"
+                    className="ml-1 hover:bg-background/80 rounded-full p-2 transition-colors duration-200"
+                    aria-label="Remove amount range filter"
                   >
-                    <X className="h-3 w-3" />
+                    <X className="h-4 w-4" />
                   </button>
                 </FilterBadge>
               )}
@@ -411,9 +422,10 @@ export default function TransactionsPage() {
                   Type: {advancedFilters.type}
                   <button
                     onClick={() => handleAdvancedFiltersChange({ ...advancedFilters, type: undefined })}
-                    className="ml-1 hover:bg-black/20 rounded-full p-0.5"
+                    className="ml-1 hover:bg-background/80 rounded-full p-2 transition-colors duration-200"
+                    aria-label="Remove type filter"
                   >
-                    <X className="h-3 w-3" />
+                    <X className="h-4 w-4" />
                   </button>
                 </FilterBadge>
               )}
@@ -422,9 +434,10 @@ export default function TransactionsPage() {
                   {advancedFilters.isReconciled === 'true' ? 'Reconciled' : 'Unreconciled'}
                   <button
                     onClick={() => handleAdvancedFiltersChange({ ...advancedFilters, isReconciled: undefined })}
-                    className="ml-1 hover:bg-black/20 rounded-full p-0.5"
+                    className="ml-1 hover:bg-background/80 rounded-full p-2 transition-colors duration-200"
+                    aria-label="Remove reconciliation filter"
                   >
-                    <X className="h-3 w-3" />
+                    <X className="h-4 w-4" />
                   </button>
                 </FilterBadge>
               )}
@@ -433,9 +446,10 @@ export default function TransactionsPage() {
                   {advancedFilters.isRecurring === 'true' ? 'Recurring' : 'One-time'}
                   <button
                     onClick={() => handleAdvancedFiltersChange({ ...advancedFilters, isRecurring: undefined })}
-                    className="ml-1 hover:bg-black/20 rounded-full p-0.5"
+                    className="ml-1 hover:bg-background/80 rounded-full p-2 transition-colors duration-200"
+                    aria-label="Remove recurring filter"
                   >
-                    <X className="h-3 w-3" />
+                    <X className="h-4 w-4" />
                   </button>
                 </FilterBadge>
               )}
@@ -464,8 +478,8 @@ export default function TransactionsPage() {
               <TableRow>
                 <TableHead scope="col">Date</TableHead>
                 <TableHead scope="col">Merchant</TableHead>
-                <TableHead scope="col">Account</TableHead>
-                <TableHead scope="col">Category</TableHead>
+                <TableHead scope="col" className="hidden lg:table-cell">Account</TableHead>
+                <TableHead scope="col" className="hidden md:table-cell">Category</TableHead>
                 <TableHead scope="col" className="text-right">Amount</TableHead>
                 <TableHead scope="col" className="text-right">Actions</TableHead>
               </TableRow>
@@ -491,16 +505,35 @@ export default function TransactionsPage() {
                           {transaction.merchantName}
                           {transaction.isRecurring && (
                             <span title="Recurring transaction">
-                              <Repeat className="h-3.5 w-3.5 text-purple-600" />
+                              <Repeat className="h-3.5 w-3.5 text-primary" />
                             </span>
                           )}
                         </div>
                         <div className="text-sm text-muted-foreground">
                           {transaction.description}
                         </div>
+                        {/* Show account and category inline on smaller screens */}
+                        <div className="flex flex-wrap gap-2 mt-2 md:hidden">
+                          <Badge
+                            variant="outline"
+                            style={{ borderColor: transaction.account.color }}
+                            className="text-xs"
+                          >
+                            {transaction.account.name}
+                          </Badge>
+                          {transaction.category && (
+                            <Badge
+                              variant="secondary"
+                              style={getCategoryBadgeColors(transaction.category.color)}
+                              className="text-xs"
+                            >
+                              {transaction.category.name}
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden lg:table-cell">
                       <Badge
                         variant="outline"
                         style={{ borderColor: transaction.account.color }}
@@ -508,14 +541,11 @@ export default function TransactionsPage() {
                         {transaction.account.name}
                       </Badge>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden md:table-cell">
                       {transaction.category ? (
                         <Badge
                           variant="secondary"
-                          style={{
-                            backgroundColor: `${transaction.category.color}20`,
-                            color: transaction.category.color,
-                          }}
+                          style={getCategoryBadgeColors(transaction.category.color)}
                         >
                           {transaction.category.name}
                         </Badge>
@@ -525,11 +555,11 @@ export default function TransactionsPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <span
-                        className={
+                        className={`font-mono ${
                           transaction.type === 'DEBIT'
-                            ? 'text-red-600 dark:text-red-400'
-                            : 'text-green-600 dark:text-green-400'
-                        }
+                            ? 'text-error'
+                            : 'text-success'
+                        }`}
                       >
                         {formatAmount(transaction.amount, transaction.type)}
                       </span>
@@ -555,16 +585,17 @@ export default function TransactionsPage() {
 
         {/* Pagination */}
         {!loading && transactions.length > 0 && (
-          <div className="flex items-center justify-between px-4 py-4 border-t">
-            <div className="text-sm text-muted-foreground">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 py-4 border-t">
+            <div className="text-sm text-muted-foreground text-center sm:text-left">
               Showing {offset + 1} to {Math.min(offset + limit, total)} of {total}{' '}
               transactions
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 justify-center sm:justify-end">
               <Button
                 variant="outline"
                 onClick={handlePrevPage}
                 disabled={offset === 0}
+                className="flex-1 sm:flex-initial"
               >
                 Previous
               </Button>
@@ -572,6 +603,7 @@ export default function TransactionsPage() {
                 variant="outline"
                 onClick={handleNextPage}
                 disabled={offset + limit >= total}
+                className="flex-1 sm:flex-initial"
               >
                 Next
               </Button>

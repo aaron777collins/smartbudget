@@ -7,7 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { formatCurrency } from '@/lib/utils';
 import type { TimeframeValue } from './timeframe-selector';
 import { getMonthsFromTimeframe } from '@/lib/timeframe';
-import { ChartExportButton } from '@/components/charts/chart-export-button';
+import { getCurrentTheme, getExtendedChartColors } from '@/lib/design-tokens';
 
 interface HeatmapData {
   data: Array<{
@@ -75,10 +75,12 @@ export function CategoryHeatmap({ timeframe }: CategoryHeatmapProps) {
     const container = containerRef.current;
     const containerWidth = container.clientWidth;
 
-    // Calculate dimensions based on data
-    const cellSize = 60;
-    const categoryLabelWidth = 180;
-    const monthLabelHeight = 60;
+    // Calculate responsive dimensions based on viewport
+    const isMobile = containerWidth < 640;
+    const isTablet = containerWidth >= 640 && containerWidth < 1024;
+    const cellSize = isMobile ? 45 : isTablet ? 50 : 60;
+    const categoryLabelWidth = isMobile ? 120 : 180;
+    const monthLabelHeight = isMobile ? 50 : 60;
     const margin = { top: monthLabelHeight, right: 20, bottom: 20, left: categoryLabelWidth };
 
     const categories = data.data;
@@ -95,13 +97,37 @@ export function CategoryHeatmap({ timeframe }: CategoryHeatmapProps) {
 
     const g = svg.append('g');
 
-    // Create color scale
+    // Get theme colors for AICEO palette
+    const theme = getCurrentTheme();
+    const aiceoColors = getExtendedChartColors(theme);
+
+    // Create a custom interpolator using AICEO colors
+    // We'll use a gradient from the first color (low values) to the fourth color (high values)
+    // to create a visually appealing sequential scale
+    const lowColor = aiceoColors[1];  // Emerald for low spending
+    const midColor = aiceoColors[2];  // Amber for medium spending
+    const highColor = aiceoColors[3]; // Rose for high spending
+
+    const customInterpolator = (t: number): string => {
+      if (t < 0.5) {
+        // Interpolate between low and mid
+        return d3.interpolateHsl(lowColor, midColor)(t * 2);
+      } else {
+        // Interpolate between mid and high
+        return d3.interpolateHsl(midColor, highColor)((t - 0.5) * 2);
+      }
+    };
+
+    // Create color scale using AICEO palette
     const colorScale = d3
-      .scaleSequential(d3.interpolateYlOrRd)
+      .scaleSequential(customInterpolator)
       .domain([0, data.scale.max]);
 
     // Get month labels
     const monthLabels = categories[0]?.months.map(m => m.month) || [];
+
+    // Get theme-aware text color
+    const textColor = theme === 'dark' ? '#D1D5DB' : '#374151';
 
     // Draw month labels
     g.selectAll('.month-label')
@@ -117,7 +143,7 @@ export function CategoryHeatmap({ timeframe }: CategoryHeatmapProps) {
         return `rotate(-45, ${x}, ${y})`;
       })
       .attr('font-size', '11px')
-      .attr('fill', '#374151')
+      .attr('fill', textColor)
       .text(d => d);
 
     // Draw category labels
@@ -130,7 +156,7 @@ export function CategoryHeatmap({ timeframe }: CategoryHeatmapProps) {
       .attr('dy', '0.35em')
       .attr('text-anchor', 'end')
       .attr('font-size', '12px')
-      .attr('fill', '#374151')
+      .attr('fill', textColor)
       .text(d => d.category);
 
     // Draw cells
@@ -140,6 +166,11 @@ export function CategoryHeatmap({ timeframe }: CategoryHeatmapProps) {
           .attr('class', 'heatmap-cell')
           .attr('transform', `translate(${margin.left + monthIndex * cellSize}, ${margin.top + categoryIndex * cellSize})`);
 
+        // Get theme-aware empty cell color and stroke color
+        const emptyCellColor = theme === 'dark' ? '#1F2937' : '#F3F4F6';
+        const strokeColor = theme === 'dark' ? '#374151' : '#fff';
+        const hoverStrokeColor = aiceoColors[0]; // Primary blue for hover
+
         // Draw rectangle
         cell
           .append('rect')
@@ -147,23 +178,26 @@ export function CategoryHeatmap({ timeframe }: CategoryHeatmapProps) {
           .attr('height', cellSize - 2)
           .attr('x', 1)
           .attr('y', 1)
-          .attr('fill', month.amount === 0 ? '#F3F4F6' : colorScale(month.amount))
-          .attr('stroke', '#fff')
+          .attr('fill', month.amount === 0 ? emptyCellColor : colorScale(month.amount))
+          .attr('stroke', strokeColor)
           .attr('stroke-width', 2)
           .attr('rx', 4)
           .style('cursor', 'pointer')
           .on('mouseover', function(event) {
             d3.select(this)
-              .attr('stroke', '#2563EB')
+              .attr('stroke', hoverStrokeColor)
               .attr('stroke-width', 3);
 
-            // Show tooltip
+            // Show tooltip with theme-aware colors
+            const tooltipBg = theme === 'dark' ? 'rgba(31, 41, 55, 0.95)' : 'rgba(0, 0, 0, 0.8)';
+            const tooltipText = theme === 'dark' ? '#D1D5DB' : 'white';
+
             const tooltip = d3.select('body')
               .append('div')
               .attr('class', 'heatmap-tooltip')
               .style('position', 'absolute')
-              .style('background', 'rgba(0, 0, 0, 0.8)')
-              .style('color', 'white')
+              .style('background', tooltipBg)
+              .style('color', tooltipText)
               .style('padding', '8px 12px')
               .style('border-radius', '6px')
               .style('font-size', '12px')
@@ -179,7 +213,7 @@ export function CategoryHeatmap({ timeframe }: CategoryHeatmapProps) {
           })
           .on('mouseout', function() {
             d3.select(this)
-              .attr('stroke', '#fff')
+              .attr('stroke', strokeColor)
               .attr('stroke-width', 2);
 
             // Remove tooltip
@@ -188,6 +222,10 @@ export function CategoryHeatmap({ timeframe }: CategoryHeatmapProps) {
 
         // Add amount text for larger values
         if (month.amount > 0 && month.amount > data.scale.max * 0.1) {
+          // Use theme-aware contrasting text for high values (darker cells), standard text for low values (lighter cells)
+          const lightTextColor = theme === 'dark' ? '#F3F4F6' : '#fff';
+          const cellTextColor = month.amount > data.scale.max * 0.5 ? lightTextColor : textColor;
+
           cell
             .append('text')
             .attr('x', cellSize / 2)
@@ -196,18 +234,18 @@ export function CategoryHeatmap({ timeframe }: CategoryHeatmapProps) {
             .attr('text-anchor', 'middle')
             .attr('font-size', '10px')
             .attr('font-weight', 'bold')
-            .attr('fill', month.amount > data.scale.max * 0.5 ? '#fff' : '#374151')
+            .attr('fill', cellTextColor)
             .attr('pointer-events', 'none')
             .text(formatCurrency(month.amount, true));
         }
       });
     });
 
-    // Add legend
-    const legendWidth = 200;
+    // Add legend (responsive sizing)
+    const legendWidth = isMobile ? 150 : 200;
     const legendHeight = 20;
-    const legendX = width - legendWidth - margin.right;
-    const legendY = 20;
+    const legendX = isMobile ? margin.left : (width - legendWidth - margin.right);
+    const legendY = isMobile ? (height - margin.bottom - 50) : 20;
 
     const legendScale = d3.scaleLinear()
       .domain([0, data.scale.max])
@@ -220,7 +258,7 @@ export function CategoryHeatmap({ timeframe }: CategoryHeatmapProps) {
     const legend = svg.append('g')
       .attr('transform', `translate(${legendX}, ${legendY})`);
 
-    // Draw gradient
+    // Draw gradient using AICEO colors
     const defs = svg.append('defs');
     const gradient = defs.append('linearGradient')
       .attr('id', 'heatmap-gradient')
@@ -229,11 +267,15 @@ export function CategoryHeatmap({ timeframe }: CategoryHeatmapProps) {
 
     gradient.append('stop')
       .attr('offset', '0%')
-      .attr('stop-color', d3.interpolateYlOrRd(0));
+      .attr('stop-color', lowColor);
+
+    gradient.append('stop')
+      .attr('offset', '50%')
+      .attr('stop-color', midColor);
 
     gradient.append('stop')
       .attr('offset', '100%')
-      .attr('stop-color', d3.interpolateYlOrRd(1));
+      .attr('stop-color', highColor);
 
     legend.append('rect')
       .attr('width', legendWidth)

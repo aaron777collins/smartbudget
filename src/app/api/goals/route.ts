@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { GoalType } from '@prisma/client';
+import { createGoalSchema } from '@/lib/validations';
+import { z } from 'zod';
 
 // GET /api/goals - Get all goals for the current user
 export async function GET(request: NextRequest) {
@@ -57,50 +59,35 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, type, targetAmount, currentAmount, targetDate, icon, color } =
-      body;
 
-    // Validation
-    if (!name || !type || !targetAmount) {
-      return NextResponse.json(
-        { error: 'Missing required fields: name, type, targetAmount' },
-        { status: 400 }
-      );
-    }
-
-    if (!Object.values(GoalType).includes(type)) {
-      return NextResponse.json(
-        {
-          error: `Invalid goal type. Must be one of: ${Object.values(GoalType).join(', ')}`,
-        },
-        { status: 400 }
-      );
-    }
-
-    if (targetAmount <= 0) {
-      return NextResponse.json(
-        { error: 'Target amount must be greater than 0' },
-        { status: 400 }
-      );
-    }
+    // Validate request body
+    const validatedData = createGoalSchema.parse(body);
 
     const goal = await prisma.goal.create({
       data: {
         userId: session.user.id,
-        name,
-        type,
-        targetAmount,
-        currentAmount: currentAmount || 0,
-        targetDate: targetDate ? new Date(targetDate) : null,
-        icon: icon || 'target',
-        color: color || '#10B981',
-        isCompleted: false,
+        name: validatedData.name,
+        type: validatedData.type,
+        targetAmount: validatedData.targetAmount,
+        currentAmount: validatedData.currentAmount,
+        targetDate: validatedData.targetDate,
+        icon: validatedData.icon,
+        color: validatedData.color,
+        isCompleted: validatedData.isCompleted,
       },
     });
 
     return NextResponse.json(goal, { status: 201 });
   } catch (error) {
     console.error('Error creating goal:', error);
+
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Invalid data', issues: error.issues },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
       { error: 'Failed to create goal' },
       { status: 500 }

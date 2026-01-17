@@ -17,6 +17,7 @@ import {
 import { Switch } from "@/components/ui/switch"
 import { BugReportForm } from "@/components/bug-report-form"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Shake, Pulse } from "@/components/ui/animated"
 import {
   Settings as SettingsIcon,
   User,
@@ -122,11 +123,13 @@ export default function SettingsPage() {
 
   if (!settings) {
     return (
-      <div className={SPACING.page.container}>
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{errorMessage || "Failed to load settings"}</AlertDescription>
-        </Alert>
+      <div className="container mx-auto py-8 px-4">
+        <Shake trigger={!!errorMessage} duration={0.5} intensity={10}>
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{errorMessage || "Failed to load settings"}</AlertDescription>
+          </Alert>
+        </Shake>
       </div>
     )
   }
@@ -138,7 +141,7 @@ export default function SettingsPage() {
           <SettingsIcon className="h-8 w-8 text-primary" />
         </div>
         <div>
-          <h1 className={TYPOGRAPHY.pageTitle}>Settings</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
           <p className="text-muted-foreground">
             Manage your account preferences and application settings
           </p>
@@ -166,19 +169,23 @@ export default function SettingsPage() {
         </TabsList>
 
         {saveStatus === "success" && (
-          <Alert className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
-            <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
-            <AlertDescription className="text-green-800 dark:text-green-200">
-              Settings saved successfully!
-            </AlertDescription>
-          </Alert>
+          <Pulse scale={1.02} duration={0.6}>
+            <Alert className="bg-success/10 border-success/20">
+              <Check className="h-4 w-4 text-success" />
+              <AlertDescription className="text-success">
+                Settings saved successfully!
+              </AlertDescription>
+            </Alert>
+          </Pulse>
         )}
 
         {saveStatus === "error" && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{errorMessage}</AlertDescription>
-          </Alert>
+          <Shake trigger={saveStatus === "error"} duration={0.5} intensity={10}>
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{errorMessage}</AlertDescription>
+            </Alert>
+          </Shake>
         )}
 
         <TabsContent value="general" className="space-y-6">

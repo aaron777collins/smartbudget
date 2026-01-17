@@ -15,7 +15,8 @@ import { formatCurrency } from '@/lib/utils';
 import { ELEVATION } from '@/lib/design-tokens';
 import type { TimeframeValue } from './timeframe-selector';
 import { getPeriodForAPI, buildTimeframeParams } from '@/lib/timeframe';
-import { ChartExportButton } from '@/components/charts/chart-export-button';
+import { FadeIn, HoverScale } from '@/components/ui/animated';
+import { getCurrentTheme, getChartColorByIndex } from '@/lib/design-tokens';
 
 interface CategoryData {
   id: string;
@@ -43,9 +44,16 @@ interface CategoryBreakdownData {
   };
 }
 
+interface TooltipPayload {
+  payload: CategoryData;
+  name: string;
+  value: number;
+  color: string;
+}
+
 interface CustomTooltipProps {
   active?: boolean;
-  payload?: any[];
+  payload?: TooltipPayload[];
 }
 
 const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
@@ -55,10 +63,10 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
       <div className={`rounded-lg border bg-background p-3 ${ELEVATION.medium}`}>
         <p className="font-semibold mb-1">{data.name}</p>
         <p className="text-sm">
-          Amount: <span className="font-bold">{formatCurrency(data.amount)}</span>
+          Amount: <span className="font-bold font-mono">{formatCurrency(data.amount)}</span>
         </p>
         <p className="text-sm">
-          Percentage: <span className="font-bold">{data.percentage.toFixed(1)}%</span>
+          Percentage: <span className="font-bold font-mono">{data.percentage.toFixed(1)}%</span>
         </p>
         <p className="text-xs text-muted-foreground mt-1">
           {data.transactionCount} transaction{data.transactionCount !== 1 ? 's' : ''}
@@ -69,7 +77,16 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
   return null;
 };
 
-const CustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
+interface CustomLabelProps {
+  cx: number;
+  cy: number;
+  midAngle: number;
+  innerRadius: number;
+  outerRadius: number;
+  percent: number;
+}
+
+const CustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: CustomLabelProps) => {
   const RADIAN = Math.PI / 180;
   const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
   const x = cx + radius * Math.cos(-midAngle * RADIAN);
@@ -103,6 +120,7 @@ export function CategoryBreakdownChart({ timeframe }: CategoryBreakdownChartProp
   const [data, setData] = useState<CategoryBreakdownData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const theme = getCurrentTheme();
 
   useEffect(() => {
     async function fetchData() {
@@ -181,24 +199,21 @@ export function CategoryBreakdownChart({ timeframe }: CategoryBreakdownChartProp
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <CardTitle>Category Breakdown</CardTitle>
-            <CardDescription>
-              Current month spending by category
-            </CardDescription>
-            <div className="mt-2 grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="text-muted-foreground">Total Spending: </span>
-                <span className="font-semibold">{formatCurrency(data.totalSpending)}</span>
-              </div>
-              <div>
-                <span className="text-muted-foreground">Categories: </span>
-                <span className="font-semibold">{data.summary.categoryCount}</span>
-              </div>
-            </div>
+    <HoverScale scale={1.01} className="h-full">
+      <Card className="h-full transition-shadow duration-300 hover:shadow-lg">
+        <CardHeader>
+          <CardTitle>Category Breakdown</CardTitle>
+          <CardDescription>
+            Current month spending by category
+          </CardDescription>
+        <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+          <div>
+            <span className="text-muted-foreground">Total Spending: </span>
+            <span className="font-semibold font-mono">{formatCurrency(data.totalSpending)}</span>
+          </div>
+          <div>
+            <span className="text-muted-foreground">Categories: </span>
+            <span className="font-semibold font-mono">{data.summary.categoryCount}</span>
           </div>
           <ChartExportButton
             chartRef={chartRef}
@@ -213,66 +228,64 @@ export function CategoryBreakdownChart({ timeframe }: CategoryBreakdownChartProp
         </div>
       </CardHeader>
       <CardContent>
-        <div ref={chartRef} className="flex flex-col lg:flex-row gap-6">
-          {/* Pie Chart */}
-          <div className="flex-1" role="img" aria-label={`Category breakdown pie chart showing spending across ${data.summary.categoryCount} categories. Total spending: ${formatCurrency(data.totalSpending)}.${data.topCategories.length > 0 ? ` Top category: ${data.topCategories[0].name} with ${formatCurrency(data.topCategories[0].amount)}.` : ''}`}>
-            <ResponsiveContainer width="100%" height={400}>
-              <PieChart>
-                <Pie
-                  data={data.chartData as any[]}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={CustomLabel}
-                  outerRadius={120}
-                  fill="#8884d8"
-                  dataKey="amount"
-                >
-                  {data.chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip content={<CustomTooltip />} />
-                <Legend
-                  verticalAlign="bottom"
-                  height={36}
-                  iconType="circle"
-                  formatter={(value, entry: any) => (
-                    <span className="text-xs">{entry.payload.name}</span>
-                  )}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
+        <FadeIn duration={0.5} delay={0.1}>
+          <div className="flex flex-col lg:flex-row gap-6">
+            {/* Pie Chart */}
+            <div className="flex-1" role="img" aria-label={`Category breakdown pie chart showing spending across ${data.summary.categoryCount} categories. Total spending: ${formatCurrency(data.totalSpending)}.${data.topCategories.length > 0 ? ` Top category: ${data.topCategories[0].name} with ${formatCurrency(data.topCategories[0].amount)}.` : ''}`}>
+              <ResponsiveContainer width="100%" height={400}>
+                <PieChart>
+                  <Pie
+                    data={data.chartData as unknown as Array<Record<string, unknown>>}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={CustomLabel as never}
+                    outerRadius="80%"
+                    fill={getChartColorByIndex(0, theme)}
+                    dataKey="amount"
+                    animationBegin={0}
+                    animationDuration={800}
+                    animationEasing="ease-out"
+                  >
+                    {data.chartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={getChartColorByIndex(index, theme)} />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<CustomTooltip />} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
 
-          {/* Top Categories List */}
-          <div className="lg:w-64 space-y-3">
-            <h3 className="font-semibold text-sm">Top Categories</h3>
-            {data.topCategories.map((category, index) => (
-              <div
-                key={category.id}
-                className="flex items-center justify-between p-2 rounded-lg bg-gradient-to-r from-muted/50 to-transparent border border-border/50 transition-all duration-200 hover:border-border hover:shadow-sm"
-              >
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <div
-                    className="h-3 w-3 rounded-full flex-shrink-0 shadow-sm"
-                    style={{ backgroundColor: category.color }}
-                  />
-                  <span className="text-sm font-medium truncate">{category.name}</span>
-                </div>
-                <div className="text-right flex-shrink-0 ml-2">
-                  <div className="text-sm font-semibold">
-                    {formatCurrency(category.amount)}
+            {/* Top Categories List */}
+            <div className="lg:w-64 space-y-3">
+              <h3 className="font-semibold text-sm">Top Categories</h3>
+              {data.topCategories.map((category, index) => (
+                <div
+                  key={category.id}
+                  className="flex items-center justify-between p-2 rounded-lg bg-muted/50"
+                >
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <div
+                      className="h-3 w-3 rounded-full flex-shrink-0"
+                      style={{ backgroundColor: getChartColorByIndex(data.chartData.findIndex(c => c.id === category.id), theme) }}
+                    />
+                    <span className="text-sm font-medium truncate">{category.name}</span>
                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    {category.percentage.toFixed(1)}%
+                  <div className="text-right flex-shrink-0 ml-2">
+                    <div className="text-sm font-semibold font-mono">
+                      {formatCurrency(category.amount)}
+                    </div>
+                    <div className="text-xs text-muted-foreground font-mono">
+                      {category.percentage.toFixed(1)}%
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        </FadeIn>
       </CardContent>
     </Card>
+    </HoverScale>
   );
 }

@@ -5,8 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { HoverScale } from '@/components/ui/animated';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { getContrastTextColor } from '@/lib/design-tokens';
 import {
   Dialog,
   DialogContent,
@@ -136,9 +138,9 @@ export default function TagsClient() {
       toast.success('Tag created successfully');
       setCreateDialogOpen(false);
       fetchTags();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error creating tag:', error);
-      toast.error(error.message || 'Failed to create tag');
+      toast.error(error instanceof Error ? error.message : 'Failed to create tag');
     } finally {
       setSaving(false);
     }
@@ -171,9 +173,9 @@ export default function TagsClient() {
       setEditDialogOpen(false);
       setSelectedTag(null);
       fetchTags();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error updating tag:', error);
-      toast.error(error.message || 'Failed to update tag');
+      toast.error(error instanceof Error ? error.message : 'Failed to update tag');
     } finally {
       setSaving(false);
     }
@@ -239,7 +241,7 @@ export default function TagsClient() {
 
       {/* Tags Grid */}
       {tags.length === 0 ? (
-        <Card>
+        <Card className="hover:shadow-lg transition-all duration-200">
           <CardContent className="p-12 text-center">
             <Tag className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">No tags yet</h3>
@@ -254,46 +256,53 @@ export default function TagsClient() {
         </Card>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {tags.map((tag) => (
-            <Card key={tag.id} className="hover:shadow-md transition-shadow">
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <Badge
-                    style={{ backgroundColor: tag.color }}
-                    className="text-white"
-                  >
-                    #{tag.name}
-                  </Badge>
-                  <div className="flex gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7"
-                      onClick={() => openEditDialog(tag)}
-                      aria-label="Edit tag"
-                    >
-                      <Edit className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7"
-                      onClick={() => openDeleteDialog(tag)}
-                      aria-label="Delete tag"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
+          {tags.map((tag) => {
+            const textColor = getContrastTextColor(tag.color);
+            return (
+              <HoverScale key={tag.id} scale={1.02}>
+                <Card className="h-full hover:shadow-lg transition-all duration-200">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <Badge
+                        style={{
+                          backgroundColor: tag.color,
+                          color: textColor
+                        }}
+                      >
+                        #{tag.name}
+                      </Badge>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={() => openEditDialog(tag)}
+                        aria-label={`Edit tag ${tag.name}`}
+                      >
+                        <Edit className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={() => openDeleteDialog(tag)}
+                        aria-label={`Delete tag ${tag.name}`}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-sm text-muted-foreground">
-                  {tag._count.transactions}{' '}
-                  {tag._count.transactions === 1 ? 'transaction' : 'transactions'}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardHeader>
+                <CardContent>
+                  <div className="text-sm text-muted-foreground">
+                    {tag._count.transactions}{' '}
+                    {tag._count.transactions === 1 ? 'transaction' : 'transactions'}
+                  </div>
+                </CardContent>
+              </Card>
+            </HoverScale>
+            );
+          })}
         </div>
       )}
 
@@ -334,6 +343,7 @@ export default function TagsClient() {
                     style={{ backgroundColor: preset.value }}
                     onClick={() => setFormColor(preset.value)}
                     title={preset.name}
+                    aria-label={`Select ${preset.name} color`}
                   />
                 ))}
               </div>
@@ -392,6 +402,7 @@ export default function TagsClient() {
                     style={{ backgroundColor: preset.value }}
                     onClick={() => setFormColor(preset.value)}
                     title={preset.name}
+                    aria-label={`Select ${preset.name} color`}
                   />
                 ))}
               </div>

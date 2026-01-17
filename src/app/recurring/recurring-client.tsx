@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { HoverScale } from '@/components/ui/animated';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Repeat,
@@ -114,9 +115,9 @@ export default function RecurringClient() {
     if (daysUntil < 0) {
       return <Badge variant="destructive">Overdue</Badge>;
     } else if (daysUntil === 0) {
-      return <Badge className="bg-orange-500">Due Today</Badge>;
+      return <Badge className="bg-warning">Due Today</Badge>;
     } else if (daysUntil <= 7) {
-      return <Badge className="bg-yellow-500">Due Soon</Badge>;
+      return <Badge className="bg-warning">Due Soon</Badge>;
     } else {
       return <Badge variant="secondary">{daysUntil} days</Badge>;
     }
@@ -162,7 +163,7 @@ export default function RecurringClient() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Repeat className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">No Recurring Transactions Yet</h3>
+            <h3 className="text-lg font-semibold mb-2">No Recurring Transactions Yet</h3>
             <p className="text-muted-foreground text-center mb-6 max-w-md">
               Automatically detect recurring patterns from your transaction history to track bills
               and subscriptions.
@@ -184,7 +185,7 @@ export default function RecurringClient() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{rules.length}</div>
+                <div className="text-2xl font-bold font-mono">{rules.length}</div>
               </CardContent>
             </Card>
             <Card>
@@ -194,7 +195,7 @@ export default function RecurringClient() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
+                <div className="text-2xl font-bold font-mono">
                   $
                   {rules
                     .reduce((sum, rule) => {
@@ -217,7 +218,7 @@ export default function RecurringClient() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
+                <div className="text-2xl font-bold font-mono">
                   {rules.filter((r) => getDaysUntilDue(r.nextDueDate) <= 7).length}
                 </div>
               </CardContent>
@@ -229,50 +230,51 @@ export default function RecurringClient() {
             {rules.map((rule) => {
               const daysUntil = getDaysUntilDue(rule.nextDueDate);
               return (
-                <Card key={rule.id} className="hover:shadow-md transition-shadow">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <div className="space-y-1 flex-1">
-                        <CardTitle className="text-lg">{rule.merchantName}</CardTitle>
+                <HoverScale key={rule.id} scale={1.02}>
+                  <Card className="h-full">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <div className="space-y-1 flex-1">
+                          <CardTitle className="text-lg">{rule.merchantName}</CardTitle>
+                          <div className="flex items-center gap-2">
+                            {getDueBadge(daysUntil)}
+                          </div>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => openDeleteDialog(rule.id)}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="grid grid-cols-2 gap-3 text-sm">
                         <div className="flex items-center gap-2">
-                          {getDueBadge(daysUntil)}
+                          <DollarSign className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium">${parseFloat(rule.amount.toString()).toFixed(2)}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                          <span className="capitalize">{getFrequencyLabel(rule.frequency)}</span>
                         </div>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => openDeleteDialog(rule.id)}
-                        aria-label="Delete recurring transaction"
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                      <div className="flex items-center gap-2">
-                        <DollarSign className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-medium">${parseFloat(rule.amount.toString()).toFixed(2)}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                        <span className="capitalize">{getFrequencyLabel(rule.frequency)}</span>
-                      </div>
-                    </div>
 
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Calendar className="h-4 w-4" />
-                      <span>Next: {new Date(rule.nextDueDate).toLocaleDateString()}</span>
-                    </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Calendar className="h-4 w-4" />
+                        <span>Next: {new Date(rule.nextDueDate).toLocaleDateString()}</span>
+                      </div>
 
-                    <div className="pt-2 border-t">
-                      <p className="text-xs text-muted-foreground">
-                        {rule._count.transactions} linked transaction
-                        {rule._count.transactions !== 1 ? 's' : ''}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
+                      <div className="pt-2 border-t">
+                        <p className="text-xs text-muted-foreground">
+                          {rule._count.transactions} linked transaction
+                          {rule._count.transactions !== 1 ? 's' : ''}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </HoverScale>
               );
             })}
           </div>

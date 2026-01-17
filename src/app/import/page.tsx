@@ -5,12 +5,13 @@ import { FileUpload, UploadedFile } from "@/components/file-upload";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Info, Upload, FileText, Database, CheckCircle } from "lucide-react";
-import { TYPOGRAPHY } from "@/lib/design-tokens";
+import { Info, Upload, FileText, Database, CheckCircle, AlertCircle } from "lucide-react";
+import { Shake } from "@/components/ui/animated";
 
 export default function ImportPage() {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [processingError, setProcessingError] = useState<string | null>(null);
 
   const handleFilesSelected = (files: File[]) => {
     const newFiles: UploadedFile[] = files.map((file) => ({
@@ -30,6 +31,7 @@ export default function ImportPage() {
     if (uploadedFiles.length === 0) return;
 
     setIsProcessing(true);
+    setProcessingError(null);
 
     // Process each file
     for (let i = 0; i < uploadedFiles.length; i++) {
@@ -181,6 +183,7 @@ export default function ImportPage() {
 
     try {
       setIsProcessing(true);
+      setProcessingError(null);
 
       // Import each file's transactions
       for (const uploadedFile of uploadedFiles.filter(f => f.status === "success")) {
@@ -219,9 +222,10 @@ export default function ImportPage() {
       alert(`Successfully imported ${totalTransactions} transactions! Auto-categorization applied where possible.`);
       // Redirect to transactions page
       window.location.href = '/transactions';
-    } catch (error) {
-      console.error('Import error:', error);
-      alert(error instanceof Error ? error.message : 'Failed to import transactions');
+    } catch (err) {
+      console.error('Import error:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to import transactions';
+      setProcessingError(errorMessage);
     } finally {
       setIsProcessing(false);
     }
@@ -245,11 +249,20 @@ export default function ImportPage() {
     <div className="space-y-6">
       {/* Page Header */}
       <div>
-        <h1 className={`${TYPOGRAPHY.pageTitle} mb-2`}>Import Transactions</h1>
-        <p className="text-gray-600 dark:text-gray-400">
+        <h1 className="text-3xl font-bold tracking-tight mb-2">Import Transactions</h1>
+        <p className="text-muted-foreground">
           Upload your bank statements to automatically import and categorize transactions
         </p>
       </div>
+
+      {processingError && (
+        <Shake trigger={!!processingError} duration={0.5} intensity={10}>
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{processingError}</AlertDescription>
+          </Alert>
+        </Shake>
+      )}
 
       {/* Info Alert */}
       <Alert>
@@ -266,12 +279,12 @@ export default function ImportPage() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Upload className="h-5 w-5 text-blue-600" />
+              <Upload className="h-5 w-5 text-primary" />
               <CardTitle className="text-base">1. Upload Files</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-sm text-muted-foreground">
               Drag and drop or select files from your computer
             </p>
           </CardContent>
@@ -280,12 +293,12 @@ export default function ImportPage() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-blue-600" />
+              <FileText className="h-5 w-5 text-primary" />
               <CardTitle className="text-base">2. Validate & Preview</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-sm text-muted-foreground">
               Review parsed transactions and fix any issues
             </p>
           </CardContent>
@@ -294,12 +307,12 @@ export default function ImportPage() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Database className="h-5 w-5 text-blue-600" />
+              <Database className="h-5 w-5 text-primary" />
               <CardTitle className="text-base">3. Import</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-sm text-muted-foreground">
               Save transactions and automatically categorize them
             </p>
           </CardContent>
@@ -326,9 +339,9 @@ export default function ImportPage() {
           {/* Action Buttons */}
           {uploadedFiles.length > 0 && (
             <div className="mt-6 flex items-center justify-between">
-              <div className="text-sm text-gray-600 dark:text-gray-400">
+              <div className="text-sm text-muted-foreground">
                 {allProcessed ? (
-                  <div className="flex items-center gap-2 text-green-600">
+                  <div className="flex items-center gap-2 text-success">
                     <CheckCircle className="h-4 w-4" />
                     <span>
                       Ready to import {totalTransactions} transactions from {uploadedFiles.length}{" "}
@@ -375,7 +388,7 @@ export default function ImportPage() {
         <CardContent className="space-y-4">
           <div>
             <h4 className="font-medium mb-2">How to export from CIBC:</h4>
-            <ol className="list-decimal list-inside space-y-1 text-sm text-gray-600 dark:text-gray-400">
+            <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
               <li>Log in to CIBC Online Banking</li>
               <li>Go to Account Activity for the account you want to export</li>
               <li>Select the date range and click "Download"</li>
@@ -385,7 +398,7 @@ export default function ImportPage() {
           </div>
           <div>
             <h4 className="font-medium mb-2">Supported formats:</h4>
-            <ul className="list-disc list-inside space-y-1 text-sm text-gray-600 dark:text-gray-400">
+            <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
               <li><strong>CSV:</strong> Standard 3-column (Date, Description, Amount) or 4-column (Date, Description, Credit, Debit)</li>
               <li><strong>OFX/QFX:</strong> Open Financial Exchange format with transaction details</li>
             </ul>

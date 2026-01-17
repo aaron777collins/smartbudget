@@ -8,32 +8,35 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
-  id            String         @id @default(uuid())
-  username      String         @unique
-  email         String?        @unique
-  name          String?
-  passwordHash  String?
-  emailVerified DateTime?
-  image         String?
-  role          UserRole       @default(USER)
-  accounts      Account[]
-  transactions  Transaction[]
-  budgets       Budget[]
-  goals         Goal[]
-  categories    Category[]
-  tags          Tag[]
-  settings      UserSettings?
-  filterPresets FilterPreset[]
-  jobs          Job[]
-  feedback      Feedback[]
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-
-  @@index([username])
-  @@index([role])
+  id                   String         @id @default(uuid())
+  username             String         @unique
+  email                String?        @unique
+  name                 String?
+  password             String
+  emailVerified        DateTime?
+  image                String?
+  failedLoginAttempts  Int            @default(0)
+  accountLockedUntil   DateTime?
+  lastFailedLoginAt    DateTime?
+  lastActivityAt       DateTime?      // Track last user activity for inactivity detection
+  sessionCreatedAt     DateTime?      // When current session was created
+  accounts             Account[]
+  transactions         Transaction[]
+  budgets              Budget[]
+  goals                Goal[]
+  categories           Category[]
+  tags                 Tag[]
+  settings             UserSettings?
+  filterPresets        FilterPreset[]
+  jobs                 Job[]
+  feedback             Feedback[]
+  refreshTokens        RefreshToken[]
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
 }
 
 model Account {
@@ -360,6 +363,46 @@ model Feedback {
   @@index([type, priority])
 }
 
+model AuditLog {
+  id          String        @id @default(uuid())
+  userId      String?
+  action      AuditAction
+  entityType  String // "account", "transaction", "budget", etc.
+  entityId    String?
+  oldValues   Json? // Previous state of the entity
+  newValues   Json? // New state of the entity
+  ipAddress   String?
+  userAgent   String?
+  status      AuditStatus   @default(SUCCESS)
+  errorMessage String?      @db.Text
+  metadata    Json? // Additional context
+  createdAt   DateTime      @default(now())
+
+  @@index([userId, createdAt])
+  @@index([entityType, entityId])
+  @@index([action, createdAt])
+  @@index([status, createdAt])
+}
+
+model SecurityEvent {
+  id            String           @id @default(uuid())
+  userId        String?
+  eventType     SecurityEventType
+  severity      SecuritySeverity @default(INFO)
+  description   String           @db.Text
+  ipAddress     String?
+  userAgent     String?
+  success       Boolean          @default(true)
+  failureReason String?
+  metadata      Json? // Additional context
+  createdAt     DateTime         @default(now())
+
+  @@index([userId, createdAt])
+  @@index([eventType, createdAt])
+  @@index([severity, createdAt])
+  @@index([success, createdAt])
+}
+
 enum FeedbackType {
   BUG
   FEATURE
@@ -383,33 +426,73 @@ enum FeedbackStatus {
   WONT_FIX
 }
 
-model AuditLog {
-  id         String         @id @default(uuid())
-  userId     String?
-  action     AuditLogAction
-  ipAddress  String?
-  userAgent  String?
-  metadata   Json?          // Additional context (username attempted, error details, etc.)
-  timestamp  DateTime       @default(now())
-
-  @@index([userId, timestamp])
-  @@index([action, timestamp])
-  @@index([timestamp])
+enum AuditAction {
+  CREATE
+  READ
+  UPDATE
+  DELETE
+  EXPORT
+  IMPORT
+  LOGIN
+  LOGOUT
+  PASSWORD_CHANGE
+  EMAIL_CHANGE
+  SETTINGS_UPDATE
+  PERMISSION_CHANGE
 }
 
-enum AuditLogAction {
+enum AuditStatus {
+  SUCCESS
+  FAILURE
+  PARTIAL
+}
+
+enum SecurityEventType {
   LOGIN_SUCCESS
   LOGIN_FAILURE
   LOGOUT
   PASSWORD_CHANGE
-  USER_CREATED
-  USER_UPDATED
-  USER_DELETED
-  SESSION_CREATED
+  PASSWORD_RESET_REQUEST
+  PASSWORD_RESET_COMPLETE
+  EMAIL_CHANGE
+  ACCOUNT_LOCKED
+  ACCOUNT_UNLOCKED
   SESSION_EXPIRED
+  UNAUTHORIZED_ACCESS_ATTEMPT
+  RATE_LIMIT_EXCEEDED
+  SUSPICIOUS_ACTIVITY
+  DATA_EXPORT
+  DATA_DELETION
+  PERMISSION_ELEVATION
+  MFA_ENABLED
+  MFA_DISABLED
+  MFA_BACKUP_CODES_GENERATED
 }
 
-enum UserRole {
-  USER
-  ADMIN
+enum SecuritySeverity {
+  LOW
+  INFO
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+model RefreshToken {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token           String   @unique // Hashed refresh token
+  tokenFamily     String   // Family identifier for rotation detection
+  expiresAt       DateTime // Refresh token expiration (7 days)
+  isRevoked       Boolean  @default(false)
+  revokedAt       DateTime?
+  revokedReason   String? // "logout", "password_change", "token_theft", "manual_revocation"
+  ipAddress       String?
+  userAgent       String?
+  createdAt       DateTime @default(now())
+  lastUsedAt      DateTime @default(now())
+
+  @@index([userId, isRevoked])
+  @@index([tokenFamily, isRevoked])
+  @@index([expiresAt])
 }

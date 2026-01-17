@@ -80,24 +80,24 @@ export type JobResultData =
 /**
  * Job creation parameters
  */
-export interface CreateJobParams {
+export interface CreateJobParams<TPayload = unknown> {
   userId: string;
   type: JobType;
-  payload: JobPayload;
+  payload: TPayload;
   total?: number;
 }
 
 /**
  * Job result
  */
-export interface JobResult {
+export interface JobResult<TResult = unknown> {
   id: string;
   type: JobType;
   status: JobStatus;
   progress: number;
   total?: number;
   processed: number;
-  result?: JobResultData;
+  result?: TResult;
   error?: string;
   startedAt?: Date;
   completedAt?: Date;
@@ -108,7 +108,7 @@ export interface JobResult {
 /**
  * Create a new background job
  */
-export async function createJob(params: CreateJobParams): Promise<JobResult> {
+export async function createJob<TPayload = unknown>(params: CreateJobParams<TPayload>): Promise<JobResult> {
   const job = await prisma.job.create({
     data: {
       userId: params.userId,
@@ -218,7 +218,7 @@ export async function markJobStarted(jobId: string): Promise<void> {
 /**
  * Mark job as completed
  */
-export async function markJobCompleted(jobId: string, result: JobResultData): Promise<void> {
+export async function markJobCompleted<TResult = unknown>(jobId: string, result: TResult): Promise<void> {
   await prisma.job.update({
     where: { id: jobId },
     data: {
@@ -326,15 +326,29 @@ export async function processJob(jobId: string): Promise<void> {
   }
 }
 
+interface MerchantResearchPayload {
+  merchants: Array<{ merchantName: string; amount?: number; date?: string }>;
+  saveToKnowledgeBase?: boolean;
+}
+
+interface MerchantResearchResult {
+  merchantName: string;
+  businessName?: string;
+  businessType?: string;
+  categorySlug?: string;
+  confidence: number;
+  reasoning?: string;
+  sources?: string[];
+  website?: string;
+  location?: string;
+  error?: string;
+}
+
 /**
  * Process merchant research batch job
  */
-async function processMerchantResearchBatch(job: {
-  id: string;
-  type: string;
-  payload: Prisma.JsonValue;
-}): Promise<void> {
-  const payload = job.payload as unknown as MerchantResearchBatchPayload;
+async function processMerchantResearchBatch(job: { id: string; payload: Prisma.JsonValue }): Promise<void> {
+  const payload = job.payload as unknown as MerchantResearchPayload;
 
   const merchants = payload.merchants.map((m) => ({
     merchantName: m.merchantName,
@@ -467,7 +481,7 @@ function formatJobResult(job: {
     progress: job.progress,
     total: job.total ?? undefined,
     processed: job.processed,
-    result: job.result as JobResultData | undefined,
+    result: job.result as unknown,
     error: job.error ?? undefined,
     startedAt: job.startedAt ?? undefined,
     completedAt: job.completedAt ?? undefined,

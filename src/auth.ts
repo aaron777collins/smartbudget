@@ -1,16 +1,21 @@
 import NextAuth from "next-auth"
-import { PrismaAdapter } from "@auth/prisma-adapter"
 import Credentials from "next-auth/providers/credentials"
 import GitHub from "next-auth/providers/github"
 import { compare } from "bcryptjs"
 import { prisma } from "@/lib/prisma"
-import { logLoginSuccess, logLoginFailure } from "@/lib/audit-log"
-import { checkRateLimit, resetRateLimit } from "@/lib/rate-limit"
+import {
+  logLoginSuccess,
+  logLoginFailure,
+  logAccountLocked,
+} from "@/lib/audit-logger"
+import { initializeSession, SESSION_CONFIG } from "@/lib/session-manager"
+import { Prisma } from "@prisma/client"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  adapter: PrismaAdapter(prisma),
+  trustHost: true,
   session: {
     strategy: "jwt",
+    maxAge: SESSION_CONFIG.MAX_SESSION_AGE / 1000, // Convert ms to seconds (4 hours)
   },
   pages: {
     signIn: "/auth/signin",
@@ -30,68 +35,121 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.username || !credentials?.password) {
-          // Log failed login attempt - missing credentials
-          await logLoginFailure(
-            credentials?.username as string || "unknown",
-            "Missing credentials"
-          )
-          return null
-        }
-
-        // Check rate limit for this username
-        const username = credentials.username as string
-        const rateLimitResult = checkRateLimit(`auth:${username}`)
-
-        if (!rateLimitResult.success) {
-          // Rate limit exceeded
-          await logLoginFailure(
-            username,
-            `Rate limit exceeded - ${rateLimitResult.remaining} attempts remaining`
-          )
-          // NextAuth doesn't support custom error messages easily,
-          // but returning null will trigger a generic error
           return null
         }
 
         const user = await prisma.user.findUnique({
           where: {
-            username: username,
+            username: credentials.username as string,
           },
         })
 
-        if (!user || !user.passwordHash) {
-          // Log failed login attempt - user not found or no password hash
+        if (!user || !user.password) {
+          // Log failed login attempt for non-existent user
           await logLoginFailure(
-            username,
-            user ? "No password hash" : "User not found"
+            credentials.username as string,
+            'User not found or invalid credentials',
+            { ipAddress: 'unknown', userAgent: 'unknown' }
           )
           return null
+        }
+
+        // Check if account is locked
+        if (user.accountLockedUntil && new Date() < user.accountLockedUntil) {
+          const lockTimeRemaining = Math.ceil(
+            (user.accountLockedUntil.getTime() - Date.now()) / 1000 / 60
+          )
+          throw new Error(
+            `Account is locked. Please try again in ${lockTimeRemaining} minute${lockTimeRemaining !== 1 ? 's' : ''}.`
+          )
+        }
+
+        // If lock period has expired, reset the failed attempts
+        if (user.accountLockedUntil && new Date() >= user.accountLockedUntil) {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: {
+              failedLoginAttempts: 0,
+              accountLockedUntil: null,
+              lastFailedLoginAt: null,
+            },
+          })
         }
 
         const isPasswordValid = await compare(
           credentials.password as string,
-          user.passwordHash
+          user.password
         )
 
         if (!isPasswordValid) {
-          // Log failed login attempt - invalid password
+          // Increment failed login attempts
+          const newFailedAttempts = user.failedLoginAttempts + 1
+          const maxAttempts = 5
+          const lockDurationMinutes = 15
+
+          const updateData: Prisma.UserUpdateInput = {
+            failedLoginAttempts: newFailedAttempts,
+            lastFailedLoginAt: new Date(),
+          }
+
+          // Lock account if max attempts reached
+          if (newFailedAttempts >= maxAttempts) {
+            updateData.accountLockedUntil = new Date(
+              Date.now() + lockDurationMinutes * 60 * 1000
+            )
+          }
+
+          await prisma.user.update({
+            where: { id: user.id },
+            data: updateData,
+          })
+
+          // Log failed login attempt
           await logLoginFailure(
-            username,
-            "Invalid password"
+            credentials.username as string,
+            'Invalid password',
+            { ipAddress: 'unknown', userAgent: 'unknown' }
           )
+
+          if (newFailedAttempts >= maxAttempts) {
+            // Log account lockout
+            await logAccountLocked(
+              user.id,
+              { ipAddress: 'unknown', userAgent: 'unknown' }
+            )
+            throw new Error(
+              `Account locked due to too many failed login attempts. Please try again in ${lockDurationMinutes} minutes.`
+            )
+          }
+
           return null
         }
 
-        // Login successful - reset rate limit for this username
-        resetRateLimit(`auth:${username}`)
+        // Reset failed login attempts on successful login
+        if (user.failedLoginAttempts > 0) {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: {
+              failedLoginAttempts: 0,
+              accountLockedUntil: null,
+              lastFailedLoginAt: null,
+            },
+          })
+        }
+
+        // Initialize session tracking
+        await initializeSession(user.id)
 
         // Log successful login
-        await logLoginSuccess(user.id, user.username)
+        await logLoginSuccess(
+          user.id,
+          { ipAddress: 'unknown', userAgent: 'unknown' }
+        )
 
         return {
           id: user.id,
           username: user.username,
-          email: user.email || "",
+          email: user.email,
           name: user.name,
           image: user.image,
         }
@@ -99,16 +157,30 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user) {
         token.id = user.id
+        token.username = user.username
       }
+
+      // On token creation or update, add timestamp
+      if (trigger === 'signIn' || trigger === 'signUp') {
+        token.sessionCreatedAt = Date.now()
+      }
+
       return token
     },
     async session({ session, token }) {
       if (token && session.user) {
         session.user.id = token.id as string
+        session.user.username = token.username as string
       }
+
+      // Add session creation timestamp to session
+      if (token.sessionCreatedAt) {
+        session.sessionCreatedAt = token.sessionCreatedAt as number
+      }
+
       return session
     },
   },

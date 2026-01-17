@@ -48,9 +48,16 @@ export const POST = withExpensiveOp(async (req, context) => {
       );
     }
 
+    // Define type for merchant input
+    interface MerchantInput {
+      merchantName: string;
+      amount?: number;
+      date?: string;
+    }
+
     // Batch research
     if (body.merchants && Array.isArray(body.merchants)) {
-      const merchants = (body.merchants as MerchantResearchInput[]).map((m) => ({
+      const merchants = body.merchants.map((m: MerchantInput) => ({
         merchantName: m.merchantName,
         amount: m.amount,
         date: m.date,
@@ -88,7 +95,7 @@ export const POST = withExpensiveOp(async (req, context) => {
 
       // For small batches, process immediately
       const results = await researchMerchantsBatch(
-        merchants.map((m) => ({
+        merchants.map((m: MerchantInput) => ({
           merchantName: m.merchantName,
           amount: m.amount,
           date: m.date ? new Date(m.date) : undefined,

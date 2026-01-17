@@ -1,0 +1,140 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - link "Skip to main content" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=e3]:
+    - link "Skip to main content" [ref=e4] [cursor=pointer]:
+      - /url: "#main-content"
+    - banner [ref=e5]:
+      - generic [ref=e6]:
+        - link "SmartBudget home" [ref=e8] [cursor=pointer]:
+          - /url: /
+          - img [ref=e9]
+          - generic [ref=e12]: SmartBudget
+        - generic [ref=e13]:
+          - button "Toggle theme" [ref=e14] [cursor=pointer]:
+            - img
+            - generic [ref=e15]: Toggle theme
+          - generic [ref=e16]:
+            - link "Sign in" [ref=e17] [cursor=pointer]:
+              - /url: /auth/signin
+            - link "Sign up" [ref=e18] [cursor=pointer]:
+              - /url: /auth/signup
+    - generic [ref=e19]:
+      - complementary "Main navigation" [ref=e20]:
+        - navigation "Sidebar navigation" [ref=e21]:
+          - list [ref=e23]:
+            - listitem [ref=e24] [cursor=pointer]:
+              - generic [ref=e25]:
+                - img [ref=e26]
+                - text: Dashboard
+            - listitem [ref=e31] [cursor=pointer]:
+              - generic [ref=e32]:
+                - img [ref=e33]
+                - text: Transactions
+            - listitem [ref=e35] [cursor=pointer]:
+              - generic [ref=e36]:
+                - img [ref=e37]
+                - text: Accounts
+            - listitem [ref=e40] [cursor=pointer]:
+              - generic [ref=e41]:
+                - img [ref=e42]
+                - text: Budgets
+            - listitem [ref=e45] [cursor=pointer]:
+              - generic [ref=e46]:
+                - img [ref=e47]
+                - text: Recurring
+            - listitem [ref=e52] [cursor=pointer]:
+              - generic [ref=e53]:
+                - img [ref=e54]
+                - text: Tags
+            - listitem [ref=e57] [cursor=pointer]:
+              - generic [ref=e58]:
+                - img [ref=e59]
+                - text: Goals
+            - listitem [ref=e63] [cursor=pointer]:
+              - generic [ref=e64]:
+                - img [ref=e65]
+                - text: Insights
+            - listitem [ref=e68] [cursor=pointer]:
+              - generic [ref=e69]:
+                - img [ref=e70]
+                - text: Import
+            - listitem [ref=e73] [cursor=pointer]:
+              - generic [ref=e74]:
+                - img [ref=e75]
+                - text: Jobs
+            - listitem [ref=e78] [cursor=pointer]:
+              - generic [ref=e79]:
+                - img [ref=e80]
+                - text: Settings
+      - main [ref=e83]:
+        - generic [ref=e85]:
+          - generic [ref=e86]:
+            - heading "Welcome to SmartBudget" [level=1] [ref=e87]
+            - paragraph [ref=e88]: Intelligent Personal Finance Management with AI-powered transaction categorization
+          - generic [ref=e89]:
+            - generic [ref=e90]:
+              - generic [ref=e91]:
+                - generic [ref=e92]: Total Accounts
+                - img [ref=e93]
+              - generic [ref=e96]:
+                - generic [ref=e97]: "0"
+                - paragraph [ref=e98]: No accounts yet
+            - generic [ref=e99]:
+              - generic [ref=e100]:
+                - generic [ref=e101]: Transactions
+                - img [ref=e102]
+              - generic [ref=e105]:
+                - generic [ref=e106]: "0"
+                - paragraph [ref=e107]: Import transactions to get started
+            - generic [ref=e108]:
+              - generic [ref=e109]:
+                - generic [ref=e110]: Active Budgets
+                - img [ref=e111]
+              - generic [ref=e114]:
+                - generic [ref=e115]: "0"
+                - paragraph [ref=e116]: Create your first budget
+            - generic [ref=e117]:
+              - generic [ref=e118]:
+                - generic [ref=e119]: Goals
+                - img [ref=e120]
+              - generic [ref=e124]:
+                - generic [ref=e125]: "0"
+                - paragraph [ref=e126]: Set financial goals
+          - generic [ref=e127]:
+            - generic [ref=e128]:
+              - generic [ref=e129]: Get Started
+              - generic [ref=e130]: Follow these steps to set up your personal finance management system
+            - generic [ref=e131]:
+              - generic [ref=e132]:
+                - generic [ref=e133]: "1"
+                - generic [ref=e134]:
+                  - heading "Create an Account" [level=3] [ref=e135]
+                  - paragraph [ref=e136]: Add your first bank account or credit card
+                - link "Add Account" [ref=e137] [cursor=pointer]:
+                  - /url: /accounts
+                  - button "Add Account" [ref=e138]
+              - generic [ref=e139]:
+                - generic [ref=e140]: "2"
+                - generic [ref=e141]:
+                  - heading "Import Transactions" [level=3] [ref=e142]
+                  - paragraph [ref=e143]: Upload CSV, OFX, or QFX files from your bank
+                - link "Import" [ref=e144] [cursor=pointer]:
+                  - /url: /import
+                  - button "Import" [ref=e145]
+              - generic [ref=e146]:
+                - generic [ref=e147]: "3"
+                - generic [ref=e148]:
+                  - heading "Set Up Budgets" [level=3] [ref=e149]
+                  - paragraph [ref=e150]: Create budgets to track your spending
+                - link "Create Budget" [ref=e151] [cursor=pointer]:
+                  - /url: /budgets
+                  - button "Create Budget" [ref=e152]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e158] [cursor=pointer]:
+    - img [ref=e159]
+  - alert [ref=e162]
+```
