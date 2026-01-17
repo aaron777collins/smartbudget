@@ -9,6 +9,7 @@ import { TimeframeSelector, type TimeframeValue } from '@/components/dashboard/t
 import { UpcomingExpenses } from '@/components/dashboard/upcoming-expenses';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Stagger } from '@/components/ui/animated';
+import { ScreenReaderAnnouncer } from '@/components/ui/screen-reader-announcer';
 
 // Lazy load ALL chart components for bundle optimization
 const SpendingTrendsChart = lazy(() => import('@/components/dashboard/spending-trends-chart').then(m => ({ default: m.SpendingTrendsChart })));
@@ -84,6 +85,7 @@ export function DashboardClient() {
   if (loading) {
     return (
       <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+        <ScreenReaderAnnouncer message="Loading dashboard data..." />
         <div className="flex items-center justify-between space-y-2">
           <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
         </div>
@@ -99,6 +101,10 @@ export function DashboardClient() {
   if (error) {
     return (
       <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+        <ScreenReaderAnnouncer
+          message={`Error loading dashboard: ${error}`}
+          politeness="assertive"
+        />
         <div className="flex items-center justify-between space-y-2">
           <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
         </div>
@@ -117,6 +123,7 @@ export function DashboardClient() {
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+      <ScreenReaderAnnouncer message="Dashboard data loaded successfully" />
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
         <TimeframeSelector value={timeframe} onChange={setTimeframe} />

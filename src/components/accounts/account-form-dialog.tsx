@@ -23,6 +23,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Shake, Pulse } from '@/components/ui/animated';
 import { Wallet, CreditCard, Landmark, PiggyBank, TrendingUp, HelpCircle, Trash2, CheckCircle } from 'lucide-react';
+import { ScreenReaderAnnouncer } from '@/components/ui/screen-reader-announcer';
 
 interface Account {
   id: string;
@@ -242,20 +243,29 @@ export function AccountFormDialog({ open, onClose, account }: AccountFormDialogP
           <form onSubmit={handleSubmit}>
             <div className="space-y-4 py-4">
               {success && (
-                <Pulse scale={1.02} duration={0.6}>
-                  <Alert className="bg-success/10 border-success">
-                    <CheckCircle className="h-4 w-4 text-success" />
-                    <AlertDescription className="text-success">{success}</AlertDescription>
-                  </Alert>
-                </Pulse>
+                <>
+                  <ScreenReaderAnnouncer message={success} />
+                  <Pulse scale={1.02} duration={0.6}>
+                    <Alert className="bg-success/10 border-success" role="status">
+                      <CheckCircle className="h-4 w-4 text-success" />
+                      <AlertDescription className="text-success">{success}</AlertDescription>
+                    </Alert>
+                  </Pulse>
+                </>
               )}
 
               {error && (
-                <Shake trigger={!!error} duration={0.5} intensity={10}>
-                  <div className="bg-destructive/10 border border-destructive rounded-md p-3 text-sm text-destructive">
-                    {error}
-                  </div>
-                </Shake>
+                <>
+                  <ScreenReaderAnnouncer
+                    message={`Error: ${error}`}
+                    politeness="assertive"
+                  />
+                  <Shake trigger={!!error} duration={0.5} intensity={10}>
+                    <div className="bg-destructive/10 border border-destructive rounded-md p-3 text-sm text-destructive" role="alert">
+                      {error}
+                    </div>
+                  </Shake>
+                </>
               )}
 
               {/* Account Name */}

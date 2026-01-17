@@ -26,6 +26,7 @@ import { AdvancedFilters, TransactionFilters } from '@/components/transactions/a
 import { ExportDialog } from '@/components/transactions/export-dialog';
 import { Search, Filter, Download, Plus, Pencil, Trash2, Repeat, X } from 'lucide-react';
 import { Badge as FilterBadge } from '@/components/ui/badge';
+import { ScreenReaderAnnouncer } from '@/components/ui/screen-reader-announcer';
 
 interface Transaction {
   id: string;
@@ -85,6 +86,7 @@ export default function TransactionsPage() {
   const [availableTags, setAvailableTags] = useState<Array<{ id: string; name: string; color: string }>>([]);
   const [advancedFilters, setAdvancedFilters] = useState<TransactionFilters>({});
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const [srMessage, setSrMessage] = useState<string>('');
   const limit = 50;
 
   useEffect(() => {
@@ -114,6 +116,7 @@ export default function TransactionsPage() {
   const fetchTransactions = async () => {
     try {
       setLoading(true);
+      setSrMessage('Loading transactions...');
       const params = new URLSearchParams({
         limit: limit.toString(),
         offset: offset.toString(),
@@ -167,8 +170,10 @@ export default function TransactionsPage() {
       const data: TransactionResponse = await response.json();
       setTransactions(data.transactions);
       setTotal(data.total);
+      setSrMessage(`Loaded ${data.transactions.length} transactions. Total ${data.total} transactions found.`);
     } catch (error) {
       console.error('Error fetching transactions:', error);
+      setSrMessage('Error loading transactions. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -247,6 +252,7 @@ export default function TransactionsPage() {
 
   return (
     <div className="container mx-auto py-6 space-y-6">
+      {srMessage && <ScreenReaderAnnouncer message={srMessage} />}
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
