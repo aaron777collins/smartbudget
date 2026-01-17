@@ -239,7 +239,7 @@ export default function TagsClient() {
 
       {/* Tags Grid */}
       {tags.length === 0 ? (
-        <Card>
+        <Card className="hover:shadow-lg transition-all duration-200">
           <CardContent className="p-12 text-center">
             <Tag className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">No tags yet</h3>
@@ -256,7 +256,7 @@ export default function TagsClient() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {tags.map((tag) => (
             <HoverScale key={tag.id} scale={1.02}>
-              <Card className="h-full">
+              <Card className="h-full hover:shadow-lg transition-all duration-200">
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <Badge
