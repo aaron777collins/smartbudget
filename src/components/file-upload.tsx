@@ -89,7 +89,7 @@ export function FileUpload({
     return Math.round(bytes / Math.pow(k, i) * 100) / 100 + " " + sizes[i];
   };
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive, open: openFileDialog } = useDropzone({
     onDrop,
     accept: {
       "text/csv": [".csv"],
@@ -100,6 +100,8 @@ export function FileUpload({
     maxSize,
     onDragEnter: () => setDragActive(true),
     onDragLeave: () => setDragActive(false),
+    noClick: false,
+    noKeyboard: false,
   });
 
   const getStatusIcon = (status: UploadedFile["status"]) => {

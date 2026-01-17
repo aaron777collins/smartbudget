@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus, CreditCard, PieChart, X } from 'lucide-react';
 import Link from 'next/link';
@@ -25,12 +25,25 @@ import { cn } from '@/lib/utils';
  * - Keyboard navigable
  * - Clear labels for screen readers
  * - Proper z-index to stay above content
+ * - Escape key closes the expanded menu
  */
 export function QuickActionFAB() {
   const [open, setOpen] = useState(false);
   const shouldReduceMotion = useReducedMotion();
 
   const toggleOpen = () => setOpen(!open);
+
+  // Close FAB when Escape key is pressed
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && open) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [open]);
 
   // If user prefers reduced motion, render simplified version without animations
   if (shouldReduceMotion) {

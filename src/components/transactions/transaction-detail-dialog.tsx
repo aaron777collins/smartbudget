@@ -167,6 +167,15 @@ export function TransactionDetailDialog({
     }
   };
 
+  // Handle keyboard shortcuts for form submission
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    // Ctrl/Cmd + Enter to save when editing
+    if ((event.ctrlKey || event.metaKey) && event.key === 'Enter' && editing && !loading) {
+      event.preventDefault();
+      handleSave();
+    }
+  };
+
   const handleCategoryChange = (categoryId: string | null, subcategoryId: string | null) => {
     // Update formData with new category selection
     setFormData((prev) => ({
@@ -344,7 +353,7 @@ export function TransactionDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl" onKeyDown={handleKeyDown}>
         <DialogHeader>
           <DialogTitle>Transaction Details</DialogTitle>
           <DialogDescription>
