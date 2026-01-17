@@ -288,7 +288,7 @@ export default function BudgetAnalyticsClient() {
       {/* Insights */}
       {insights.length > 0 && (
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Insights & Recommendations</h2>
+          <h2 className="text-lg font-semibold">Insights & Recommendations</h2>
           <div className="grid gap-4 md:grid-cols-2">
             {insights.map((insight, index) => (
               <Alert

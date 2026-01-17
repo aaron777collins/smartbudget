@@ -162,7 +162,7 @@ export default function RecurringClient() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Repeat className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">No Recurring Transactions Yet</h3>
+            <h3 className="text-lg font-semibold mb-2">No Recurring Transactions Yet</h3>
             <p className="text-muted-foreground text-center mb-6 max-w-md">
               Automatically detect recurring patterns from your transaction history to track bills
               and subscriptions.

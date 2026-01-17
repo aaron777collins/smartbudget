@@ -319,7 +319,7 @@ export function GoalsClient() {
       {/* Active Goals */}
       {activeGoals.length > 0 && (
         <div>
-          <h2 className="text-xl font-bold text-foreground mb-4">Active Goals</h2>
+          <h2 className="text-lg font-semibold text-foreground mb-4">Active Goals</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {activeGoals.map((goal) => (
               <GoalCard
@@ -340,7 +340,7 @@ export function GoalsClient() {
       {/* Completed Goals */}
       {completedGoals.length > 0 && (
         <div>
-          <h2 className="text-xl font-bold text-foreground mb-4">
+          <h2 className="text-lg font-semibold text-foreground mb-4">
             Completed Goals
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -364,7 +364,7 @@ export function GoalsClient() {
       {goals.length === 0 && (
         <div className="text-center py-12">
           <Target className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-foreground mb-2">
+          <h3 className="text-lg font-semibold text-foreground mb-2">
             No goals yet
           </h3>
           <p className="text-muted-foreground mb-6">

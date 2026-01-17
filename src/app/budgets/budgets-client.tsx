@@ -178,7 +178,7 @@ export default function BudgetsClient() {
         <Card>
           <CardContent className="pt-6 text-center py-12">
             <Target className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-xl font-semibold mb-2">No budgets yet</h3>
+            <h3 className="text-lg font-semibold mb-2">No budgets yet</h3>
             <p className="text-muted-foreground mb-6">
               Get started by creating your first budget to track and manage your spending
             </p>
