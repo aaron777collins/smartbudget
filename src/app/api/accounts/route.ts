@@ -37,8 +37,8 @@ export async function GET(request: NextRequest) {
     // Build where clause
     const where: Prisma.AccountWhereInput = { userId };
 
-    if (active !== undefined) {
-      where.isActive = active;
+    if (active !== null) {
+      where.isActive = active === 'true';
     }
 
     if (search) {
@@ -90,8 +90,6 @@ export async function POST(request: NextRequest) {
 
     // Validate request body
     const validatedData = createAccountSchema.parse(body);
-
-    const validatedData = result.data;
 
     // Check for duplicate account
     if (validatedData.accountNumber) {

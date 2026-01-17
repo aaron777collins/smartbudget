@@ -1,9 +1,13 @@
 import { prisma } from "@/lib/prisma"
-import { AuditLogAction } from "@prisma/client"
+import { AuditAction } from "@prisma/client"
 
 export interface AuditLogEvent {
-  action: AuditLogAction
+  action: AuditAction
+  entityType: string
+  entityId?: string
   userId?: string
+  oldValues?: Record<string, any>
+  newValues?: Record<string, any>
   metadata?: Record<string, any>
 }
 
@@ -64,7 +68,11 @@ export async function logAuditEvent(
     await prisma.auditLog.create({
       data: {
         action: event.action,
+        entityType: event.entityType,
+        entityId: event.entityId,
         userId: event.userId,
+        oldValues: event.oldValues,
+        newValues: event.newValues,
         ipAddress,
         userAgent,
         metadata: event.metadata,
@@ -86,9 +94,11 @@ export async function logLoginSuccess(
 ): Promise<void> {
   await logAuditEvent(
     {
-      action: "LOGIN_SUCCESS",
+      action: "LOGIN",
+      entityType: "user",
+      entityId: userId,
       userId,
-      metadata: { username },
+      metadata: { username, success: true },
     },
     req
   )
@@ -104,8 +114,9 @@ export async function logLoginFailure(
 ): Promise<void> {
   await logAuditEvent(
     {
-      action: "LOGIN_FAILURE",
-      metadata: { username, reason },
+      action: "LOGIN",
+      entityType: "user",
+      metadata: { username, reason, success: false },
     },
     req
   )
@@ -118,6 +129,8 @@ export async function logLogout(userId: string, req?: Request): Promise<void> {
   await logAuditEvent(
     {
       action: "LOGOUT",
+      entityType: "user",
+      entityId: userId,
       userId,
     },
     req
@@ -134,7 +147,9 @@ export async function logUserCreated(
 ): Promise<void> {
   await logAuditEvent(
     {
-      action: "USER_CREATED",
+      action: "CREATE",
+      entityType: "user",
+      entityId: userId,
       userId,
       metadata: { username },
     },
@@ -152,6 +167,8 @@ export async function logPasswordChange(
   await logAuditEvent(
     {
       action: "PASSWORD_CHANGE",
+      entityType: "user",
+      entityId: userId,
       userId,
     },
     req
@@ -167,8 +184,10 @@ export async function logSessionCreated(
 ): Promise<void> {
   await logAuditEvent(
     {
-      action: "SESSION_CREATED",
+      action: "LOGIN",
+      entityType: "session",
       userId,
+      metadata: { event: "session_created" },
     },
     req
   )
@@ -179,7 +198,9 @@ export async function logSessionCreated(
  */
 export async function logSessionExpired(userId: string): Promise<void> {
   await logAuditEvent({
-    action: "SESSION_EXPIRED",
+    action: "LOGOUT",
+    entityType: "session",
     userId,
+    metadata: { event: "session_expired" },
   })
 }

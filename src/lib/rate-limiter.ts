@@ -13,7 +13,6 @@
 
 import { Redis } from '@upstash/redis'
 import { Ratelimit } from '@upstash/ratelimit'
-import { checkRateLimit as inMemoryCheckRateLimit } from './rate-limit'
 
 // Rate limit tier configurations
 export enum RateLimitTier {
@@ -164,11 +163,6 @@ function checkInMemoryRateLimit(
   reset: number
   retryAfter?: number
 } {
-  // Use existing in-memory implementation for STRICT tier
-  if (tier === RateLimitTier.STRICT) {
-    return inMemoryCheckRateLimit(identifier)
-  }
-
   const config = TIER_CONFIGS[tier]
   const now = Date.now()
   const key = `${tier}:${identifier}`

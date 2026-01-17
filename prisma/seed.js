@@ -1,22 +1,6 @@
-require('dotenv').config();
 const { PrismaClient } = require('@prisma/client');
-const { PrismaPg } = require('@prisma/adapter-pg');
-const { Pool } = require('pg');
-const bcrypt = require('bcryptjs');
-
-const connectionString = process.env.DATABASE_URL || process.env.DIRECT_URL;
-if (!connectionString) {
-  throw new Error('DATABASE_URL or DIRECT_URL environment variable is required');
-}
-
-const pool = new Pool({
-  connectionString,
-});
-
-const adapter = new PrismaPg(pool);
 
 const prisma = new PrismaClient({
-  adapter,
   log: ['error', 'warn'],
 });
 
@@ -360,38 +344,6 @@ async function main() {
     } catch (error) {
       console.error(`❌ Error creating category "${categoryData.name}":`, error.message);
     }
-  }
-
-  // Create default user (aaron7c)
-  console.log('\n👤 Creating default user...');
-  const defaultUsername = 'aaron7c';
-  const defaultPassword = 'KingOfKings12345!';
-
-  try {
-    // Check if default user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { username: defaultUsername },
-    });
-
-    if (existingUser) {
-      console.log(`⏭️  User "${defaultUsername}" already exists, skipping...`);
-    } else {
-      // Hash password with bcrypt (12 salt rounds)
-      const passwordHash = await bcrypt.hash(defaultPassword, 12);
-
-      // Create default user
-      await prisma.user.create({
-        data: {
-          username: defaultUsername,
-          passwordHash: passwordHash,
-          email: null, // Username-based auth, no email required
-        },
-      });
-      console.log(`✅ Created default user: ${defaultUsername}`);
-      console.log(`   Password: ${defaultPassword}`);
-    }
-  } catch (error) {
-    console.error(`❌ Error creating default user:`, error.message);
   }
 
   console.log('\n✨ Seed completed successfully!');

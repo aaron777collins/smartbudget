@@ -8,8 +8,6 @@
 
 # testing
 /coverage
-/lighthouse-results
-/playwright-report
 
 # next.js
 /.next/
@@ -42,4 +40,3 @@ credential-rotation.log
 next-env.d.ts
 
 /src/generated/prisma
-uploads/

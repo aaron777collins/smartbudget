@@ -25,16 +25,13 @@ export function ThemeToggle() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme("light")} className="group">
-          <Sun className="mr-2 h-4 w-4 transition-transform duration-200 group-hover:rotate-180 group-hover:scale-110" />
+        <DropdownMenuItem onClick={() => setTheme("light")}>
           Light
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")} className="group">
-          <Moon className="mr-2 h-4 w-4 transition-transform duration-200 group-hover:rotate-12 group-hover:scale-110" />
+        <DropdownMenuItem onClick={() => setTheme("dark")}>
           Dark
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")} className="group">
-          <div className="mr-2 h-4 w-4 rounded-full border-2 border-current transition-all duration-200 group-hover:scale-110 group-hover:rotate-180" style={{ background: 'linear-gradient(90deg, currentColor 50%, transparent 50%)' }} />
+        <DropdownMenuItem onClick={() => setTheme("system")}>
           System
         </DropdownMenuItem>
       </DropdownMenuContent>

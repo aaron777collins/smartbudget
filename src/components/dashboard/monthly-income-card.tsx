@@ -25,9 +25,6 @@ export function MonthlyIncomeCard({
   vsAveragePercentage,
   sources,
 }: MonthlyIncomeCardProps) {
-  const animatedCurrent = useCounterAnimation({ end: current, duration: 1200, decimals: 2 });
-  const animatedAverage = useCounterAnimation({ end: average, duration: 1200, decimals: 2, delay: 100 });
-  const animatedPercentage = useCounterAnimation({ end: vsAveragePercentage, duration: 1200, decimals: 1, delay: 100 });
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-CA', {
       style: 'currency',

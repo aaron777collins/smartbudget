@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
 import { formatCurrency } from '@/lib/utils';
 import type { TimeframeValue } from './timeframe-selector';
 import { getMonthsFromTimeframe } from '@/lib/timeframe';
@@ -36,7 +35,6 @@ interface CategoryHeatmapProps {
 export function CategoryHeatmap({ timeframe }: CategoryHeatmapProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const chartWrapperRef = useRef<HTMLDivElement>(null);
   const [data, setData] = useState<HeatmapData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -298,7 +296,9 @@ export function CategoryHeatmap({ timeframe }: CategoryHeatmapProps) {
           <CardDescription>Spending intensity by category over time</CardDescription>
         </CardHeader>
         <CardContent>
-          <Skeleton className="h-[400px] w-full" />
+          <div className="flex items-center justify-center h-[400px]">
+            <div className="text-muted-foreground">Loading heatmap data...</div>
+          </div>
         </CardContent>
       </Card>
     );
@@ -322,37 +322,17 @@ export function CategoryHeatmap({ timeframe }: CategoryHeatmapProps) {
     );
   }
 
-  // Prepare CSV data
-  const csvData = data.data.flatMap(cat =>
-    cat.months.map(month => ({
-      Category: cat.category,
-      Month: month.month,
-      Amount: month.amount,
-    }))
-  );
-
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <CardTitle>Category Spending Heat Map</CardTitle>
-            <CardDescription>
-              Spending intensity by category over the last {data.period.months} months
-            </CardDescription>
-          </div>
-          <ChartExportButton
-            chartRef={chartWrapperRef}
-            filename="category-heatmap"
-            data={csvData}
-          />
-        </div>
+        <CardTitle>Category Spending Heat Map</CardTitle>
+        <CardDescription>
+          Spending intensity by category over the last {data.period.months} months
+        </CardDescription>
       </CardHeader>
       <CardContent>
-        <div ref={chartWrapperRef}>
-          <div ref={containerRef} className="w-full overflow-x-auto">
-            <svg ref={svgRef} className="w-full" />
-          </div>
+        <div ref={containerRef} className="w-full overflow-x-auto">
+          <svg ref={svgRef} className="w-full" />
         </div>
       </CardContent>
     </Card>

@@ -6,8 +6,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogBody,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
@@ -432,7 +430,7 @@ export default function OnboardingFlow({ open, onComplete, currentStep = 0 }: On
 
   return (
     <Dialog open={open} onOpenChange={() => {}}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="text-lg">
@@ -450,18 +448,14 @@ export default function OnboardingFlow({ open, onComplete, currentStep = 0 }: On
               </Button>
             )}
           </div>
-          <Progress
-            value={progress}
-            className="h-2"
-            aria-label={`Onboarding progress: Step ${step + 1} of ${ONBOARDING_STEPS.length}, ${Math.round(progress)}% complete`}
-          />
+          <Progress value={progress} className="h-2" />
         </DialogHeader>
 
-        <DialogBody>
+        <div className="mt-4">
           {renderStepContent()}
-        </DialogBody>
+        </div>
 
-        <DialogFooter className="flex justify-between sm:justify-between">
+        <div className="flex justify-between mt-6 pt-6 border-t">
           {step > 0 && step < ONBOARDING_STEPS.length - 1 ? (
             <Button
               variant="outline"
@@ -486,7 +480,7 @@ export default function OnboardingFlow({ open, onComplete, currentStep = 0 }: On
               Get Started
             </Button>
           )}
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );

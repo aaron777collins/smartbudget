@@ -30,54 +30,6 @@ export enum JobStatus {
 }
 
 /**
- * Merchant research batch payload
- */
-export interface MerchantResearchBatchPayload {
-  merchants: Array<{ merchantName: string; amount?: number; date?: string }>;
-  saveToKnowledgeBase?: boolean;
-}
-
-/**
- * Merchant research result
- */
-export interface MerchantResearchResult {
-  merchantName: string;
-  businessName?: string;
-  categorySlug?: string;
-  confidence: number;
-  businessType?: string;
-  reasoning?: string;
-  sources?: string[];
-  website?: string;
-  location?: string;
-  error?: string;
-}
-
-/**
- * Batch job result
- */
-export interface BatchJobResult {
-  total: number;
-  successful: number;
-  failed: number;
-  results: MerchantResearchResult[];
-}
-
-/**
- * Job payload types by job type
- */
-export type JobPayload =
-  | MerchantResearchBatchPayload
-  | Record<string, unknown>; // For future job types
-
-/**
- * Job result types by job type
- */
-export type JobResultData =
-  | BatchJobResult
-  | Record<string, unknown>; // For future job types
-
-/**
  * Job creation parameters
  */
 export interface CreateJobParams<TPayload = unknown> {
@@ -303,15 +255,11 @@ export async function processJob(jobId: string): Promise<void> {
         break;
 
       case JobType.TRANSACTION_CATEGORIZE_BATCH:
-        // Note: Not currently used in production. Will be implemented when bulk
-        // recategorization feature is needed (e.g., when user updates category rules
-        // and wants to reapply to existing transactions).
+        // TODO: Implement when needed
         throw new Error('TRANSACTION_CATEGORIZE_BATCH not yet implemented');
 
       case JobType.IMPORT_TRANSACTIONS:
-        // Note: Not currently used in production. Transaction imports are handled
-        // synchronously via the /api/transactions/import endpoint. This job type
-        // is reserved for future async import processing if needed for large files.
+        // TODO: Implement when needed
         throw new Error('IMPORT_TRANSACTIONS not yet implemented');
 
       default:
@@ -381,13 +329,12 @@ async function processMerchantResearchBatch(job: { id: string; payload: Prisma.J
   }
 
   // Mark as completed
-  const jobResult: BatchJobResult = {
+  await markJobCompleted(job.id, {
     total: results.length,
     successful: results.filter((r) => r.categorySlug && r.confidence >= 0.7).length,
     failed: results.filter((r) => r.error || !r.categorySlug).length,
     results: results,
-  };
-  await markJobCompleted(job.id, jobResult);
+  });
 }
 
 /**

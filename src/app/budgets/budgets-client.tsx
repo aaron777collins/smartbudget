@@ -10,7 +10,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { HoverScale, Pulse } from '@/components/ui/animated';
 import { PlusCircle, Calendar, DollarSign, Target, Trash2, BarChart3, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
-import { TYPOGRAPHY } from '@/lib/design-tokens';
 
 interface BudgetCategory {
   id: string;

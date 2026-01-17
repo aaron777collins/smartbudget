@@ -1,11 +1,32 @@
 version: '3.8'
 
 services:
-  smartbudget-app:
+  postgres:
+    image: postgres:16-alpine
+    container_name: smartbudget-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: smartbudget
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    networks:
+      - smartbudget
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: smartbudget-app
+    restart: unless-stopped
     ports:
       - "3002:3000"
     env_file:
@@ -13,9 +34,9 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
+      - SKIP_MIGRATIONS=true
     volumes:
       - ./uploads:/app/uploads
-    restart: unless-stopped
     networks:
       - internal
     healthcheck:
@@ -23,8 +44,13 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 60s
 
 networks:
+  smartbudget:
+    driver: bridge
   internal:
     external: true
+
+volumes:
+  postgres_data:

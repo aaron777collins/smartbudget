@@ -2,13 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { startOfMonth, endOfMonth, subMonths } from 'date-fns';
-import {
-  getCached,
-  setCached,
-  generateCacheKey,
-  CACHE_KEYS,
-  CACHE_TTL,
-} from '@/lib/redis-cache';
 
 export async function GET(request: NextRequest) {
   try {
@@ -24,13 +17,6 @@ export async function GET(request: NextRequest) {
     // Get query parameters for period (default to current month)
     const searchParams = request.nextUrl.searchParams;
     const months = parseInt(searchParams.get('months') || '1', 10);
-
-    // Check cache first
-    const cacheKey = generateCacheKey(CACHE_KEYS.DASHBOARD_CASH_FLOW, userId, { months });
-    const cached = await getCached<unknown>(cacheKey);
-    if (cached) {
-      return NextResponse.json(cached);
-    }
 
     const periodStart = startOfMonth(subMonths(now, months - 1));
     const periodEnd = endOfMonth(now);
@@ -205,7 +191,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const responseData = {
+    return NextResponse.json({
       nodes,
       links,
       summary: {
@@ -218,12 +204,7 @@ export async function GET(request: NextRequest) {
           months,
         },
       },
-    };
-
-    // Cache the response
-    await setCached(cacheKey, responseData, CACHE_TTL.DASHBOARD);
-
-    return NextResponse.json(responseData);
+    });
   } catch (error) {
     console.error('Cash flow Sankey error:', error);
     return NextResponse.json(

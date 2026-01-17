@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import {
   PieChart,
   Pie,
@@ -12,7 +12,6 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatCurrency } from '@/lib/utils';
-import { ELEVATION } from '@/lib/design-tokens';
 import type { TimeframeValue } from './timeframe-selector';
 import { getPeriodForAPI, buildTimeframeParams } from '@/lib/timeframe';
 import { FadeIn, HoverScale } from '@/components/ui/animated';
@@ -60,7 +59,7 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
-      <div className={`rounded-lg border bg-background p-3 ${ELEVATION.medium}`}>
+      <div className="rounded-lg border bg-background p-3 shadow-md">
         <p className="font-semibold mb-1">{data.name}</p>
         <p className="text-sm">
           Amount: <span className="font-bold font-mono">{formatCurrency(data.amount)}</span>
@@ -116,7 +115,6 @@ interface CategoryBreakdownChartProps {
 }
 
 export function CategoryBreakdownChart({ timeframe }: CategoryBreakdownChartProps) {
-  const chartRef = useRef<HTMLDivElement>(null);
   const [data, setData] = useState<CategoryBreakdownData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -215,16 +213,6 @@ export function CategoryBreakdownChart({ timeframe }: CategoryBreakdownChartProp
             <span className="text-muted-foreground">Categories: </span>
             <span className="font-semibold font-mono">{data.summary.categoryCount}</span>
           </div>
-          <ChartExportButton
-            chartRef={chartRef}
-            filename="category-breakdown"
-            data={data.chartData.map(cat => ({
-              Category: cat.name,
-              Amount: cat.amount,
-              Percentage: cat.percentage,
-              Transactions: cat.transactionCount,
-            }))}
-          />
         </div>
       </CardHeader>
       <CardContent>

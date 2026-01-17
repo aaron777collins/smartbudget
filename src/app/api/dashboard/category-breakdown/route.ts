@@ -2,13 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { startOfMonth, endOfMonth, subMonths, startOfYear, endOfYear } from 'date-fns';
-import {
-  getCached,
-  setCached,
-  generateCacheKey,
-  CACHE_KEYS,
-  CACHE_TTL,
-} from '@/lib/redis-cache';
 
 export async function GET(request: NextRequest) {
   try {
@@ -26,17 +19,6 @@ export async function GET(request: NextRequest) {
     const period = searchParams.get('period') || 'month'; // 'month', 'quarter', 'year', or 'custom'
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
-
-    // Check cache first
-    const cacheKey = generateCacheKey(CACHE_KEYS.DASHBOARD_CATEGORY_BREAKDOWN, userId, {
-      period,
-      startDate: startDate || '',
-      endDate: endDate || '',
-    });
-    const cached = await getCached<unknown>(cacheKey);
-    if (cached) {
-      return NextResponse.json(cached);
-    }
 
     let periodStart: Date;
     let periodEnd: Date;
@@ -157,7 +139,7 @@ export async function GET(request: NextRequest) {
       ];
     }
 
-    const responseData = {
+    return NextResponse.json({
       period: {
         type: period,
         start: periodStart.toISOString(),
@@ -174,12 +156,7 @@ export async function GET(request: NextRequest) {
           : 0,
         transactionCount: transactions.length,
       },
-    };
-
-    // Cache the response
-    await setCached(cacheKey, responseData, CACHE_TTL.DASHBOARD);
-
-    return NextResponse.json(responseData);
+    });
   } catch (error) {
     console.error('Category breakdown error:', error);
     return NextResponse.json(

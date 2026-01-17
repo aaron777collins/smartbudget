@@ -11,8 +11,6 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { applyRateLimit, RateLimitTier, getRecommendedTier } from './rate-limiter'
-import { prisma } from './prisma'
-import { UserRole } from '@prisma/client'
 
 /**
  * Middleware configuration options
@@ -49,18 +47,7 @@ export type ApiHandler = (
 ) => Promise<Response>
 
 /**
- * Check if user is admin by fetching their role from the database
- */
-async function checkUserRole(userId: string): Promise<UserRole> {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { role: true },
-  })
-  return user?.role || UserRole.USER
-}
-
-/**
- * Legacy admin check using email (fallback for migration period)
+ * Check if user is admin using email
  * This checks ADMIN_EMAILS environment variable
  */
 function isAdminByEmail(email: string): boolean {
@@ -114,9 +101,8 @@ export function withMiddleware(
           )
         }
 
-        // 3. Get user role from database
-        const userRole = await checkUserRole(session.user.id)
-        const userIsAdmin = userRole === UserRole.ADMIN
+        // 3. Check if user is admin
+        const userIsAdmin = isAdminByEmail(session.user.email || '')
 
         // 4. Check admin authorization if required
         if (options.requireAdmin && !userIsAdmin) {

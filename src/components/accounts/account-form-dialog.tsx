@@ -5,7 +5,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogBody,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -46,10 +45,39 @@ interface AccountFormDialogProps {
   account: Account | null;
 }
 
+const accountTypes = [
+  { value: 'CHECKING', label: 'Checking' },
+  { value: 'SAVINGS', label: 'Savings' },
+  { value: 'CREDIT_CARD', label: 'Credit Card' },
+  { value: 'INVESTMENT', label: 'Investment' },
+  { value: 'LOAN', label: 'Loan' },
+  { value: 'OTHER', label: 'Other' },
+];
+
+const iconOptions = [
+  { value: 'wallet', label: 'Wallet', icon: Wallet },
+  { value: 'credit-card', label: 'Credit Card', icon: CreditCard },
+  { value: 'landmark', label: 'Bank', icon: Landmark },
+  { value: 'piggy-bank', label: 'Piggy Bank', icon: PiggyBank },
+  { value: 'trending-up', label: 'Investment', icon: TrendingUp },
+  { value: 'help-circle', label: 'Other', icon: HelpCircle },
+];
+
+const colorOptions = [
+  { value: '#2563EB', label: 'Blue' },
+  { value: '#10B981', label: 'Green' },
+  { value: '#F59E0B', label: 'Amber' },
+  { value: '#EF4444', label: 'Red' },
+  { value: '#8B5CF6', label: 'Purple' },
+  { value: '#EC4899', label: 'Pink' },
+  { value: '#14B8A6', label: 'Teal' },
+  { value: '#6366F1', label: 'Indigo' },
+];
+
 export function AccountFormDialog({ open, onClose, account }: AccountFormDialogProps) {
   const isEditing = !!account;
 
-  const [formData, setFormData] = useState<AccountFormData>({
+  const [formData, setFormData] = useState({
     name: '',
     institution: '',
     accountType: 'CHECKING',
@@ -174,7 +202,7 @@ export function AccountFormDialog({ open, onClose, account }: AccountFormDialogP
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{isEditing ? 'Edit Account' : 'Add New Account'}</DialogTitle>
           <DialogDescription>
@@ -185,13 +213,32 @@ export function AccountFormDialog({ open, onClose, account }: AccountFormDialogP
         </DialogHeader>
 
         {showDeleteConfirm ? (
-          <DialogBody>
-            <AccountDeleteConfirmation
-              onConfirm={handleDelete}
-              onCancel={() => setShowDeleteConfirm(false)}
-              loading={loading}
-            />
-          </DialogBody>
+          <div className="space-y-4 py-4">
+            <div className="bg-destructive/10 border border-destructive rounded-md p-4">
+              <p className="font-semibold text-destructive mb-2">Are you sure?</p>
+              <p className="text-sm text-muted-foreground">
+                This action cannot be undone. This will permanently delete the account.
+              </p>
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={loading}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={handleDelete}
+                disabled={loading}
+              >
+                {loading ? 'Deleting...' : 'Delete Account'}
+              </Button>
+            </DialogFooter>
+          </div>
         ) : (
           <form onSubmit={handleSubmit}>
             <div className="space-y-4 py-4">

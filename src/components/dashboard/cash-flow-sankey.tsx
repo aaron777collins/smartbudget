@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { sankey, sankeyLinkHorizontal, SankeyNode, SankeyLink } from 'd3-sankey';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
 import { formatCurrency } from '@/lib/utils';
 import type { TimeframeValue } from './timeframe-selector';
 import { getMonthsFromTimeframe } from '@/lib/timeframe';
@@ -51,7 +50,6 @@ interface CashFlowSankeyProps {
 export function CashFlowSankey({ timeframe }: CashFlowSankeyProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const chartWrapperRef = useRef<HTMLDivElement>(null);
   const [data, setData] = useState<SankeyData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -230,7 +228,9 @@ export function CashFlowSankey({ timeframe }: CashFlowSankeyProps) {
           <CardDescription>Income sources flowing to expenses</CardDescription>
         </CardHeader>
         <CardContent>
-          <Skeleton className="h-[500px] w-full" />
+          <div className="flex items-center justify-center h-[500px]">
+            <div className="text-muted-foreground">Loading cash flow data...</div>
+          </div>
         </CardContent>
       </Card>
     );
@@ -284,24 +284,11 @@ export function CashFlowSankey({ timeframe }: CashFlowSankeyProps) {
               {formatCurrency(data.summary.netCashFlow)}
             </span>
           </div>
-          <ChartExportButton
-            chartRef={chartWrapperRef}
-            filename="cash-flow-sankey"
-            data={data.nodes.map((node, idx) => {
-              const link = data.links.find(l => l.source === idx || l.target === idx);
-              return {
-                Node: node.name,
-                Value: link?.value || 0,
-              };
-            })}
-          />
         </div>
       </CardHeader>
       <CardContent>
-        <div ref={chartWrapperRef}>
-          <div ref={containerRef} className="w-full">
-            <svg ref={svgRef} className="w-full" />
-          </div>
+        <div ref={containerRef} className="w-full">
+          <svg ref={svgRef} className="w-full" />
         </div>
       </CardContent>
     </Card>

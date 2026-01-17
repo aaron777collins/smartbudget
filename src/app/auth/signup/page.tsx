@@ -146,9 +146,6 @@ export default function SignUpPage() {
                 disabled={isLoading}
                 autoComplete="name"
               />
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                3-20 characters, alphanumeric and underscores only
-              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>

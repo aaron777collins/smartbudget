@@ -12,12 +12,6 @@
 
 import { pipeline, env, cos_sim, type FeatureExtractionPipeline } from '@xenova/transformers';
 import { prisma } from './prisma';
-import {
-  getCached,
-  setCached,
-  CACHE_KEYS,
-  CACHE_TTL,
-} from './redis-cache';
 
 // Configure Transformers.js to use local cache
 env.cacheDir = './.transformers-cache';
@@ -93,39 +87,25 @@ interface TrainingExample {
   normalizedName: string;
   categoryId: string;
   categorySlug: string;
-  subcategoryId?: string | null;
-  subcategorySlug?: string | null;
   embedding?: number[];
 }
 
-// In-memory fallback for when Redis is unavailable
 let trainingData: TrainingExample[] | null = null;
 let trainingDataLastLoaded: number = 0;
 const TRAINING_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 /**
- * Load training data from merchant knowledge base with Redis caching
+ * Load training data from merchant knowledge base
  */
 async function loadTrainingData(): Promise<TrainingExample[]> {
   const now = Date.now();
 
-  // Try Redis cache first (shared across instances)
-  const cacheKey = `${CACHE_KEYS.ML_TRAINING_DATA}:global`;
-  const cached = await getCached<TrainingExample[]>(cacheKey);
-  if (cached && cached.length > 0) {
-    console.log(`[ML] Loaded ${cached.length} training examples from Redis cache`);
-    trainingData = cached;
-    trainingDataLastLoaded = now;
-    return cached;
-  }
-
-  // Use in-memory cache if Redis unavailable and data is recent
+  // Use cached training data if recent
   if (trainingData && (now - trainingDataLastLoaded) < TRAINING_CACHE_DURATION) {
-    console.log(`[ML] Using in-memory cached training data (${trainingData.length} examples)`);
     return trainingData;
   }
 
-  console.log('[ML] Loading training data from database...');
+  console.log('Loading ML training data from merchant knowledge base...');
 
   // Fetch all categorized merchants from knowledge base
   const merchants = await prisma.merchantKnowledge.findMany({
@@ -142,29 +122,7 @@ async function loadTrainingData(): Promise<TrainingExample[]> {
     select: { id: true, slug: true }
   });
 
-  // Load subcategories
-  const subcategories = await prisma.subcategory.findMany({
-    select: { id: true, slug: true, categoryId: true }
-  });
-
   const categoryMap = new Map(categories.map((c: { id: string; slug: string }) => [c.id, c.slug]));
-  const subcategoryMap = new Map(subcategories.map((s: { id: string; slug: string }) => [s.id, s.slug]));
-
-  // Fetch recent user-corrected transactions with subcategories for training
-  const recentTransactions = await prisma.transaction.findMany({
-    where: {
-      userCorrected: true,
-      categoryId: { not: null },
-      subcategoryId: { not: null }
-    },
-    select: {
-      merchantName: true,
-      categoryId: true,
-      subcategoryId: true
-    },
-    take: 1000, // Limit to most recent 1000 user-corrected transactions
-    orderBy: { updatedAt: 'desc' }
-  });
 
   trainingData = merchants
     .filter((m: { categoryId: string | null }) => m.categoryId)
@@ -172,58 +130,27 @@ async function loadTrainingData(): Promise<TrainingExample[]> {
       merchantName: m.merchantName,
       normalizedName: m.normalizedName,
       categoryId: m.categoryId!,
-      categorySlug: categoryMap.get(m.categoryId!) || 'general',
-      subcategoryId: null,
-      subcategorySlug: null
+      categorySlug: categoryMap.get(m.categoryId!) || 'general'
     }));
-
-  // Add user-corrected transactions with subcategories to training data
-  const transactionExamples = recentTransactions
-    .filter((t: { categoryId: string | null; subcategoryId: string | null }) => t.categoryId && t.subcategoryId)
-    .map((t: { merchantName: string; categoryId: string | null; subcategoryId: string | null }) => ({
-      merchantName: t.merchantName,
-      normalizedName: t.merchantName.toLowerCase().trim(),
-      categoryId: t.categoryId!,
-      categorySlug: categoryMap.get(t.categoryId!) || 'general',
-      subcategoryId: t.subcategoryId,
-      subcategorySlug: subcategoryMap.get(t.subcategoryId!) || null
-    }));
-
-  trainingData = [...trainingData, ...transactionExamples];
 
   trainingDataLastLoaded = now;
-  console.log(`[ML] Loaded ${trainingData.length} training examples from database`);
-
-  // Cache in Redis (permanent with manual invalidation)
-  await setCached(cacheKey, trainingData, CACHE_TTL.ML_EMBEDDINGS);
+  console.log(`Loaded ${trainingData.length} training examples`);
 
   return trainingData || [];
 }
 
 /**
- * Generate embeddings for all training data (lazy initialization) with Redis caching
+ * Generate embeddings for all training data (lazy initialization)
  */
 async function ensureTrainingEmbeddings(): Promise<TrainingExample[]> {
   const data = await loadTrainingData();
 
-  // Try to get cached embeddings from Redis
-  const embeddingsCacheKey = `${CACHE_KEYS.ML_EMBEDDINGS}:global`;
-  const cachedEmbeddings = await getCached<TrainingExample[]>(embeddingsCacheKey);
-
-  if (cachedEmbeddings && cachedEmbeddings.length > 0 && cachedEmbeddings[0].embedding) {
-    console.log(`[ML] Loaded ${cachedEmbeddings.length} pre-computed embeddings from Redis cache`);
-    // Update in-memory data with cached embeddings
-    trainingData = cachedEmbeddings;
-    return cachedEmbeddings;
-  }
-
-  // Check if embeddings already generated in memory
+  // Check if embeddings already generated
   if (data.length > 0 && data[0].embedding) {
-    console.log('[ML] Using in-memory cached embeddings');
     return data;
   }
 
-  console.log('[ML] Generating embeddings for training data...');
+  console.log('Generating embeddings for training data...');
 
   // Generate embeddings in batches to avoid memory issues
   const batchSize = 50;
@@ -236,14 +163,10 @@ async function ensureTrainingEmbeddings(): Promise<TrainingExample[]> {
         }
       })
     );
-    console.log(`[ML] Generated embeddings for ${Math.min(i + batchSize, data.length)}/${data.length} examples`);
+    console.log(`Generated embeddings for ${Math.min(i + batchSize, data.length)}/${data.length} examples`);
   }
 
-  console.log('[ML] All training embeddings generated');
-
-  // Cache embeddings in Redis (permanent with manual invalidation)
-  await setCached(embeddingsCacheKey, data, CACHE_TTL.ML_EMBEDDINGS);
-
+  console.log('All training embeddings generated');
   return data;
 }
 
@@ -357,66 +280,11 @@ export async function categorizeWithML(
       confidenceScore = confidenceScore * 0.7;
     }
 
-    // Predict subcategory based on similar examples with same category
-    let predictedSubcategoryId: string | null = null;
-    let predictedSubcategorySlug: string | null = null;
-
-    // Find examples with the same category that have subcategories
-    const examplesWithSubcategories = topExamples
-      .filter(({ example }) =>
-        example.categoryId === bestCategoryId &&
-        example.subcategoryId &&
-        example.subcategorySlug
-      );
-
-    if (examplesWithSubcategories.length > 0) {
-      // Vote on subcategory (weighted by similarity)
-      const subcategoryVotes = new Map<string, {
-        count: number;
-        totalSim: number;
-        subcategoryId: string;
-        subcategorySlug: string;
-      }>();
-
-      for (const { example, similarity } of examplesWithSubcategories) {
-        const key = example.subcategorySlug!;
-        const existing = subcategoryVotes.get(key) || {
-          count: 0,
-          totalSim: 0,
-          subcategoryId: example.subcategoryId!,
-          subcategorySlug: example.subcategorySlug!
-        };
-        subcategoryVotes.set(key, {
-          count: existing.count + 1,
-          totalSim: existing.totalSim + similarity,
-          subcategoryId: example.subcategoryId!,
-          subcategorySlug: example.subcategorySlug!
-        });
-      }
-
-      // Find subcategory with highest weighted vote
-      let bestSubcategoryScore = 0;
-      for (const [, { totalSim, subcategoryId, subcategorySlug }] of subcategoryVotes) {
-        const weightedScore = totalSim / examplesWithSubcategories.length;
-        if (weightedScore > bestSubcategoryScore) {
-          bestSubcategoryScore = weightedScore;
-          predictedSubcategoryId = subcategoryId;
-          predictedSubcategorySlug = subcategorySlug;
-        }
-      }
-
-      // Only use subcategory prediction if confidence is high enough (>0.65)
-      if (bestSubcategoryScore < 0.65) {
-        predictedSubcategoryId = null;
-        predictedSubcategorySlug = null;
-      }
-    }
-
     return {
       categoryId: bestCategoryId,
       categorySlug: bestCategory,
-      subcategoryId: predictedSubcategoryId,
-      subcategorySlug: predictedSubcategorySlug,
+      subcategoryId: null, // TODO: Implement subcategory prediction
+      subcategorySlug: null,
       confidenceScore,
       method: 'ml',
       matchedMerchant: topExamples[0]?.example.normalizedName,

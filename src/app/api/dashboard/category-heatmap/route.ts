@@ -2,13 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { startOfMonth, endOfMonth, subMonths, format } from 'date-fns';
-import {
-  getCached,
-  setCached,
-  generateCacheKey,
-  CACHE_KEYS,
-  CACHE_TTL,
-} from '@/lib/redis-cache';
 
 export async function GET(request: NextRequest) {
   try {
@@ -24,13 +17,6 @@ export async function GET(request: NextRequest) {
     // Get query parameters for timeframe (default to 12 months)
     const searchParams = request.nextUrl.searchParams;
     const months = parseInt(searchParams.get('months') || '12', 10);
-
-    // Check cache first
-    const cacheKey = generateCacheKey(CACHE_KEYS.DASHBOARD_CATEGORY_HEATMAP, userId, { months });
-    const cached = await getCached<unknown>(cacheKey);
-    if (cached) {
-      return NextResponse.json(cached);
-    }
 
     // Get all categories first
     const categories = await prisma.category.findMany({
@@ -80,44 +66,7 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // Build heat map data using single-pass aggregation (optimized from O(n×m×k) to O(n+m×k))
-    // Create a map of category ID to category data for fast lookup
-    const categoryMap = new Map(
-      categories
-        .filter(cat => cat.slug !== 'transfer-in' && cat.slug !== 'transfer-out')
-        .map(cat => [cat.id, cat])
-    );
-
-    // Create nested map: categoryId -> monthKey -> amount
-    const aggregationMap = new Map<string, Map<string, number>>();
-
-    // Initialize all categories with all months at 0
-    for (const category of categoryMap.values()) {
-      const monthMap = new Map<string, number>();
-      for (let i = months - 1; i >= 0; i--) {
-        const monthStart = startOfMonth(subMonths(now, i));
-        const monthKey = monthStart.toISOString();
-        monthMap.set(monthKey, 0);
-      }
-      aggregationMap.set(category.id, monthMap);
-    }
-
-    // Single-pass aggregation of all transactions
-    for (const txn of allTransactions) {
-      if (!txn.categoryId) continue;
-
-      const txnDate = new Date(txn.date);
-      const monthStart = startOfMonth(txnDate);
-      const monthKey = monthStart.toISOString();
-
-      const categoryMonthMap = aggregationMap.get(txn.categoryId);
-      if (categoryMonthMap) {
-        const currentAmount = categoryMonthMap.get(monthKey) || 0;
-        categoryMonthMap.set(monthKey, currentAmount + Number(txn.amount));
-      }
-    }
-
-    // Convert aggregation map to output format
+    // Build heat map data by grouping in application code
     const heatmapData: Array<{
       category: string;
       categoryId: string;
@@ -129,9 +78,11 @@ export async function GET(request: NextRequest) {
       }>;
     }> = [];
 
-    for (const [categoryId, monthMap] of aggregationMap.entries()) {
-      const category = categoryMap.get(categoryId);
-      if (!category) continue;
+    for (const category of categories) {
+      // Skip transfer categories
+      if (category.slug === 'transfer-in' || category.slug === 'transfer-out') {
+        continue;
+      }
 
       const monthlyAmounts: Array<{
         month: string;
@@ -141,13 +92,25 @@ export async function GET(request: NextRequest) {
 
       for (let i = months - 1; i >= 0; i--) {
         const monthStart = startOfMonth(subMonths(now, i));
-        const monthKey = monthStart.toISOString();
-        const amount = monthMap.get(monthKey) || 0;
+        const monthEnd = endOfMonth(subMonths(now, i));
+
+        // Filter transactions for this category and month
+        const categoryTransactions = allTransactions.filter(txn => {
+          const txnDate = new Date(txn.date);
+          return txn.categoryId === category.id &&
+                 txnDate >= monthStart &&
+                 txnDate <= monthEnd;
+        });
+
+        const totalAmount = categoryTransactions.reduce(
+          (sum, txn) => sum + Number(txn.amount),
+          0
+        );
 
         monthlyAmounts.push({
           month: format(monthStart, 'MMM yyyy'),
-          monthDate: monthKey,
-          amount,
+          monthDate: monthStart.toISOString(),
+          amount: totalAmount,
         });
       }
 
@@ -181,7 +144,7 @@ export async function GET(request: NextRequest) {
     // If no data, set sensible defaults
     if (minValue === Infinity) minValue = 0;
 
-    const responseData = {
+    return NextResponse.json({
       data: heatmapData,
       scale: {
         min: minValue,
@@ -190,12 +153,7 @@ export async function GET(request: NextRequest) {
       period: {
         months,
       },
-    };
-
-    // Cache the response
-    await setCached(cacheKey, responseData, CACHE_TTL.DASHBOARD);
-
-    return NextResponse.json(responseData);
+    });
   } catch (error) {
     console.error('Category heatmap error:', error);
     return NextResponse.json(

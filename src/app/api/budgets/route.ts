@@ -16,22 +16,18 @@ export async function GET(request: NextRequest) {
     const userId = session.user.id;
     const { searchParams } = new URL(request.url);
 
-    // Validate query parameters
-    const validation = validateQueryParams(getBudgetsQuerySchema, searchParams);
-    if (!validation.success || !validation.data) {
-      return NextResponse.json(
-        { error: validation.error?.message, details: validation.error?.details },
-        { status: 400 }
-      );
-    }
-
-    const { active, type, period, sortBy, sortOrder } = validation.data;
+    // Query parameters
+    const active = searchParams.get('active');
+    const type = searchParams.get('type');
+    const period = searchParams.get('period');
+    const sortBy = searchParams.get('sortBy') || 'createdAt';
+    const sortOrder = searchParams.get('sortOrder') || 'desc';
 
     // Build where clause
     const where: Prisma.BudgetWhereInput = { userId };
 
-    if (active !== undefined) {
-      where.isActive = active;
+    if (active !== null) {
+      where.isActive = active === 'true';
     }
 
     if (type) {

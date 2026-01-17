@@ -17,10 +17,6 @@ export function NetWorthCard({
   changePercentage,
   sparklineData = [],
 }: NetWorthCardProps) {
-  const animatedCurrent = useCounterAnimation({ end: current, duration: 1200, decimals: 2 });
-  const animatedChange = useCounterAnimation({ end: change, duration: 1200, decimals: 2, delay: 100 });
-  const animatedPercentage = useCounterAnimation({ end: changePercentage, duration: 1200, decimals: 1, delay: 100 });
-
   const isPositive = change > 0;
   const isNegative = change < 0;
   const isNeutral = change === 0;

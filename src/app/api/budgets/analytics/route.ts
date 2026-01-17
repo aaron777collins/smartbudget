@@ -3,57 +3,6 @@ import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { startOfMonth, endOfMonth, subMonths, format } from 'date-fns';
 
-/**
- * Historical performance data for a month
- */
-interface HistoricalPerformance {
-  month: string;
-  date: Date;
-  budgetId: string;
-  budgetName: string;
-  budgeted: number;
-  spent: number;
-  remaining: number;
-  variance: number;
-  percentUsed: number;
-  underBudget: boolean;
-  status: 'over' | 'near' | 'good';
-}
-
-/**
- * Category trend data point
- */
-interface CategoryTrendDataPoint {
-  month: string;
-  budgeted: number;
-  spent: number;
-  percentUsed: number;
-}
-
-/**
- * Category trend with metadata
- */
-interface CategoryTrend {
-  categoryInfo: {
-    id: string;
-    name: string;
-    slug: string;
-    color: string | null;
-    icon: string | null;
-  };
-  data: CategoryTrendDataPoint[];
-}
-
-/**
- * Insight generated from analytics
- */
-interface BudgetInsight {
-  type: 'warning' | 'success' | 'info';
-  title: string;
-  description: string;
-  priority: 'high' | 'medium' | 'low';
-}
-
 // GET /api/budgets/analytics - Get historical budget performance analytics
 export async function GET(request: NextRequest) {
   try {
@@ -98,7 +47,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Calculate historical performance for each month
-    const historicalPerformance: HistoricalPerformance[] = [];
+    const historicalPerformance = [];
     const now = new Date();
 
     for (let i = 0; i < months; i++) {
@@ -392,7 +341,7 @@ function generateInsights(
   }
 
   // Insight 4: Consistently over-budget categories
-  const problematicCategories: string[] = [];
+  const problematicCategories = [];
   for (const [categoryId, trendData] of Object.entries(categoryTrends)) {
     const overBudgetCount = trendData.data.filter(d => d.percentUsed > 100).length;
     if (overBudgetCount >= trendData.data.length * 0.6) {

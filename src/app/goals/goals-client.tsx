@@ -219,30 +219,6 @@ export function GoalsClient() {
               <div key={i} className="h-48 bg-muted rounded"></div>
             ))}
           </div>
-          <Skeleton className="h-10 w-[130px]" />
-        </div>
-
-        {/* Goal cards grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="rounded-lg border bg-card p-6 space-y-4">
-              <div className="flex items-start justify-between">
-                <div className="space-y-2 flex-1">
-                  <Skeleton className="h-6 w-3/4" />
-                  <Skeleton className="h-4 w-1/2" />
-                </div>
-                <Skeleton className="h-10 w-10 rounded-full" />
-              </div>
-              <div className="space-y-2">
-                <Skeleton className="h-2 w-full rounded-full" />
-                <div className="flex justify-between">
-                  <Skeleton className="h-4 w-20" />
-                  <Skeleton className="h-4 w-20" />
-                </div>
-              </div>
-              <Skeleton className="h-4 w-full" />
-            </div>
-          ))}
         </div>
       </div>
     );
@@ -886,8 +862,8 @@ function GoalDetailModal({
           </div>
         )}
 
-        {/* Footer - Fixed */}
-        <div className="flex gap-2 p-6 pt-4 border-t border-gray-200 dark:border-gray-800">
+        {/* Actions */}
+        <div className="flex gap-2">
           <button
             onClick={onEdit}
             className="flex-1 px-4 py-2 border border-border text-foreground rounded-lg hover:bg-muted transition-all duration-200"

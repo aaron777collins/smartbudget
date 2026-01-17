@@ -28,8 +28,6 @@ import {
   Check,
   AlertCircle
 } from "lucide-react"
-import { TYPOGRAPHY } from "@/lib/design-tokens"
-import { SPACING } from "@/lib/design-tokens"
 
 interface UserSettings {
   currency: string
@@ -112,7 +110,7 @@ export default function SettingsPage() {
 
   if (status === "unauthenticated") {
     return (
-      <div className={SPACING.page.container}>
+      <div className="container mx-auto py-8 px-4">
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>You must be signed in to access settings.</AlertDescription>
@@ -135,7 +133,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className={`${SPACING.page.container} max-w-6xl`}>
+    <div className="container mx-auto py-8 px-4 max-w-6xl">
       <div className="flex items-center gap-3 mb-8">
         <div className="p-2 bg-primary/10 rounded-lg">
           <SettingsIcon className="h-8 w-8 text-primary" />

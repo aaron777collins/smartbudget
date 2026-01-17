@@ -3,7 +3,6 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SessionProvider } from "@/components/session-provider";
-import { QueryProvider } from "@/components/query-provider";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { SentryUserContext } from "@/components/sentry-user-context";
 import { Toaster } from "sonner";

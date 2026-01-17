@@ -19,9 +19,6 @@ export function MonthlySpendingCard({
   budgetUsedPercentage,
   daysRemaining,
 }: MonthlySpendingCardProps) {
-  const animatedCurrent = useCounterAnimation({ end: current, duration: 1200, decimals: 2 });
-  const animatedBudget = useCounterAnimation({ end: budget || 0, duration: 1200, decimals: 2, delay: 100 });
-  const animatedPercentage = useCounterAnimation({ end: budgetUsedPercentage || 0, duration: 1200, decimals: 0, delay: 150 });
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-CA', {
       style: 'currency',

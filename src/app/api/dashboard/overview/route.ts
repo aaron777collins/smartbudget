@@ -2,13 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { startOfMonth, endOfMonth, subMonths, startOfDay, endOfDay } from 'date-fns';
-import {
-  getCached,
-  setCached,
-  generateCacheKey,
-  CACHE_KEYS,
-  CACHE_TTL,
-} from '@/lib/redis-cache';
 
 export async function GET(request: NextRequest) {
   try {
@@ -20,13 +13,6 @@ export async function GET(request: NextRequest) {
 
     const userId = session.user.id;
     const now = new Date();
-
-    // Check cache first
-    const cacheKey = generateCacheKey(CACHE_KEYS.DASHBOARD_OVERVIEW, userId);
-    const cached = await getCached<unknown>(cacheKey);
-    if (cached) {
-      return NextResponse.json(cached);
-    }
     const currentMonthStart = startOfMonth(now);
     const currentMonthEnd = endOfMonth(now);
     const lastMonthStart = startOfMonth(subMonths(now, 1));
@@ -140,19 +126,10 @@ export async function GET(request: NextRequest) {
     // Calculate cash flow
     const cashFlow = monthlyIncome - monthlySpending;
 
-    // Get last 12 months data for sparkline - OPTIMIZED: Database-level aggregation
+    // Get last 12 months data for sparkline - OPTIMIZED: Single query instead of 12
     const last12MonthsStart = startOfMonth(subMonths(now, 11));
 
-    // Get transfer category IDs to exclude
-    const transferCategories = await prisma.category.findMany({
-      where: {
-        slug: { in: ['transfer-in', 'transfer-out'] },
-      },
-      select: { id: true },
-    });
-    const transferCategoryIds = transferCategories.map(c => c.id);
-
-    // Fetch all transactions for 12 months (needed for month-by-month breakdown)
+    // Fetch all transactions for 12 months in one query
     const allMonthTransactions = await prisma.transaction.findMany({
       where: {
         userId,
@@ -165,51 +142,45 @@ export async function GET(request: NextRequest) {
         amount: true,
         type: true,
         date: true,
-        categoryId: true,
+        category: {
+          select: {
+            slug: true,
+          },
+        },
       },
     });
 
-    // Group transactions by month using efficient Map-based approach
-    const monthlyDataMap = new Map<string, { income: number; spending: number }>();
-
-    // Pre-populate months to ensure all 12 months are present
-    for (let i = 11; i >= 0; i--) {
-      const monthStart = startOfMonth(subMonths(now, i));
-      const monthKey = monthStart.toISOString();
-      monthlyDataMap.set(monthKey, { income: 0, spending: 0 });
-    }
-
-    // Single-pass aggregation of transactions
-    for (const txn of allMonthTransactions) {
-      const txnDate = new Date(txn.date);
-      const monthStart = startOfMonth(txnDate);
-      const monthKey = monthStart.toISOString();
-
-      const monthData = monthlyDataMap.get(monthKey);
-      if (!monthData) continue;
-
-      const amount = Number(txn.amount);
-      const isTransfer = transferCategoryIds.includes(txn.categoryId || '');
-
-      if (txn.type === 'CREDIT' && !isTransfer) {
-        monthData.income += amount;
-      } else if (txn.type === 'DEBIT' && !isTransfer) {
-        monthData.spending += amount;
-      }
-    }
-
-    // Convert map to array with proper ordering
+    // Group transactions by month in application code
     const monthlyData = [];
     for (let i = 11; i >= 0; i--) {
       const monthStart = startOfMonth(subMonths(now, i));
-      const monthKey = monthStart.toISOString();
-      const data = monthlyDataMap.get(monthKey) || { income: 0, spending: 0 };
+      const monthEnd = endOfMonth(subMonths(now, i));
+
+      // Filter transactions for this month
+      const monthTransactions = allMonthTransactions.filter(txn => {
+        const txnDate = new Date(txn.date);
+        return txnDate >= monthStart && txnDate <= monthEnd;
+      });
+
+      const income = monthTransactions.reduce((sum, txn) => {
+        if (txn.type === 'CREDIT' && txn.category?.slug !== 'transfer-in') {
+          return sum + Number(txn.amount);
+        }
+        return sum;
+      }, 0);
+
+      const spending = monthTransactions.reduce((sum, txn) => {
+        if (txn.type === 'DEBIT' && txn.category?.slug !== 'transfer-out') {
+          return sum + Number(txn.amount);
+        }
+        return sum;
+      }, 0);
 
       monthlyData.push({
-        month: monthKey,
-        income: data.income,
-        spending: data.spending,
-        netChange: data.income - data.spending,
+        month: monthStart.toISOString(),
+        income,
+        spending,
+        netChange: income - spending,
       });
     }
 
@@ -257,7 +228,7 @@ export async function GET(request: NextRequest) {
     const currentDay = now.getDate();
     const daysRemaining = daysInMonth - currentDay;
 
-    const responseData = {
+    return NextResponse.json({
       netWorth: {
         current: netWorth,
         change: netWorthChange,
@@ -285,12 +256,7 @@ export async function GET(request: NextRequest) {
         projectedEndOfMonth: monthlyIncome - monthlySpending,
       },
       monthlyData,
-    };
-
-    // Cache the response
-    await setCached(cacheKey, responseData, CACHE_TTL.DASHBOARD);
-
-    return NextResponse.json(responseData);
+    });
   } catch (error) {
     console.error('Dashboard overview error:', error);
     return NextResponse.json(

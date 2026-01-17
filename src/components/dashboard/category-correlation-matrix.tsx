@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
 import type { TimeframeValue } from './timeframe-selector';
 import { getMonthsFromTimeframe } from '@/lib/timeframe';
 import { getCurrentTheme, getExtendedChartColors } from '@/lib/design-tokens';
@@ -38,7 +37,6 @@ interface CategoryCorrelationMatrixProps {
 export function CategoryCorrelationMatrix({ timeframe }: CategoryCorrelationMatrixProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const chartWrapperRef = useRef<HTMLDivElement>(null);
   const [data, setData] = useState<CorrelationData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -314,7 +312,9 @@ export function CategoryCorrelationMatrix({ timeframe }: CategoryCorrelationMatr
           <CardDescription>Categories that tend to occur together</CardDescription>
         </CardHeader>
         <CardContent>
-          <Skeleton className="h-[500px] w-full" />
+          <div className="flex items-center justify-center h-[500px]">
+            <div className="text-muted-foreground">Loading correlation data...</div>
+          </div>
         </CardContent>
       </Card>
     );
@@ -338,36 +338,17 @@ export function CategoryCorrelationMatrix({ timeframe }: CategoryCorrelationMatr
     );
   }
 
-  // Prepare CSV data
-  const csvData = data.matrix.map(item => ({
-    Category1: item.category1,
-    Category2: item.category2,
-    Correlation: item.correlation,
-    'Co-occurrence': item.cooccurrence,
-  }));
-
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <CardTitle>Category Correlation Matrix</CardTitle>
-            <CardDescription>
-              Categories that tend to occur together in the same months (Last {data.metadata.months} months)
-            </CardDescription>
-          </div>
-          <ChartExportButton
-            chartRef={chartWrapperRef}
-            filename="category-correlation-matrix"
-            data={csvData}
-          />
-        </div>
+        <CardTitle>Category Correlation Matrix</CardTitle>
+        <CardDescription>
+          Categories that tend to occur together in the same months (Last {data.metadata.months} months)
+        </CardDescription>
       </CardHeader>
       <CardContent>
-        <div ref={chartWrapperRef}>
-          <div ref={containerRef} className="w-full overflow-x-auto">
-            <svg ref={svgRef} className="w-full" />
-          </div>
+        <div ref={containerRef} className="w-full overflow-x-auto">
+          <svg ref={svgRef} className="w-full" />
         </div>
       </CardContent>
     </Card>

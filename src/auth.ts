@@ -1,6 +1,5 @@
 import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
-import GitHub from "next-auth/providers/github"
 import { compare } from "bcryptjs"
 import { prisma } from "@/lib/prisma"
 import {
@@ -21,12 +20,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     signIn: "/auth/signin",
     error: "/auth/error",
   },
-  trustHost: true,
   providers: [
-    GitHub({
-      clientId: process.env.GITHUB_ID,
-      clientSecret: process.env.GITHUB_SECRET,
-    }),
     Credentials({
       name: "credentials",
       credentials: {

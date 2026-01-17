@@ -5,7 +5,6 @@ import { useSession, signOut } from "next-auth/react"
 import { usePathname } from "next/navigation"
 import { useState, useEffect } from "react"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { MobileMenu } from "@/components/mobile-menu"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
@@ -53,7 +52,6 @@ export function Header() {
             <Wallet className="h-6 w-6 text-primary" aria-hidden="true" />
             <span className="font-bold text-xl">SmartBudget</span>
           </Link>
-          {/* Desktop navigation - hidden on mobile */}
           {status === "authenticated" && (
             <nav className="hidden md:flex items-center space-x-6 text-sm font-medium" aria-label="Primary navigation">
               <Link
@@ -87,12 +85,12 @@ export function Header() {
             </nav>
           )}
         </div>
-        <div className="flex flex-1 items-center justify-end space-x-2 md:space-x-4">
+        <div className="flex flex-1 items-center justify-end space-x-4">
           <ThemeToggle />
           {status === "authenticated" ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-11 w-11" aria-label="User menu">
+                <Button variant="ghost" size="icon" aria-label="User menu">
                   <Avatar>
                     <AvatarFallback>
                       {session?.user?.username?.charAt(0).toUpperCase() ||
@@ -116,14 +114,14 @@ export function Header() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href="/profile" className="flex items-center cursor-pointer group">
-                    <User className="mr-2 h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
+                  <Link href="/profile" className="flex items-center cursor-pointer">
+                    <User className="mr-2 h-4 w-4" />
                     Profile
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/settings" className="flex items-center cursor-pointer group">
-                    <Settings className="mr-2 h-4 w-4 transition-transform duration-200 group-hover:rotate-12 group-hover:scale-110" />
+                  <Link href="/settings" className="flex items-center cursor-pointer">
+                    <Settings className="mr-2 h-4 w-4" />
                     Settings
                   </Link>
                 </DropdownMenuItem>
@@ -132,7 +130,7 @@ export function Header() {
                   onClick={() => signOut({ callbackUrl: "/" })}
                   className="cursor-pointer text-error focus:text-error"
                 >
-                  <LogOut className="mr-2 h-4 w-4 transition-transform duration-200 group-hover:scale-110 group-hover:-translate-x-0.5" />
+                  <LogOut className="mr-2 h-4 w-4" />
                   Sign out
                 </DropdownMenuItem>
               </DropdownMenuContent>

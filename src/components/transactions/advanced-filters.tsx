@@ -6,7 +6,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogBody,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -156,17 +155,17 @@ export function AdvancedFilters({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="relative group">
-          <Filter className="mr-2 h-4 w-4 transition-transform duration-200 group-hover:scale-110 group-hover:rotate-12" />
+        <Button variant="outline" className="relative">
+          <Filter className="mr-2 h-4 w-4" />
           Advanced Filters
           {activeFilterCount > 0 && (
-            <Badge className="ml-2 px-1.5 py-0.5 h-5 min-w-[20px] transition-all duration-200 group-hover:scale-110" variant="secondary">
+            <Badge className="ml-2 px-1.5 py-0.5 h-5 min-w-[20px]" variant="secondary">
               {activeFilterCount}
             </Badge>
           )}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Advanced Filters</DialogTitle>
           <DialogDescription>
@@ -373,8 +372,7 @@ export function AdvancedFilters({
               </SelectContent>
             </Select>
           </div>
-          </div>
-        </DialogBody>
+        </div>
 
         <DialogFooter className="flex gap-2 animate-in fade-in slide-in-from-bottom-2 duration-300 delay-500">
           <Button variant="outline" onClick={handleClearAll}>

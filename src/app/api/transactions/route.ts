@@ -75,31 +75,12 @@ export async function GET(request: NextRequest) {
       where.categoryId = categoryId;
     }
 
-    // Handle tags filter (comma-separated IDs)
-    if (tags) {
-      const tagIds = tags.split(',').filter(Boolean);
-      if (tagIds.length > 0) {
-        where.tags = {
-          some: {
-            id: { in: tagIds },
-          },
-        };
-      }
-    }
-
-    if (excludeTags) {
-      const excludeTagIds = excludeTags.split(',').filter(Boolean);
-      if (excludeTagIds.length > 0) {
-        where.tags = {
-          none: {
-            id: { in: excludeTagIds },
-          },
-        };
-      }
-    }
-
-    if (uncategorizedOnly) {
-      where.categoryId = null;
+    if (tagId) {
+      where.tags = {
+        some: {
+          id: tagId,
+        },
+      };
     }
 
     if (startDate || endDate) {
@@ -121,7 +102,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Amount range filters
-    if (minAmount !== undefined || maxAmount !== undefined) {
+    if (minAmount || maxAmount) {
       where.amount = {};
       if (minAmount) {
         where.amount.gte = minAmount;
@@ -290,9 +271,6 @@ export async function POST(request: NextRequest) {
         }
       }
     });
-
-    // Invalidate dashboard cache after transaction creation
-    await invalidateDashboardCache(userId);
 
     return NextResponse.json(transaction, { status: 201 });
 

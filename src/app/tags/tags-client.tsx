@@ -28,7 +28,6 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Tag, Plus, Edit, Trash2, Hash } from 'lucide-react';
-import { TYPOGRAPHY } from '@/lib/design-tokens';
 import { toast } from 'sonner';
 
 interface TagData {
@@ -225,11 +224,11 @@ export default function TagsClient() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className={`${TYPOGRAPHY.pageTitle} flex items-center gap-2`}>
+          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
             <Hash className="h-8 w-8" />
             Tags
           </h1>
-          <p className={`${TYPOGRAPHY.muted} mt-1`}>
+          <p className="text-muted-foreground mt-1">
             Organize your transactions with custom labels
           </p>
         </div>

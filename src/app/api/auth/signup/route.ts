@@ -83,9 +83,6 @@ export async function POST(req: Request) {
       },
     })
 
-    // Log user creation in audit log
-    await logUserCreated(user.id, user.username, req)
-
     return NextResponse.json(
       {
         user: {

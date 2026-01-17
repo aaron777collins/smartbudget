@@ -257,6 +257,47 @@ export function getChartColorByIndex(index: number, theme?: 'light' | 'dark'): s
 }
 
 /**
+ * Animation Classes - Common animation patterns for UI components
+ * These classes provide smooth, GPU-accelerated transitions
+ */
+export const ANIMATION = {
+  /**
+   * Icon rotation animations for collapsible components
+   * Typically used with chevron icons to indicate expand/collapse state
+   */
+  iconRotation: {
+    collapsed: 'transition-transform duration-200',
+    expanded: 'rotate-180 transition-transform duration-200',
+  },
+} as const;
+
+/**
+ * Elevation Classes - Shadow levels for visual hierarchy
+ * Provides consistent shadow styling across components
+ */
+export const ELEVATION = {
+  low: 'shadow-sm',
+  medium: 'shadow-md',
+  high: 'shadow-lg',
+} as const;
+
+/**
+ * Color Classes - Semantic colors for navigation and UI elements
+ * These provide consistent color theming for navigation items
+ */
+export const COLORS = {
+  nav: {
+    recurring: 'text-violet-500 dark:text-violet-400',
+    tags: 'text-pink-500 dark:text-pink-400',
+    goals: 'text-cyan-500 dark:text-cyan-400',
+    insights: 'text-emerald-500 dark:text-emerald-400',
+    import: 'text-amber-500 dark:text-amber-400',
+    jobs: 'text-indigo-500 dark:text-indigo-400',
+    settings: 'text-slate-500 dark:text-slate-400',
+  },
+} as const;
+
+/**
  * Calculate relative luminance of an RGB color
  * Used for WCAG contrast ratio calculations
  * @param r - Red value (0-255)

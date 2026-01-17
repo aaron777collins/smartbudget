@@ -1,19 +1,17 @@
 import { PrismaClient } from "@prisma/client"
-import { PrismaPg } from "@prisma/adapter-pg"
-import { Pool } from "pg"
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
-  pool: Pool | undefined
 }
 
 // Validate SSL/TLS configuration in production
 function validateDatabaseSecurity() {
   const isDevelopment = process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test"
+  const isBuildTime = process.env.NEXT_PHASE === "phase-production-build"
   const databaseUrl = process.env.DATABASE_URL || ""
 
-  // Skip validation for development/test environments
-  if (isDevelopment) {
+  // Skip validation for development/test/build environments
+  if (isDevelopment || isBuildTime) {
     return
   }
 
@@ -71,11 +69,7 @@ function validateDatabaseSecurity() {
 validateDatabaseSecurity()
 
 export const prisma = globalForPrisma.prisma ?? new PrismaClient({
-  adapter,
   log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
 })
 
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma
-  globalForPrisma.pool = pool
-}
+if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma

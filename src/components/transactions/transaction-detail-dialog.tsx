@@ -7,7 +7,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogBody,
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -179,6 +178,7 @@ export function TransactionDetailDialog({
   };
 
   const handleCategoryChange = (categoryId: string | null, subcategoryId: string | null) => {
+    // Update formData with new category selection
     setFormData((prev) => ({
       ...prev,
       category: categoryId ? {
@@ -222,6 +222,7 @@ export function TransactionDetailDialog({
       onUpdate?.();
     } catch (error) {
       console.error('Error updating tags:', error);
+      // Revert to previous state on error
       if (transaction) {
         setFormData(transaction);
       }
@@ -280,13 +281,16 @@ export function TransactionDetailDialog({
       const result = await response.json();
       setResearchResult(result);
 
+      // If the research was successful and returned a category, offer to apply it
       if (result.categorySlug) {
+        // Fetch the category to get its full details
         const categoriesResponse = await fetch('/api/categories');
         if (categoriesResponse.ok) {
           const categories = await categoriesResponse.json();
           const category = categories.find((c: { slug: string; id: string; name: string; icon: string; color: string }) => c.slug === result.categorySlug);
 
           if (category) {
+            // Auto-populate the form with the suggested category
             setFormData((prev) => ({
               ...prev,
               category: {
@@ -297,12 +301,13 @@ export function TransactionDetailDialog({
                 color: category.color,
               },
               subcategory: result.subcategorySlug ? {
-                id: '',
+                id: '', // Will be filled when category selector loads subcategories
                 name: result.subcategoryName || '',
                 slug: result.subcategorySlug,
               } : undefined,
             }));
 
+            // Switch to editing mode so user can review and save
             if (!editing) {
               setEditing(true);
             }
@@ -315,6 +320,14 @@ export function TransactionDetailDialog({
     } finally {
       setResearching(false);
     }
+  };
+
+  const handleApplyResearchResult = () => {
+    if (!researchResult) return;
+
+    // The category has already been set in handleResearchMerchant
+    // Now just save the changes
+    handleSave();
   };
 
   const formatAmount = (amount: string, type: string) => {
@@ -613,9 +626,20 @@ export function TransactionDetailDialog({
               <div className="border-t pt-4">
                 <SplitTransactionEditor
                   transactionId={transactionId || ''}
-                  onFormChange={setFormData}
-                  onCategoryChange={handleCategoryChange}
-                  showCategorySelector={!transaction.splits || transaction.splits.length === 0}
+                  transactionAmount={transaction.amount ? parseFloat(transaction.amount) : 0}
+                  existingSplits={transaction.splits?.map(s => ({
+                    id: s.id,
+                    categoryId: s.categoryId,
+                    amount: parseFloat(s.amount),
+                    percentage: s.percentage ? parseFloat(s.percentage) : undefined,
+                    notes: s.notes,
+                  }))}
+                  onSave={() => {
+                    setShowSplitEditor(false);
+                    fetchTransaction();
+                    onUpdate?.();
+                  }}
+                  onCancel={() => setShowSplitEditor(false)}
                 />
               </div>
             ) : (
@@ -740,40 +764,39 @@ export function TransactionDetailDialog({
                   {transaction.notes || 'No notes'}
                 </div>
               )}
-
-              {/* Merchant Research Panel - Show in both modes */}
-              <MerchantResearchPanel
-                researching={researching}
-                researchResult={researchResult}
-                researchError={researchError}
-                editing={editing}
-                onResearch={handleResearchMerchant}
-              />
-
-              {/* Split Transaction Manager - Show in both modes */}
-              <TransactionSplitsManager
-                transaction={transaction}
-                transactionId={transactionId || ''}
-                showSplitEditor={showSplitEditor}
-                editing={editing}
-                formData={formData}
-                onToggleSplitEditor={setShowSplitEditor}
-                onSplitsUpdate={async () => {
-                  await fetchTransaction();
-                  onUpdate?.();
-                }}
-                onCategoryChange={handleCategoryChange}
-              />
-
-              {/* Tags Manager - Always show */}
-              <TransactionTagsManager
-                selectedTags={formData.tags || []}
-                onTagsChange={handleTagsChange}
-                updatingTags={updatingTags}
-              />
             </div>
-          ) : null}
-        </DialogBody>
+
+            {/* Tags */}
+            <div className="space-y-2">
+              <Label>Tags</Label>
+              <TagSelector
+                selectedTags={formData.tags || []}
+                onChange={handleTagsChange}
+              />
+              {updatingTags && (
+                <p className="text-xs text-muted-foreground">Updating tags...</p>
+              )}
+            </div>
+
+            {/* Metadata */}
+            <div className="grid grid-cols-2 gap-4 pt-4 border-t text-sm text-muted-foreground">
+              <div>
+                <strong>Transaction Type:</strong> {transaction.type}
+              </div>
+              {transaction.isRecurring && (
+                <div>
+                  <strong>Recurring:</strong> Yes
+                </div>
+              )}
+              {transaction.confidenceScore && (
+                <div>
+                  <strong>Categorization Confidence:</strong>{' '}
+                  {Math.round(transaction.confidenceScore * 100)}%
+                </div>
+              )}
+            </div>
+          </div>
+        ) : null}
 
         <DialogFooter className="flex justify-between sm:justify-between">
           <Button

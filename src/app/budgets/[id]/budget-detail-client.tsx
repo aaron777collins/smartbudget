@@ -26,7 +26,6 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
-import { TYPOGRAPHY } from '@/lib/design-tokens';
 
 interface BudgetCategory {
   id: string;
@@ -295,7 +294,6 @@ export default function BudgetDetailClient({ budgetId }: { budgetId: string }) {
             size="icon"
             onClick={() => fetchProgress()}
             disabled={isRefreshing}
-            aria-label="Refresh budget progress"
           >
             <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
           </Button>
@@ -306,7 +304,7 @@ export default function BudgetDetailClient({ budgetId }: { budgetId: string }) {
           >
             {autoRefresh ? 'Auto-refresh ON' : 'Auto-refresh OFF'}
           </Button>
-          <Button variant="outline" size="icon" disabled aria-label="Edit budget (coming soon)">
+          <Button variant="outline" size="icon" disabled>
             <Edit className="h-4 w-4" />
           </Button>
           <Button
@@ -337,11 +335,7 @@ export default function BudgetDetailClient({ budgetId }: { budgetId: string }) {
               <span className="font-semibold">{percentageUsed.toFixed(1)}%</span>
             </div>
           </div>
-          <Progress
-            value={percentageUsed}
-            className={getProgressColor(percentageUsed)}
-            aria-label={`Overall budget usage: ${percentageUsed.toFixed(1)}% used, $${totalSpent.toLocaleString()} spent of $${totalBudget.toLocaleString()} budget`}
-          />
+          <Progress value={percentageUsed} className={getProgressColor(percentageUsed)} />
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
             <div className="text-center">
@@ -511,11 +505,7 @@ export default function BudgetDetailClient({ budgetId }: { budgetId: string }) {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Progress
-                      value={percentage}
-                      className={`flex-1 ${getProgressColor(percentage)}`}
-                      aria-label={`${bc.category.name} budget: ${percentage.toFixed(0)}% used, $${spent.toLocaleString()} spent of $${budgeted.toLocaleString()} budgeted`}
-                    />
+                    <Progress value={percentage} className={`flex-1 ${getProgressColor(percentage)}`} />
                     {percentage > 100 ? (
                       <TrendingUp className="h-4 w-4 text-error" />
                     ) : percentage > 80 ? (

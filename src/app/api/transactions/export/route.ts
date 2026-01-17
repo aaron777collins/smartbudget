@@ -1,14 +1,21 @@
-import { NextResponse } from 'next/server';
-import { withAuth } from '@/lib/api-middleware';
-import { RateLimitTier } from '@/lib/rate-limiter';
+import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import type { TransactionType, Prisma } from '@prisma/client';
 
 // GET /api/transactions/export - Export transactions to CSV or JSON
-// Rate limited (MODERATE tier): 100 requests per 15 minutes
-export const GET = withAuth(async (req, context) => {
-  const userId = context.userId;
-  const { searchParams } = new URL(req.url);
+export async function GET(request: NextRequest) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const userId = session.user.id;
+    const { searchParams } = new URL(request.url);
 
     // Parse query parameters (same as list endpoint)
     const accountId = searchParams.get('accountId');
@@ -136,7 +143,14 @@ export const GET = withAuth(async (req, context) => {
       },
     });
 
-});
+  } catch (error) {
+    console.error('Export error:', error);
+    return NextResponse.json(
+      { error: 'Failed to export transactions' },
+      { status: 500 }
+    );
+  }
+}
 
 // Define type for transaction with includes
 type TransactionWithIncludes = Prisma.TransactionGetPayload<{

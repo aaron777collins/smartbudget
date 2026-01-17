@@ -1,9 +1,6 @@
-import { Suspense, lazy } from 'react';
+import { Suspense } from 'react';
 import { Metadata } from 'next';
-import { SPACING } from '@/lib/design-tokens';
-
-// Lazy load the analytics client to defer loading Recharts until needed
-const BudgetAnalyticsClient = lazy(() => import('./budget-analytics-client'));
+import BudgetAnalyticsClient from './budget-analytics-client';
 
 export const metadata: Metadata = {
   title: 'Budget Analytics | SmartBudget',
@@ -12,8 +9,8 @@ export const metadata: Metadata = {
 
 export default function BudgetAnalyticsPage() {
   return (
-    <div className={SPACING.page.container}>
-      <Suspense fallback={<div className="text-center py-12">Loading analytics...</div>}>
+    <div className="container mx-auto py-8 px-4">
+      <Suspense fallback={<div className="text-center">Loading analytics...</div>}>
         <BudgetAnalyticsClient />
       </Suspense>
     </div>

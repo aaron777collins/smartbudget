@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { SPACING, TYPOGRAPHY } from '@/lib/design-tokens';
 import {
   TrendingUp,
   TrendingDown,
@@ -138,9 +137,9 @@ export function InsightsClient() {
 
   if (loading) {
     return (
-      <div className={`flex-1 ${SPACING.section.default} ${SPACING.page.containerResponsive}`}>
+      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
         <div className="flex items-center justify-between space-y-2">
-          <h1 className={TYPOGRAPHY.pageTitle}>Financial Insights</h1>
+          <h2 className="text-3xl font-bold tracking-tight">Financial Insights</h2>
         </div>
         <div className="grid gap-4">
           {[...Array(5)].map((_, i) => (
@@ -153,9 +152,9 @@ export function InsightsClient() {
 
   if (error) {
     return (
-      <div className={`flex-1 ${SPACING.section.default} ${SPACING.page.containerResponsive}`}>
+      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
         <div className="flex items-center justify-between space-y-2">
-          <h1 className={TYPOGRAPHY.pageTitle}>Financial Insights</h1>
+          <h2 className="text-3xl font-bold tracking-tight">Financial Insights</h2>
         </div>
         <div className="rounded-lg border border-error/20 bg-error/10 p-4">
           <p className="text-sm text-error">
@@ -185,7 +184,7 @@ export function InsightsClient() {
   };
 
   return (
-    <div className={`flex-1 ${SPACING.section.relaxed} ${SPACING.page.containerResponsive}`}>
+    <div className="flex-1 space-y-6 p-4 md:p-8 pt-6">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight">Financial Insights</h2>
         <Badge variant="outline">AI-Powered Analysis</Badge>

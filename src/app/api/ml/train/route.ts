@@ -2,44 +2,77 @@
  * ML Training API Endpoint
  *
  * Triggers training from user corrections to improve categorization accuracy
- * Rate limited (EXPENSIVE tier): 10 requests per hour
  */
 
-import { NextResponse } from 'next/server';
-import { withExpensiveOp, withAuth } from '@/lib/api-middleware';
+import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/auth';
 import { trainFromUserCorrections } from '@/lib/ml-training';
-import { invalidateMLCache } from '@/lib/redis-cache';
 
-export const POST = withExpensiveOp(async (req, context) => {
-  // Parse request body (optional: train for specific user or all users)
-  const body = await req.json().catch(() => ({}));
-  const { allUsers } = body;
+export async function POST(request: NextRequest) {
+  try {
+    // Check authentication
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
 
-  // Train from user corrections
-  const stats = await trainFromUserCorrections(allUsers ? undefined : context.userId);
+    const userId = session.user.id;
 
-  // Invalidate ML cache after training (affects all users if allUsers=true)
-  if (allUsers) {
-    // Invalidate global ML cache
-    await invalidateMLCache('*');
-  } else {
-    // Invalidate only this user's ML cache
-    await invalidateMLCache(context.userId);
+    // Parse request body (optional: train for specific user or all users)
+    const body = await request.json().catch(() => ({}));
+    const { allUsers } = body;
+
+    // Train from user corrections
+    const stats = await trainFromUserCorrections(allUsers ? undefined : userId);
+
+    return NextResponse.json({
+      success: true,
+      ...stats
+    });
+
+  } catch (error) {
+    console.error('ML training error:', error);
+    return NextResponse.json(
+      {
+        error: 'Failed to train ML model',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
+      { status: 500 }
+    );
   }
+}
 
-  return NextResponse.json({
-    success: true,
-    ...stats
-  });
-});
+export async function GET(request: NextRequest) {
+  try {
+    // Check authentication
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
 
-export const GET = withAuth(async (req, context) => {
-  // Get training stats without running training
-  const { getTrainingStats } = await import('@/lib/ml-training');
-  const stats = await getTrainingStats();
+    // Get training stats without running training
+    const { getTrainingStats } = await import('@/lib/ml-training');
+    const stats = await getTrainingStats();
 
-  return NextResponse.json({
-    success: true,
-    ...stats
-  });
-});
+    return NextResponse.json({
+      success: true,
+      ...stats
+    });
+
+  } catch (error) {
+    console.error('ML stats error:', error);
+    return NextResponse.json(
+      {
+        error: 'Failed to get training stats',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
+      { status: 500 }
+    );
+  }
+}

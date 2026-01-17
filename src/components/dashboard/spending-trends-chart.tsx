@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import {
   AreaChart,
   Area,
@@ -91,7 +91,6 @@ interface SpendingTrendsChartProps {
 }
 
 export function SpendingTrendsChart({ timeframe }: SpendingTrendsChartProps) {
-  const chartRef = useRef<HTMLDivElement>(null);
   const [data, setData] = useState<SpendingTrendsData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -174,17 +173,6 @@ export function SpendingTrendsChart({ timeframe }: SpendingTrendsChartProps) {
             </span>
             <span className="hidden sm:inline"> ({data.summary.highestMonth.month})</span>
           </div>
-          <ChartExportButton
-            chartRef={chartRef}
-            filename="spending-trends"
-            data={data.chartData.map(month => {
-              const row: Record<string, any> = { Month: month.month };
-              data.categories.forEach(cat => {
-                row[cat.name] = month[cat.name] || 0;
-              });
-              return row;
-            })}
-          />
         </div>
       </CardHeader>
       <CardContent>

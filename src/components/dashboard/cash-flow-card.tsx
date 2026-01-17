@@ -15,8 +15,6 @@ export function CashFlowCard({
   trend,
   projectedEndOfMonth,
 }: CashFlowCardProps) {
-  const animatedCurrent = useCounterAnimation({ end: current, duration: 1200, decimals: 2 });
-  const animatedProjected = useCounterAnimation({ end: projectedEndOfMonth, duration: 1200, decimals: 2, delay: 100 });
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-CA', {
       style: 'currency',

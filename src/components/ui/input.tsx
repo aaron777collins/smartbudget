@@ -2,12 +2,10 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-export interface InputProps extends React.ComponentProps<"input"> {
-  error?: boolean
-}
+export type InputProps = React.ComponentProps<"input">
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, error, ...props }, ref) => {
+  ({ className, type, ...props }, ref) => {
     return (
       <input
         type={type}
@@ -16,7 +14,6 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           className
         )}
         ref={ref}
-        aria-invalid={error ? "true" : undefined}
         {...props}
       />
     )

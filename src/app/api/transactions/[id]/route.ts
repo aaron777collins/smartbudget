@@ -191,9 +191,6 @@ export async function PATCH(
       }
     });
 
-    // Invalidate dashboard cache after transaction update
-    await invalidateDashboardCache(userId);
-
     return NextResponse.json(transaction);
 
   } catch (error) {
@@ -249,9 +246,6 @@ export async function DELETE(
     await prisma.transaction.delete({
       where: { id }
     });
-
-    // Invalidate dashboard cache after transaction deletion
-    await invalidateDashboardCache(userId);
 
     return NextResponse.json({ success: true });
 

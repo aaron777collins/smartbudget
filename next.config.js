@@ -3,8 +3,6 @@ const { withSentryConfig } = require('@sentry/nextjs');
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-
-  // Docker standalone build output
   output: 'standalone',
 
   // Image optimization

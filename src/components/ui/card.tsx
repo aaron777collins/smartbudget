@@ -1,7 +1,6 @@
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
-import { ELEVATION } from "@/lib/design-tokens"
 
 const Card = React.forwardRef<
   HTMLDivElement,

@@ -1,8 +1,6 @@
 'use client';
 
-import { useState, lazy, Suspense } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { apiClient } from '@/lib/api-client';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import { NetWorthCard } from '@/components/dashboard/net-worth-card';
 import { MonthlySpendingCard } from '@/components/dashboard/monthly-spending-card';
 import { MonthlyIncomeCard } from '@/components/dashboard/monthly-income-card';
@@ -52,28 +50,44 @@ interface DashboardData {
 }
 
 export function DashboardClient() {
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [timeframe, setTimeframe] = useState<TimeframeValue>({
     period: 'this-month'
   });
 
-  // Use React Query for data fetching with automatic caching and background refetching
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['dashboard', 'overview'],
-    queryFn: async () => {
-      return apiClient.get<DashboardData>('/api/dashboard/overview');
-    },
-    // Dashboard data changes frequently, use shorter stale time
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    // Keep data in cache for 10 minutes
-    gcTime: 10 * 60 * 1000,
-  });
+  useEffect(() => {
+    async function fetchDashboardData() {
+      try {
+        setLoading(true);
+        setError(null);
 
-  if (isLoading) {
+        const response = await fetch('/api/dashboard/overview');
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch dashboard data');
+        }
+
+        const dashboardData = await response.json();
+        setData(dashboardData);
+      } catch (err) {
+        console.error('Error fetching dashboard data:', err);
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchDashboardData();
+  }, []);
+
+  if (loading) {
     return (
       <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
         <ScreenReaderAnnouncer message="Loading dashboard data..." />
         <div className="flex items-center justify-between space-y-2">
-          <h1 className={TYPOGRAPHY.pageTitle}>Dashboard</h1>
+          <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
         </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {[...Array(4)].map((_, i) => (
@@ -99,12 +113,6 @@ export function DashboardClient() {
             Error loading dashboard: {error}
           </p>
         </div>
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            Error loading dashboard: {error instanceof Error ? error.message : 'An error occurred'}
-          </AlertDescription>
-        </Alert>
       </div>
     );
   }
