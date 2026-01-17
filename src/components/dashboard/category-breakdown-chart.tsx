@@ -15,6 +15,7 @@ import { formatCurrency } from '@/lib/utils';
 import type { TimeframeValue } from './timeframe-selector';
 import { getPeriodForAPI, buildTimeframeParams } from '@/lib/timeframe';
 import { FadeIn, HoverScale } from '@/components/ui/animated';
+import { getCurrentTheme, getChartColorByIndex } from '@/lib/design-tokens';
 
 interface CategoryData {
   id: string;
@@ -117,6 +118,7 @@ export function CategoryBreakdownChart({ timeframe }: CategoryBreakdownChartProp
   const [data, setData] = useState<CategoryBreakdownData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const theme = getCurrentTheme();
 
   useEffect(() => {
     async function fetchData() {
@@ -234,7 +236,7 @@ export function CategoryBreakdownChart({ timeframe }: CategoryBreakdownChartProp
                     animationEasing="ease-out"
                   >
                     {data.chartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
+                      <Cell key={`cell-${index}`} fill={getChartColorByIndex(index, theme)} />
                     ))}
                   </Pie>
                   <Tooltip content={<CustomTooltip />} />
@@ -253,7 +255,7 @@ export function CategoryBreakdownChart({ timeframe }: CategoryBreakdownChartProp
                   <div className="flex items-center gap-2 flex-1 min-w-0">
                     <div
                       className="h-3 w-3 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: category.color }}
+                      style={{ backgroundColor: getChartColorByIndex(data.chartData.findIndex(c => c.id === category.id), theme) }}
                     />
                     <span className="text-sm font-medium truncate">{category.name}</span>
                   </div>
