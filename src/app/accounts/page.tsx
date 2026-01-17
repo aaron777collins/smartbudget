@@ -167,7 +167,7 @@ export default function AccountsPage() {
             <Wallet className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totalBalance)}</div>
+            <div className="text-2xl font-bold font-mono">{formatCurrency(totalBalance)}</div>
             <p className="text-xs text-muted-foreground">
               Across {activeAccounts} active account{activeAccounts !== 1 ? 's' : ''}
             </p>
@@ -180,7 +180,7 @@ export default function AccountsPage() {
             <CreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totalAvailable)}</div>
+            <div className="text-2xl font-bold font-mono">{formatCurrency(totalAvailable)}</div>
             <p className="text-xs text-muted-foreground">
               Available to spend
             </p>
@@ -193,7 +193,7 @@ export default function AccountsPage() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalTransactions}</div>
+            <div className="text-2xl font-bold font-mono">{totalTransactions}</div>
             <p className="text-xs text-muted-foreground">
               Across all accounts
             </p>

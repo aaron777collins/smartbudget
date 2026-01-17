@@ -184,7 +184,7 @@ export default function RecurringClient() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{rules.length}</div>
+                <div className="text-2xl font-bold font-mono">{rules.length}</div>
               </CardContent>
             </Card>
             <Card>
@@ -194,7 +194,7 @@ export default function RecurringClient() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
+                <div className="text-2xl font-bold font-mono">
                   $
                   {rules
                     .reduce((sum, rule) => {
@@ -217,7 +217,7 @@ export default function RecurringClient() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
+                <div className="text-2xl font-bold font-mono">
                   {rules.filter((r) => getDaysUntilDue(r.nextDueDate) <= 7).length}
                 </div>
               </CardContent>

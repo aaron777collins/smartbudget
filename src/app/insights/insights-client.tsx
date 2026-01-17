@@ -204,25 +204,25 @@ export function InsightsClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Income</p>
-                <p className="text-2xl font-bold text-success">
+                <p className="text-2xl font-bold font-mono text-success">
                   ${weeklyDigest.summary.income.toLocaleString()}
                 </p>
               </div>
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Expenses</p>
-                <p className="text-2xl font-bold text-error">
+                <p className="text-2xl font-bold font-mono text-error">
                   ${weeklyDigest.summary.expenses.toLocaleString()}
                 </p>
               </div>
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Net Cash Flow</p>
-                <p className={`text-2xl font-bold ${weeklyDigest.summary.netCashFlow >= 0 ? 'text-success' : 'text-error'}`}>
+                <p className={`text-2xl font-bold font-mono ${weeklyDigest.summary.netCashFlow >= 0 ? 'text-success' : 'text-error'}`}>
                   ${weeklyDigest.summary.netCashFlow.toLocaleString()}
                 </p>
               </div>
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Transactions</p>
-                <p className="text-2xl font-bold">{weeklyDigest.summary.transactionCount}</p>
+                <p className="text-2xl font-bold font-mono">{weeklyDigest.summary.transactionCount}</p>
               </div>
             </div>
 
@@ -299,7 +299,7 @@ export function InsightsClient() {
                   </div>
                   <div className="text-right">
                     <p className="text-sm text-muted-foreground">Potential Savings</p>
-                    <p className="text-lg font-bold text-success">
+                    <p className="text-lg font-bold font-mono text-success">
                       ${opportunity.potentialSavings.toFixed(2)}/mo
                     </p>
                   </div>
@@ -366,7 +366,7 @@ export function InsightsClient() {
                     <p className="text-sm text-muted-foreground">{sub.category}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-lg font-bold">${sub.amount.toFixed(2)}</p>
+                    <p className="text-lg font-bold font-mono">${sub.amount.toFixed(2)}</p>
                     <p className="text-xs text-muted-foreground">
                       ${sub.monthlyEquivalent.toFixed(2)}/mo
                     </p>

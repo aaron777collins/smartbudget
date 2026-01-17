@@ -328,19 +328,19 @@ export default function BudgetDetailClient({ budgetId }: { budgetId: string }) {
           <div className="grid grid-cols-3 gap-4 pt-4">
             <div className="text-center">
               <p className="text-sm text-muted-foreground">Spent</p>
-              <p className="text-2xl font-bold text-error">
+              <p className="text-2xl font-bold font-mono text-error">
                 ${totalSpent.toLocaleString()}
               </p>
             </div>
             <div className="text-center">
               <p className="text-sm text-muted-foreground">Budget</p>
-              <p className="text-2xl font-bold">
+              <p className="text-2xl font-bold font-mono">
                 ${totalBudget.toLocaleString()}
               </p>
             </div>
             <div className="text-center">
               <p className="text-sm text-muted-foreground">Remaining</p>
-              <p className={`text-2xl font-bold ${remaining >= 0 ? 'text-success' : 'text-error'}`}>
+              <p className={`text-2xl font-bold font-mono ${remaining >= 0 ? 'text-success' : 'text-error'}`}>
                 ${Math.abs(remaining).toLocaleString()}
               </p>
             </div>
@@ -373,7 +373,7 @@ export default function BudgetDetailClient({ budgetId }: { budgetId: string }) {
               <div>
                 <p className="text-sm text-muted-foreground">Spending Pace</p>
                 <div className="flex items-center gap-2 mt-1">
-                  <p className={`text-2xl font-bold ${
+                  <p className={`text-2xl font-bold font-mono ${
                     spendingVelocity > 110 ? 'text-error' :
                     spendingVelocity > 100 ? 'text-warning' :
                     'text-success'
@@ -395,7 +395,7 @@ export default function BudgetDetailClient({ budgetId }: { budgetId: string }) {
 
               <div>
                 <p className="text-sm text-muted-foreground">Projected Total</p>
-                <p className={`text-2xl font-bold mt-1 ${
+                <p className={`text-2xl font-bold font-mono mt-1 ${
                   projectedTotal > totalBudget ? 'text-error' : 'text-success'
                 }`}>
                   ${projectedTotal.toFixed(0).toLocaleString()}

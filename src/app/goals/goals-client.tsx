@@ -287,21 +287,21 @@ export function GoalsClient() {
             <Target className="w-4 h-4" />
             <span className="text-sm font-medium">Total Goals</span>
           </div>
-          <p className="text-2xl font-bold text-foreground">{goals.length}</p>
+          <p className="text-2xl font-bold font-mono text-foreground">{goals.length}</p>
         </div>
         <div className="bg-card rounded-lg border border-border p-4 hover:shadow-lg transition-all duration-200 hover:scale-[1.02]">
           <div className="flex items-center gap-2 text-primary mb-2">
             <TrendingUp className="w-4 h-4" />
             <span className="text-sm font-medium">Active</span>
           </div>
-          <p className="text-2xl font-bold text-primary">{activeGoals.length}</p>
+          <p className="text-2xl font-bold font-mono text-primary">{activeGoals.length}</p>
         </div>
         <div className="bg-card rounded-lg border border-border p-4 hover:shadow-lg transition-all duration-200 hover:scale-[1.02]">
           <div className="flex items-center gap-2 text-success mb-2">
             <CheckCircle2 className="w-4 h-4" />
             <span className="text-sm font-medium">Completed</span>
           </div>
-          <p className="text-2xl font-bold text-success">
+          <p className="text-2xl font-bold font-mono text-success">
             {completedGoals.length}
           </p>
         </div>
@@ -310,7 +310,7 @@ export function GoalsClient() {
             <DollarSign className="w-4 h-4" />
             <span className="text-sm font-medium">Total Target</span>
           </div>
-          <p className="text-2xl font-bold text-primary">
+          <p className="text-2xl font-bold font-mono text-primary">
             ${goals.reduce((sum, g) => sum + Number(g.targetAmount), 0).toLocaleString()}
           </p>
         </div>
@@ -715,13 +715,13 @@ function GoalDetailModal({
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
               <p className="text-sm text-muted-foreground">Current Amount</p>
-              <p className="text-2xl font-bold text-foreground">
+              <p className="text-2xl font-bold font-mono text-foreground">
                 ${Number(goal.currentAmount).toLocaleString()}
               </p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Target Amount</p>
-              <p className="text-2xl font-bold text-foreground">
+              <p className="text-2xl font-bold font-mono text-foreground">
                 ${Number(goal.targetAmount).toLocaleString()}
               </p>
             </div>

@@ -203,11 +203,11 @@ export function RecurringDetectionDialog({
             <div className="grid grid-cols-2 gap-4 p-4 bg-muted rounded-lg">
               <div>
                 <p className="text-sm text-muted-foreground">Transactions Analyzed</p>
-                <p className="text-2xl font-bold">{summary.totalTransactionsAnalyzed}</p>
+                <p className="text-2xl font-bold font-mono">{summary.totalTransactionsAnalyzed}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Patterns Found</p>
-                <p className="text-2xl font-bold">{summary.patternsDetected}</p>
+                <p className="text-2xl font-bold font-mono">{summary.patternsDetected}</p>
               </div>
             </div>
 

@@ -231,7 +231,7 @@ export default function BudgetAnalyticsClient() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalMonths}</div>
+            <div className="text-2xl font-bold font-mono">{totalMonths}</div>
             <p className="text-xs text-muted-foreground mt-1">
               {underBudgetMonths} under budget
             </p>
@@ -245,7 +245,7 @@ export default function BudgetAnalyticsClient() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{avgUtilization.toFixed(1)}%</div>
+            <div className="text-2xl font-bold font-mono">{avgUtilization.toFixed(1)}%</div>
             <p className="text-xs text-muted-foreground mt-1">
               {avgUtilization < 100 ? 'Under budget avg.' : 'Over budget avg.'}
             </p>
@@ -259,7 +259,7 @@ export default function BudgetAnalyticsClient() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-success">
+            <div className="text-2xl font-bold font-mono text-success">
               ${totalSaved.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
@@ -275,7 +275,7 @@ export default function BudgetAnalyticsClient() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-error">
+            <div className="text-2xl font-bold font-mono text-error">
               ${totalOverspent.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
