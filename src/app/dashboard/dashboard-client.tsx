@@ -8,6 +8,7 @@ import { CashFlowCard } from '@/components/dashboard/cash-flow-card';
 import { TimeframeSelector, type TimeframeValue } from '@/components/dashboard/timeframe-selector';
 import { UpcomingExpenses } from '@/components/dashboard/upcoming-expenses';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Stagger } from '@/components/ui/animated';
 
 // Lazy load ALL chart components for bundle optimization
 const SpendingTrendsChart = lazy(() => import('@/components/dashboard/spending-trends-chart').then(m => ({ default: m.SpendingTrendsChart })));
@@ -149,38 +150,40 @@ export function DashboardClient() {
       </div>
 
       {/* Recharts Visualizations Section - Lazy loaded for performance */}
-      <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
-        <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
-          <SpendingTrendsChart timeframe={timeframe} />
-        </Suspense>
-        <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
-          <CategoryBreakdownChart timeframe={timeframe} />
-        </Suspense>
-      </div>
+      <Stagger staggerDelay={0.1} initialDelay={0.2} duration={0.4}>
+        <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
+          <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
+            <SpendingTrendsChart timeframe={timeframe} />
+          </Suspense>
+          <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
+            <CategoryBreakdownChart timeframe={timeframe} />
+          </Suspense>
+        </div>
 
-      {/* D3.js Custom Visualizations Section - Lazy loaded for performance */}
-      <div className="grid gap-4 md:grid-cols-1">
-        <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
-          <CashFlowSankey timeframe={timeframe} />
-        </Suspense>
-      </div>
+        {/* D3.js Custom Visualizations Section - Lazy loaded for performance */}
+        <div className="grid gap-4 md:grid-cols-1">
+          <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
+            <CashFlowSankey timeframe={timeframe} />
+          </Suspense>
+        </div>
 
-      <div className="grid gap-4 md:grid-cols-1">
-        <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
-          <CategoryHeatmap timeframe={timeframe} />
-        </Suspense>
-      </div>
+        <div className="grid gap-4 md:grid-cols-1">
+          <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
+            <CategoryHeatmap timeframe={timeframe} />
+          </Suspense>
+        </div>
 
-      <div className="grid gap-4 md:grid-cols-1">
-        <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
-          <CategoryCorrelationMatrix timeframe={timeframe} />
-        </Suspense>
-      </div>
+        <div className="grid gap-4 md:grid-cols-1">
+          <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
+            <CategoryCorrelationMatrix timeframe={timeframe} />
+          </Suspense>
+        </div>
 
-      {/* Upcoming Recurring Expenses */}
-      <div className="grid gap-4 md:grid-cols-1">
-        <UpcomingExpenses />
-      </div>
+        {/* Upcoming Recurring Expenses */}
+        <div className="grid gap-4 md:grid-cols-1">
+          <UpcomingExpenses />
+        </div>
+      </Stagger>
 
       {/* Future sections:
           - Recent Transactions
