@@ -19,7 +19,10 @@ import {
   TrendingUp,
   TrendingDown,
   RefreshCw,
-  Gauge
+  Gauge,
+  CheckCircle,
+  AlertTriangle,
+  XCircle
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -222,6 +225,12 @@ export default function BudgetDetailClient({ budgetId }: { budgetId: string }) {
     return 'bg-error';
   }
 
+  function getBudgetStatusIcon(percentage: number) {
+    if (percentage < 80) return <CheckCircle className="h-4 w-4 text-success" aria-label="Under budget" />;
+    if (percentage < 100) return <AlertTriangle className="h-4 w-4 text-warning" aria-label="Near budget limit" />;
+    return <XCircle className="h-4 w-4 text-error" aria-label="Over budget" />;
+  }
+
   if (loading) {
     return (
       <div className="container mx-auto p-6 space-y-6">
@@ -321,7 +330,10 @@ export default function BudgetDetailClient({ budgetId }: { budgetId: string }) {
         <CardContent className="space-y-4">
           <div className="flex justify-between items-center text-sm">
             <span>Budget Used</span>
-            <span className="font-semibold">{percentageUsed.toFixed(1)}%</span>
+            <div className="flex items-center gap-2">
+              {getBudgetStatusIcon(percentageUsed)}
+              <span className="font-semibold">{percentageUsed.toFixed(1)}%</span>
+            </div>
           </div>
           <Progress value={percentageUsed} className={getProgressColor(percentageUsed)} />
 
@@ -340,9 +352,16 @@ export default function BudgetDetailClient({ budgetId }: { budgetId: string }) {
             </div>
             <div className="text-center">
               <p className="text-sm text-muted-foreground">Remaining</p>
-              <p className={`text-2xl font-bold font-mono ${remaining >= 0 ? 'text-success' : 'text-error'}`}>
-                ${Math.abs(remaining).toLocaleString()}
-              </p>
+              <div className="flex items-center justify-center gap-2">
+                {remaining >= 0 ? (
+                  <CheckCircle className="h-5 w-5 text-success" aria-label="Budget remaining" />
+                ) : (
+                  <XCircle className="h-5 w-5 text-error" aria-label="Over budget" />
+                )}
+                <p className={`text-2xl font-bold font-mono ${remaining >= 0 ? 'text-success' : 'text-error'}`}>
+                  ${Math.abs(remaining).toLocaleString()}
+                </p>
+              </div>
             </div>
           </div>
 
@@ -395,11 +414,18 @@ export default function BudgetDetailClient({ budgetId }: { budgetId: string }) {
 
               <div>
                 <p className="text-sm text-muted-foreground">Projected Total</p>
-                <p className={`text-2xl font-bold font-mono mt-1 ${
-                  projectedTotal > totalBudget ? 'text-error' : 'text-success'
-                }`}>
-                  ${projectedTotal.toFixed(0).toLocaleString()}
-                </p>
+                <div className="flex items-center gap-2 mt-1">
+                  {projectedTotal > totalBudget ? (
+                    <XCircle className="h-5 w-5 text-error" aria-label="Projected to exceed budget" />
+                  ) : (
+                    <CheckCircle className="h-5 w-5 text-success" aria-label="Projected to stay within budget" />
+                  )}
+                  <p className={`text-2xl font-bold font-mono ${
+                    projectedTotal > totalBudget ? 'text-error' : 'text-success'
+                  }`}>
+                    ${projectedTotal.toFixed(0).toLocaleString()}
+                  </p>
+                </div>
                 <p className="text-xs text-muted-foreground mt-1">
                   Based on {daysElapsed} days of spending
                 </p>
@@ -426,11 +452,18 @@ export default function BudgetDetailClient({ budgetId }: { budgetId: string }) {
               </div>
               <div className="flex justify-between text-sm mt-1">
                 <span className="text-muted-foreground">Difference:</span>
-                <span className={`font-medium ${
-                  totalSpent > expectedSpentByNow ? 'text-error' : 'text-success'
-                }`}>
-                  ${Math.abs(totalSpent - expectedSpentByNow).toFixed(0).toLocaleString()}
-                  {totalSpent > expectedSpentByNow ? ' over' : ' under'}
+                <span className="flex items-center gap-1.5">
+                  {totalSpent > expectedSpentByNow ? (
+                    <XCircle className="h-3.5 w-3.5 text-error" aria-label="Over expected spending" />
+                  ) : (
+                    <CheckCircle className="h-3.5 w-3.5 text-success" aria-label="Under expected spending" />
+                  )}
+                  <span className={`font-medium ${
+                    totalSpent > expectedSpentByNow ? 'text-error' : 'text-success'
+                  }`}>
+                    ${Math.abs(totalSpent - expectedSpentByNow).toFixed(0).toLocaleString()}
+                    {totalSpent > expectedSpentByNow ? ' over' : ' under'}
+                  </span>
                 </span>
               </div>
             </div>

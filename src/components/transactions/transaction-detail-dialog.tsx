@@ -15,7 +15,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Shake, Pulse } from '@/components/ui/animated';
-import { Calendar, DollarSign, Store, FileText, Tag, Trash2, Search, Loader2, Split, CheckCircle } from 'lucide-react';
+import { Calendar, DollarSign, Store, FileText, Tag, Trash2, Search, Loader2, Split, CheckCircle, ArrowDown, ArrowUp } from 'lucide-react';
 import { CategorySelector } from './category-selector';
 import { SplitTransactionEditor } from './split-transaction-editor';
 import { TagSelector } from './tag-selector';
@@ -384,20 +384,29 @@ export function TransactionDetailDialog({
                 </div>
                 <div>
                   <div className="text-sm text-muted-foreground">Amount</div>
-                  <div
-                    className={`text-2xl font-bold font-mono ${
-                      transaction.type === 'DEBIT'
-                        ? 'text-error'
-                        : 'text-success'
-                    }`}
-                  >
-                    {formatAmount(transaction.amount, transaction.type)}
+                  <div className="flex items-center gap-2">
+                    {transaction.type === 'DEBIT' ? (
+                      <ArrowDown className="h-5 w-5 text-error" aria-label="Debit" />
+                    ) : (
+                      <ArrowUp className="h-5 w-5 text-success" aria-label="Credit" />
+                    )}
+                    <div
+                      className={`text-2xl font-bold font-mono ${
+                        transaction.type === 'DEBIT'
+                          ? 'text-error'
+                          : 'text-success'
+                      }`}
+                    >
+                      {formatAmount(transaction.amount, transaction.type)}
+                    </div>
                   </div>
                 </div>
               </div>
               <Badge
                 variant={transaction.isReconciled ? 'default' : 'secondary'}
+                className="flex items-center gap-1"
               >
+                {transaction.isReconciled && <CheckCircle className="h-3 w-3" aria-label="Reconciled" />}
                 {transaction.isReconciled ? 'Reconciled' : 'Unreconciled'}
               </Badge>
             </div>

@@ -770,13 +770,20 @@ function GoalDetailModal({
                       <TrendingUp className="w-4 h-4" />
                       <span className="text-sm font-medium">Status</span>
                     </div>
-                    <p
-                      className={`text-lg font-semibold ${
-                        progress.onTrack ? 'text-success' : 'text-error'
-                      }`}
-                    >
-                      {progress.onTrack ? 'On Track' : 'Behind Schedule'}
-                    </p>
+                    <div className="flex items-center gap-2">
+                      {progress.onTrack ? (
+                        <CheckCircle2 className="w-4 h-4 text-success" aria-label="On track" />
+                      ) : (
+                        <AlertCircle className="w-4 h-4 text-error" aria-label="Behind schedule" />
+                      )}
+                      <p
+                        className={`text-lg font-semibold ${
+                          progress.onTrack ? 'text-success' : 'text-error'
+                        }`}
+                      >
+                        {progress.onTrack ? 'On Track' : 'Behind Schedule'}
+                      </p>
+                    </div>
                   </div>
                 )}
               </div>

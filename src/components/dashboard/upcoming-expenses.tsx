@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Calendar, DollarSign, AlertCircle, ExternalLink } from 'lucide-react';
+import { Calendar, DollarSign, AlertCircle, ExternalLink, Clock, CheckCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { HoverScale, CountUp } from '@/components/ui/animated';
 
@@ -62,13 +62,33 @@ export function UpcomingExpenses() {
 
   const getDueBadge = (expense: UpcomingExpense) => {
     if (expense.isOverdue) {
-      return <Badge variant="destructive">Overdue</Badge>;
+      return (
+        <Badge variant="destructive" className="flex items-center gap-1">
+          <AlertCircle className="h-3 w-3" aria-label="Overdue" />
+          Overdue
+        </Badge>
+      );
     } else if (expense.isDueToday) {
-      return <Badge className="bg-warning">Due Today</Badge>;
+      return (
+        <Badge className="bg-warning flex items-center gap-1">
+          <Clock className="h-3 w-3" aria-label="Due today" />
+          Due Today
+        </Badge>
+      );
     } else if (expense.isDueSoon) {
-      return <Badge className="bg-warning">Due Soon</Badge>;
+      return (
+        <Badge className="bg-warning flex items-center gap-1">
+          <Clock className="h-3 w-3" aria-label="Due soon" />
+          Due Soon
+        </Badge>
+      );
     } else {
-      return <Badge variant="secondary">{expense.daysUntil} days</Badge>;
+      return (
+        <Badge variant="secondary" className="flex items-center gap-1">
+          <CheckCircle className="h-3 w-3" aria-label="Upcoming" />
+          {expense.daysUntil} days
+        </Badge>
+      );
     }
   };
 
@@ -159,11 +179,17 @@ export function UpcomingExpenses() {
             </div>
             <div className="text-center">
               <p className="text-sm font-medium text-muted-foreground">Due Soon</p>
-              <p className="font-bold text-warning">{summary.dueSoon}</p>
+              <div className="flex items-center justify-center gap-1">
+                <Clock className="h-4 w-4 text-warning" aria-label="Due soon" />
+                <p className="font-bold text-warning">{summary.dueSoon}</p>
+              </div>
             </div>
             <div className="text-center">
               <p className="text-sm font-medium text-muted-foreground">Overdue</p>
-              <p className="font-bold text-error">{summary.overdue}</p>
+              <div className="flex items-center justify-center gap-1">
+                <AlertCircle className="h-4 w-4 text-error" aria-label="Overdue" />
+                <p className="font-bold text-error">{summary.overdue}</p>
+              </div>
             </div>
           </div>
         )}
