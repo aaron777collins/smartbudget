@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { formatCurrency } from '@/lib/utils';
 import type { TimeframeValue } from './timeframe-selector';
 import { getMonthsFromTimeframe } from '@/lib/timeframe';
-import { getCurrentTheme, getChartColors } from '@/lib/design-tokens';
+import { getCurrentTheme, getChartColors, getChartColorByIndex } from '@/lib/design-tokens';
 
 interface SankeyData {
   nodes: Array<{ id: string; name: string; color?: string }>;
@@ -88,6 +88,12 @@ export function CashFlowSankey({ timeframe }: CashFlowSankeyProps) {
     const theme = getCurrentTheme();
     const colors = getChartColors(theme);
 
+    // Create a mapping of node index to AICEO color
+    const nodeColorMap = new Map<number, string>();
+    data.nodes.forEach((node, index) => {
+      nodeColorMap.set(index, getChartColorByIndex(index, theme));
+    });
+
     // Get container dimensions
     const container = containerRef.current;
     const width = container.clientWidth;
@@ -128,9 +134,10 @@ export function CashFlowSankey({ timeframe }: CashFlowSankeyProps) {
       .attr('d', sankeyLinkHorizontal())
       .attr('fill', 'none')
       .attr('stroke', (d: ExtendedSankeyLink) => {
-        // Use source node color or default
+        // Find source node index and use AICEO color
         const sourceNode = d.source;
-        return sourceNode.color || colors.linkDefault;
+        const sourceIndex = nodes.findIndex((n) => n === sourceNode);
+        return nodeColorMap.get(sourceIndex) || colors.linkDefault;
       })
       .attr('stroke-width', (d: ExtendedSankeyLink) => Math.max(1, d.width || 0))
       .attr('opacity', 0.4)
@@ -156,7 +163,10 @@ export function CashFlowSankey({ timeframe }: CashFlowSankeyProps) {
       .attr('y', (d: ExtendedSankeyNode) => d.y0 ?? 0)
       .attr('height', (d: ExtendedSankeyNode) => Math.max(0, (d.y1 ?? 0) - (d.y0 ?? 0)))
       .attr('width', (d: ExtendedSankeyNode) => (d.x1 ?? 0) - (d.x0 ?? 0))
-      .attr('fill', (d: ExtendedSankeyNode) => d.color || '#2563EB')
+      .attr('fill', (d: ExtendedSankeyNode, i: number) => {
+        // Use AICEO color palette based on node index
+        return nodeColorMap.get(i) || colors.primary;
+      })
       .attr('opacity', 0.8)
       .on('mouseover', function () {
         d3.select(this).attr('opacity', 1);
