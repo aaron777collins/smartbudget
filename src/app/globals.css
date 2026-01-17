@@ -60,6 +60,20 @@
   --input: 214.3 31.8% 91.4%;
   --ring: 221.2 83.2% 53.3%;
 
+  /* Extended Accent Colors for Charts & Visualizations (8-category support) */
+  --accent-cyan: 188 94% 43%;
+  --accent-emerald: 160 84% 39%;
+  --accent-amber: 38 92% 50%;
+  --accent-rose: 346 87% 63%;
+  --accent-purple: 280 84% 47%;
+  --accent-violet: 258 90% 66%;
+  --accent-indigo: 239 84% 67%;
+  --accent-teal: 173 80% 40%;
+
+  /* Surface States */
+  --card-elevated: 0 0% 98%;
+  --surface-hover: 210 40% 98%;
+
   /* Radius */
   --radius: 0.5rem;
 
@@ -156,6 +170,20 @@
   --border: 217.2 32.6% 17.5%;
   --input: 217.2 32.6% 17.5%;
   --ring: 224.3 76.3% 48%;
+
+  /* Extended Accent Colors for Charts & Visualizations (8-category support, dark mode) */
+  --accent-cyan: 188 94% 50%;
+  --accent-emerald: 160 84% 45%;
+  --accent-amber: 38 92% 55%;
+  --accent-rose: 346 87% 68%;
+  --accent-purple: 280 84% 55%;
+  --accent-violet: 258 90% 70%;
+  --accent-indigo: 239 84% 72%;
+  --accent-teal: 173 80% 45%;
+
+  /* Surface States (dark mode) */
+  --card-elevated: 217.2 32.6% 12%;
+  --surface-hover: 217.2 32.6% 20%;
 }
 
 html,

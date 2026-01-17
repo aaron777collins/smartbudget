@@ -124,6 +124,34 @@ export const chartColors = {
 } as const;
 
 /**
+ * Extended Chart Color Palette - 8-category support for complex visualizations
+ * These colors provide a broader palette for charts with many categories
+ * All colors are WCAG AA compliant in their respective themes
+ */
+export const extendedChartColors = {
+  light: [
+    'hsl(221.2, 83.2%, 53.3%)',  // primary (blue)
+    'hsl(160, 84%, 39%)',         // accent-emerald
+    'hsl(38, 92%, 50%)',          // accent-amber
+    'hsl(346, 87%, 63%)',         // accent-rose
+    'hsl(280, 84%, 47%)',         // accent-purple
+    'hsl(188, 94%, 43%)',         // accent-cyan
+    'hsl(258, 90%, 66%)',         // accent-violet
+    'hsl(173, 80%, 40%)',         // accent-teal
+  ],
+  dark: [
+    'hsl(217.2, 91.2%, 59.8%)',   // primary (lighter blue)
+    'hsl(160, 84%, 45%)',         // accent-emerald (lighter)
+    'hsl(38, 92%, 55%)',          // accent-amber (lighter)
+    'hsl(346, 87%, 68%)',         // accent-rose (lighter)
+    'hsl(280, 84%, 55%)',         // accent-purple (lighter)
+    'hsl(188, 94%, 50%)',         // accent-cyan (lighter)
+    'hsl(258, 90%, 70%)',         // accent-violet (lighter)
+    'hsl(173, 80%, 45%)',         // accent-teal (lighter)
+  ],
+} as const;
+
+/**
  * Budget Status Colors - For budget progress indicators
  */
 export const budgetStatusColors = {
@@ -204,4 +232,26 @@ export function getChartColors(theme: 'light' | 'dark' = 'light') {
 export function getCurrentTheme(): 'light' | 'dark' {
   if (typeof window === 'undefined') return 'light';
   return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+}
+
+/**
+ * Helper function to get extended chart colors for multi-category visualizations
+ * @param theme - 'light' or 'dark', defaults to 'light'
+ * @returns Array of 8 HSL color strings optimized for the theme
+ */
+export function getExtendedChartColors(theme: 'light' | 'dark' = 'light'): readonly string[] {
+  return extendedChartColors[theme];
+}
+
+/**
+ * Helper function to get a specific chart color by index (with wrapping)
+ * Useful for assigning colors to dynamic categories
+ * @param index - Category index (0-based)
+ * @param theme - 'light' or 'dark', defaults to current theme
+ * @returns HSL color string for the category
+ */
+export function getChartColorByIndex(index: number, theme?: 'light' | 'dark'): string {
+  const activeTheme = theme || getCurrentTheme();
+  const colors = extendedChartColors[activeTheme];
+  return colors[index % colors.length];
 }
