@@ -6,6 +6,11 @@ const globalForPrisma = globalThis as unknown as {
 
 // Validate SSL/TLS configuration in production
 function validateDatabaseSecurity() {
+  // Skip validation if running in browser (client-side)
+  if (typeof window !== "undefined") {
+    return
+  }
+
   const isDevelopment = process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test"
   const isBuildTime = process.env.NEXT_PHASE === "phase-production-build"
   const databaseUrl = process.env.DATABASE_URL || ""
