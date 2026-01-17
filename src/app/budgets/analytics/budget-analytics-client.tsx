@@ -32,6 +32,9 @@ import {
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { FadeIn } from '@/components/ui/animated';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { getChartColors, getCurrentTheme } from '@/lib/design-tokens';
+import { useTheme } from 'next-themes';
 
 interface HistoricalPerformance {
   month: string;
@@ -87,11 +90,16 @@ interface AnalyticsData {
 
 export default function BudgetAnalyticsClient() {
   const router = useRouter();
+  const { theme, resolvedTheme } = useTheme();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [months, setMonths] = useState(6);
+
+  // Get theme-aware chart colors
+  const currentTheme = (resolvedTheme || theme || 'light') as 'light' | 'dark';
+  const colors = getChartColors(currentTheme);
 
   const fetchAnalytics = async (showLoading = true) => {
     try {
@@ -202,15 +210,16 @@ export default function BudgetAnalyticsClient() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <select
-            value={months}
-            onChange={(e) => setMonths(parseInt(e.target.value, 10))}
-            className="border rounded-md px-3 py-2 text-sm"
-          >
-            <option value={3}>Last 3 months</option>
-            <option value={6}>Last 6 months</option>
-            <option value={12}>Last 12 months</option>
-          </select>
+          <Select value={months.toString()} onValueChange={(value) => setMonths(parseInt(value, 10))}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select period" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="3">Last 3 months</SelectItem>
+              <SelectItem value="6">Last 6 months</SelectItem>
+              <SelectItem value="12">Last 12 months</SelectItem>
+            </SelectContent>
+          </Select>
           <Button
             variant="outline"
             size="icon"
@@ -331,9 +340,9 @@ export default function BudgetAnalyticsClient() {
               <FadeIn duration={0.5} delay={0.1}>
                 <ResponsiveContainer width="100%" height={400}>
                   <AreaChart data={performanceChartData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
+                    <CartesianGrid strokeDasharray="3 3" stroke={colors.grid} />
+                    <XAxis dataKey="month" stroke={colors.textMuted} />
+                    <YAxis stroke={colors.textMuted} />
                     <Tooltip
                       formatter={(value: number | undefined) => value ? `$${value.toFixed(2)}` : '$0.00'}
                     />
@@ -342,8 +351,8 @@ export default function BudgetAnalyticsClient() {
                       type="monotone"
                       dataKey="Budgeted"
                       stackId="1"
-                      stroke="#8884d8"
-                      fill="#8884d8"
+                      stroke={colors.primary}
+                      fill={colors.primary}
                       fillOpacity={0.6}
                       animationBegin={0}
                       animationDuration={800}
@@ -353,8 +362,8 @@ export default function BudgetAnalyticsClient() {
                       type="monotone"
                       dataKey="Spent"
                       stackId="2"
-                      stroke="#ef4444"
-                      fill="#ef4444"
+                      stroke={colors.secondary}
+                      fill={colors.secondary}
                       fillOpacity={0.6}
                       animationBegin={100}
                       animationDuration={800}
@@ -431,16 +440,16 @@ export default function BudgetAnalyticsClient() {
               <FadeIn duration={0.5} delay={0.1}>
                 <ResponsiveContainer width="100%" height={400}>
                   <BarChart data={utilizationChartData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
+                    <CartesianGrid strokeDasharray="3 3" stroke={colors.grid} />
+                    <XAxis dataKey="month" stroke={colors.textMuted} />
+                    <YAxis stroke={colors.textMuted} />
                     <Tooltip
                       formatter={(value: number | undefined) => value ? `${value.toFixed(1)}%` : '0.0%'}
                     />
                     <Legend />
                     <Bar
                       dataKey="Budget Used (%)"
-                      fill="#8884d8"
+                      fill={colors.primary}
                       animationBegin={0}
                       animationDuration={800}
                       animationEasing="ease-out"
@@ -478,9 +487,9 @@ export default function BudgetAnalyticsClient() {
                   <FadeIn duration={0.5} delay={0.1}>
                     <ResponsiveContainer width="100%" height={200}>
                       <LineChart data={trend.data}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="month" />
-                        <YAxis />
+                        <CartesianGrid strokeDasharray="3 3" stroke={colors.grid} />
+                        <XAxis dataKey="month" stroke={colors.textMuted} />
+                        <YAxis stroke={colors.textMuted} />
                         <Tooltip
                           formatter={(value: number | undefined) => value ? `$${value.toFixed(2)}` : '$0.00'}
                         />
