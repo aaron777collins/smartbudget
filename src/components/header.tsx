@@ -16,6 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Wallet, LogOut, Settings, User } from "lucide-react"
+import { MobileNav } from "@/components/mobile-nav"
 
 export function Header() {
   const { data: session, status } = useSession()
@@ -45,13 +46,14 @@ export function Header() {
       }`}
     >
       <div className="container flex h-16 items-center">
-        <div className="mr-4 flex">
+        <div className="mr-4 flex items-center">
+          {status === "authenticated" && <MobileNav />}
           <Link href="/" className="mr-6 flex items-center space-x-2" aria-label="SmartBudget home">
             <Wallet className="h-6 w-6 text-primary" aria-hidden="true" />
             <span className="font-bold text-xl">SmartBudget</span>
           </Link>
           {status === "authenticated" && (
-            <nav className="flex items-center space-x-6 text-sm font-medium" aria-label="Primary navigation">
+            <nav className="hidden md:flex items-center space-x-6 text-sm font-medium" aria-label="Primary navigation">
               <Link
                 href="/dashboard"
                 className="transition-colors hover:text-foreground/80 text-foreground/60"
