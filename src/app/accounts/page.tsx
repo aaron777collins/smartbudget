@@ -297,15 +297,17 @@ export default function AccountsPage() {
                         <div className="flex items-center justify-end gap-2">
                           <Button
                             variant="ghost"
-                            size="sm"
+                            size="icon"
                             onClick={() => handleViewTransactions(account.id)}
+                            aria-label={`View transactions for ${account.name}`}
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
                           <Button
                             variant="ghost"
-                            size="sm"
+                            size="icon"
                             onClick={() => handleEditAccount(account)}
+                            aria-label={`Edit ${account.name}`}
                           >
                             <Edit className="h-4 w-4" />
                           </Button>

@@ -87,9 +87,10 @@ export function TagSelector({ selectedTags, onChange }: TagSelectorProps) {
             <button
               type="button"
               onClick={() => removeTag(tag.id)}
-              className="ml-1 hover:bg-white/20 rounded-full p-0.5"
+              className="ml-1 hover:bg-white/20 rounded-full p-2"
+              aria-label={`Remove tag ${tag.name}`}
             >
-              <X className="h-3 w-3" />
+              <X className="h-4 w-4" />
             </button>
           </Badge>
         ))}

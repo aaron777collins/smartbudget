@@ -394,11 +394,12 @@ export function AccountFormDialog({ open, onClose, account }: AccountFormDialogP
                       key={option.value}
                       type="button"
                       onClick={() => setFormData({ ...formData, color: option.value })}
-                      className={`w-10 h-10 rounded-full border-2 transition-all duration-200 hover:scale-110 ${
+                      className={`w-11 h-11 rounded-full border-2 transition-all duration-200 hover:scale-110 ${
                         formData.color === option.value ? 'border-foreground scale-110' : 'border-border'
                       }`}
                       style={{ backgroundColor: option.value }}
                       title={option.label}
+                      aria-label={`Select color ${option.label}`}
                     />
                   ))}
                 </div>

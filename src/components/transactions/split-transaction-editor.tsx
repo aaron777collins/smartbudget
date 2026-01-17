@@ -326,10 +326,11 @@ export function SplitTransactionEditor({
               {/* Remove Button */}
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon"
                 onClick={() => removeSplit(index)}
                 disabled={splits.length <= 1}
                 className="mt-6"
+                aria-label={`Remove split ${index + 1}`}
               >
                 <X className="h-4 w-4" />
               </Button>

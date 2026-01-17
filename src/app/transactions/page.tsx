@@ -315,10 +315,10 @@ export default function TransactionsPage() {
                   Tag: {availableTags.find(t => t.id === selectedTagId)?.name}
                   <button
                     onClick={() => handleTagFilter('')}
-                    className="ml-1 hover:bg-background/80 rounded-full p-0.5 transition-colors duration-200"
+                    className="ml-1 hover:bg-background/80 rounded-full p-2 transition-colors duration-200"
                     aria-label="Remove tag filter"
                   >
-                    <X className="h-3 w-3" />
+                    <X className="h-4 w-4" />
                   </button>
                 </FilterBadge>
               )}
@@ -327,10 +327,10 @@ export default function TransactionsPage() {
                   Account
                   <button
                     onClick={() => handleAdvancedFiltersChange({ ...advancedFilters, accountId: undefined })}
-                    className="ml-1 hover:bg-background/80 rounded-full p-0.5 transition-colors duration-200"
+                    className="ml-1 hover:bg-background/80 rounded-full p-2 transition-colors duration-200"
                     aria-label="Remove account filter"
                   >
-                    <X className="h-3 w-3" />
+                    <X className="h-4 w-4" />
                   </button>
                 </FilterBadge>
               )}
@@ -339,10 +339,10 @@ export default function TransactionsPage() {
                   Category
                   <button
                     onClick={() => handleAdvancedFiltersChange({ ...advancedFilters, categoryId: undefined })}
-                    className="ml-1 hover:bg-background/80 rounded-full p-0.5 transition-colors duration-200"
+                    className="ml-1 hover:bg-background/80 rounded-full p-2 transition-colors duration-200"
                     aria-label="Remove category filter"
                   >
-                    <X className="h-3 w-3" />
+                    <X className="h-4 w-4" />
                   </button>
                 </FilterBadge>
               )}
@@ -351,10 +351,10 @@ export default function TransactionsPage() {
                   Date Range
                   <button
                     onClick={() => handleAdvancedFiltersChange({ ...advancedFilters, dateRange: undefined })}
-                    className="ml-1 hover:bg-background/80 rounded-full p-0.5 transition-colors duration-200"
+                    className="ml-1 hover:bg-background/80 rounded-full p-2 transition-colors duration-200"
                     aria-label="Remove date range filter"
                   >
-                    <X className="h-3 w-3" />
+                    <X className="h-4 w-4" />
                   </button>
                 </FilterBadge>
               )}
@@ -363,10 +363,10 @@ export default function TransactionsPage() {
                   Amount Range
                   <button
                     onClick={() => handleAdvancedFiltersChange({ ...advancedFilters, minAmount: undefined, maxAmount: undefined })}
-                    className="ml-1 hover:bg-background/80 rounded-full p-0.5 transition-colors duration-200"
+                    className="ml-1 hover:bg-background/80 rounded-full p-2 transition-colors duration-200"
                     aria-label="Remove amount range filter"
                   >
-                    <X className="h-3 w-3" />
+                    <X className="h-4 w-4" />
                   </button>
                 </FilterBadge>
               )}
@@ -375,10 +375,10 @@ export default function TransactionsPage() {
                   Type: {advancedFilters.type}
                   <button
                     onClick={() => handleAdvancedFiltersChange({ ...advancedFilters, type: undefined })}
-                    className="ml-1 hover:bg-background/80 rounded-full p-0.5 transition-colors duration-200"
+                    className="ml-1 hover:bg-background/80 rounded-full p-2 transition-colors duration-200"
                     aria-label="Remove type filter"
                   >
-                    <X className="h-3 w-3" />
+                    <X className="h-4 w-4" />
                   </button>
                 </FilterBadge>
               )}
@@ -387,10 +387,10 @@ export default function TransactionsPage() {
                   {advancedFilters.isReconciled === 'true' ? 'Reconciled' : 'Unreconciled'}
                   <button
                     onClick={() => handleAdvancedFiltersChange({ ...advancedFilters, isReconciled: undefined })}
-                    className="ml-1 hover:bg-background/80 rounded-full p-0.5 transition-colors duration-200"
+                    className="ml-1 hover:bg-background/80 rounded-full p-2 transition-colors duration-200"
                     aria-label="Remove reconciliation filter"
                   >
-                    <X className="h-3 w-3" />
+                    <X className="h-4 w-4" />
                   </button>
                 </FilterBadge>
               )}
@@ -399,10 +399,10 @@ export default function TransactionsPage() {
                   {advancedFilters.isRecurring === 'true' ? 'Recurring' : 'One-time'}
                   <button
                     onClick={() => handleAdvancedFiltersChange({ ...advancedFilters, isRecurring: undefined })}
-                    className="ml-1 hover:bg-background/80 rounded-full p-0.5 transition-colors duration-200"
+                    className="ml-1 hover:bg-background/80 rounded-full p-2 transition-colors duration-200"
                     aria-label="Remove recurring filter"
                   >
-                    <X className="h-3 w-3" />
+                    <X className="h-4 w-4" />
                   </button>
                 </FilterBadge>
               )}
