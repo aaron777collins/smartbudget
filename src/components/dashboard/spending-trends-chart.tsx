@@ -17,6 +17,7 @@ import { formatCurrency } from '@/lib/utils';
 import type { TimeframeValue } from './timeframe-selector';
 import { getMonthsFromTimeframe, buildTimeframeParams } from '@/lib/timeframe';
 import { FadeIn } from '@/components/ui/animated';
+import { getCurrentTheme, getChartColorByIndex } from '@/lib/design-tokens';
 
 interface CategoryMetadata {
   id: string;
@@ -93,6 +94,7 @@ export function SpendingTrendsChart({ timeframe }: SpendingTrendsChartProps) {
   const [data, setData] = useState<SpendingTrendsData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const theme = getCurrentTheme();
 
   useEffect(() => {
     async function fetchData() {
@@ -182,19 +184,22 @@ export function SpendingTrendsChart({ timeframe }: SpendingTrendsChartProps) {
                 margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
               >
               <defs>
-                {data.categories.map((category) => (
-                  <linearGradient
-                    key={category.id}
-                    id={`color-${category.id}`}
-                    x1="0"
-                    y1="0"
-                    x2="0"
-                    y2="1"
-                  >
-                    <stop offset="5%" stopColor={category.color} stopOpacity={0.8} />
-                    <stop offset="95%" stopColor={category.color} stopOpacity={0.1} />
-                  </linearGradient>
-                ))}
+                {data.categories.map((category, index) => {
+                  const color = getChartColorByIndex(index, theme);
+                  return (
+                    <linearGradient
+                      key={category.id}
+                      id={`color-${category.id}`}
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop offset="5%" stopColor={color} stopOpacity={0.8} />
+                      <stop offset="95%" stopColor={color} stopOpacity={0.1} />
+                    </linearGradient>
+                  );
+                })}
               </defs>
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis
@@ -212,20 +217,23 @@ export function SpendingTrendsChart({ timeframe }: SpendingTrendsChartProps) {
                 wrapperStyle={{ paddingTop: '20px' }}
                 iconType="circle"
               />
-              {data.categories.map((category, index) => (
-                <Area
-                  key={category.id}
-                  type="monotone"
-                  dataKey={category.name}
-                  stackId="1"
-                  stroke={category.color}
-                  fill={`url(#color-${category.id})`}
-                  fillOpacity={1}
-                  animationBegin={index * 100}
-                  animationDuration={800}
-                  animationEasing="ease-out"
-                />
-              ))}
+              {data.categories.map((category, index) => {
+                const color = getChartColorByIndex(index, theme);
+                return (
+                  <Area
+                    key={category.id}
+                    type="monotone"
+                    dataKey={category.name}
+                    stackId="1"
+                    stroke={color}
+                    fill={`url(#color-${category.id})`}
+                    fillOpacity={1}
+                    animationBegin={index * 100}
+                    animationDuration={800}
+                    animationEasing="ease-out"
+                  />
+                );
+              })}
             </AreaChart>
           </ResponsiveContainer>
           </div>
