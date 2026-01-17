@@ -192,7 +192,7 @@ export function InsightsClient() {
 
       {/* Weekly Digest */}
       {weeklyDigest && (
-        <Card>
+        <Card className="hover:shadow-lg transition-all duration-200 hover:scale-[1.02]">
           <CardHeader>
             <div className="flex items-center gap-2">
               <Calendar className="h-5 w-5 text-primary" />
@@ -244,7 +244,7 @@ export function InsightsClient() {
 
       {/* Spending Patterns */}
       {patterns && patterns.insights && patterns.insights.length > 0 && (
-        <Card>
+        <Card className="hover:shadow-lg transition-all duration-200 hover:scale-[1.02]">
           <CardHeader>
             <div className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-primary" />
@@ -255,7 +255,7 @@ export function InsightsClient() {
           <CardContent>
             <div className="space-y-3">
               {patterns.insights.map((insight: Insight, idx: number) => (
-                <div key={idx} className="flex items-start justify-between gap-4 p-3 rounded-lg bg-muted/50">
+                <div key={idx} className="flex items-start justify-between gap-4 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors duration-200">
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center gap-2">
                       <p className="font-medium">{insight.title}</p>
@@ -274,7 +274,7 @@ export function InsightsClient() {
 
       {/* Savings Opportunities */}
       {savings.length > 0 && (
-        <Card>
+        <Card className="hover:shadow-lg transition-all duration-200 hover:scale-[1.02]">
           <CardHeader>
             <div className="flex items-center gap-2">
               <Lightbulb className="h-5 w-5 text-warning" />
@@ -287,7 +287,7 @@ export function InsightsClient() {
           <CardContent>
             <div className="space-y-3">
               {savings.map((opportunity, idx) => (
-                <div key={idx} className="flex items-start justify-between gap-4 p-3 rounded-lg bg-muted/50">
+                <div key={idx} className="flex items-start justify-between gap-4 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors duration-200">
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center gap-2">
                       <p className="font-medium">{opportunity.title}</p>
@@ -312,7 +312,7 @@ export function InsightsClient() {
 
       {/* Anomalies */}
       {anomalies.length > 0 && (
-        <Card>
+        <Card className="hover:shadow-lg transition-all duration-200 hover:scale-[1.02]">
           <CardHeader>
             <div className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-error" />
@@ -323,7 +323,7 @@ export function InsightsClient() {
           <CardContent>
             <div className="space-y-3">
               {anomalies.slice(0, 5).map((anomaly, idx) => (
-                <div key={idx} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                <div key={idx} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors duration-200">
                   {getSeverityIcon(anomaly.severity)}
                   <div className="flex-1 space-y-1">
                     <p className="font-medium">{anomaly.title}</p>
@@ -338,7 +338,7 @@ export function InsightsClient() {
 
       {/* Subscriptions */}
       {subscriptions.length > 0 && (
-        <Card>
+        <Card className="hover:shadow-lg transition-all duration-200 hover:scale-[1.02]">
           <CardHeader>
             <div className="flex items-center gap-2">
               <Repeat className="h-5 w-5 text-primary" />
@@ -352,7 +352,7 @@ export function InsightsClient() {
           <CardContent>
             <div className="space-y-3">
               {subscriptions.slice(0, 10).map((sub, idx) => (
-                <div key={idx} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                <div key={idx} className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors duration-200">
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center gap-2">
                       <p className="font-medium">{sub.merchant}</p>
