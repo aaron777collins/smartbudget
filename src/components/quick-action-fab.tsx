@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus, CreditCard, PieChart, X } from 'lucide-react';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 /**
@@ -28,9 +28,68 @@ import { cn } from '@/lib/utils';
  */
 export function QuickActionFAB() {
   const [open, setOpen] = useState(false);
+  const shouldReduceMotion = useReducedMotion();
 
   const toggleOpen = () => setOpen(!open);
 
+  // If user prefers reduced motion, render simplified version without animations
+  if (shouldReduceMotion) {
+    return (
+      <div className="fixed bottom-6 right-6 z-50 md:hidden">
+        <div className="flex flex-col items-end gap-3">
+          {/* Action Buttons - Show without animation when open */}
+          {open && (
+            <div className="flex flex-col items-end gap-3">
+              {/* Create Budget Action */}
+              <Link href="/budgets/create">
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  className="h-14 rounded-full shadow-lg hover:shadow-xl transition-shadow px-6 gap-2"
+                  onClick={() => setOpen(false)}
+                >
+                  <PieChart className="h-5 w-5" />
+                  <span className="font-medium">New Budget</span>
+                </Button>
+              </Link>
+
+              {/* Add Transaction Action */}
+              <Link href="/transactions">
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  className="h-14 rounded-full shadow-lg hover:shadow-xl transition-shadow px-6 gap-2"
+                  onClick={() => setOpen(false)}
+                >
+                  <CreditCard className="h-5 w-5" />
+                  <span className="font-medium">Add Transaction</span>
+                </Button>
+              </Link>
+            </div>
+          )}
+
+          {/* Main FAB Button - Always visible */}
+          <Button
+            size="icon"
+            className={cn(
+              'h-16 w-16 rounded-full shadow-xl hover:shadow-2xl transition-shadow',
+              open && 'bg-primary/90'
+            )}
+            onClick={toggleOpen}
+            aria-label={open ? 'Close quick actions' : 'Open quick actions'}
+          >
+            {open ? (
+              <X className="h-7 w-7" />
+            ) : (
+              <Plus className="h-7 w-7" />
+            )}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Full animated version for users who don't prefer reduced motion
   return (
     <div className="fixed bottom-6 right-6 z-50 md:hidden">
       <div className="flex flex-col items-end gap-3">

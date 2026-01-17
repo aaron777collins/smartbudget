@@ -1,6 +1,6 @@
 "use client"
 
-import { motion, HTMLMotionProps, Variants, useMotionValue, useTransform, animate as animateValue } from "framer-motion"
+import { motion, HTMLMotionProps, Variants, useMotionValue, useTransform, animate as animateValue, useReducedMotion } from "framer-motion"
 import { ReactNode, useEffect } from "react"
 
 // Fade In Animation
@@ -18,8 +18,17 @@ export function FadeIn({
   duration = 0.5,
   direction = "none",
   distance = 20,
+  className,
+  style,
   ...props
 }: FadeInProps) {
+  const shouldReduceMotion = useReducedMotion()
+
+  // If user prefers reduced motion, return plain wrapper without animation
+  if (shouldReduceMotion) {
+    return <div className={className} style={style as React.CSSProperties}>{children}</div>
+  }
+
   const directions = {
     up: { y: distance, x: 0 },
     down: { y: -distance, x: 0 },
@@ -72,8 +81,17 @@ export function SlideIn({
   duration = 0.4,
   direction = "up",
   distance = 50,
+  className,
+  style,
   ...props
 }: SlideInProps) {
+  const shouldReduceMotion = useReducedMotion()
+
+  // If user prefers reduced motion, return plain wrapper without animation
+  if (shouldReduceMotion) {
+    return <div className={className} style={style as React.CSSProperties}>{children}</div>
+  }
+
   const directions = {
     up: { y: distance, x: 0 },
     down: { y: -distance, x: 0 },
@@ -123,8 +141,17 @@ export function Stagger({
   staggerDelay = 0.1,
   initialDelay = 0,
   duration = 0.4,
+  className,
+  style,
   ...props
 }: StaggerProps) {
+  const shouldReduceMotion = useReducedMotion()
+
+  // If user prefers reduced motion, return plain wrapper without animation
+  if (shouldReduceMotion) {
+    return <div className={className} style={style as React.CSSProperties}>{children}</div>
+  }
+
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
@@ -181,8 +208,17 @@ export function ScaleIn({
   delay = 0,
   duration = 0.4,
   initialScale = 0.8,
+  className,
+  style,
   ...props
 }: ScaleInProps) {
+  const shouldReduceMotion = useReducedMotion()
+
+  // If user prefers reduced motion, return plain wrapper without animation
+  if (shouldReduceMotion) {
+    return <div className={className} style={style as React.CSSProperties}>{children}</div>
+  }
+
   const variants: Variants = {
     hidden: {
       scale: initialScale,
@@ -233,12 +269,19 @@ export function CountUp({
   suffix = "",
   className = "",
 }: CountUpProps) {
+  const shouldReduceMotion = useReducedMotion()
   const count = useMotionValue(from)
   const rounded = useTransform(count, (latest) => {
     return `${prefix}${latest.toFixed(decimals)}${suffix}`
   })
 
   useEffect(() => {
+    // If user prefers reduced motion, instantly set to final value
+    if (shouldReduceMotion) {
+      count.set(to)
+      return
+    }
+
     const timeout = setTimeout(() => {
       const controls = animateValue(count, to, {
         duration,
@@ -248,7 +291,7 @@ export function CountUp({
     }, delay * 1000)
 
     return () => clearTimeout(timeout)
-  }, [count, to, duration, delay])
+  }, [count, to, duration, delay, shouldReduceMotion])
 
   return <motion.span className={className}>{rounded}</motion.span>
 }
@@ -264,8 +307,17 @@ export function HoverScale({
   children,
   scale = 1.05,
   duration = 0.2,
+  className,
+  style,
   ...props
 }: HoverScaleProps) {
+  const shouldReduceMotion = useReducedMotion()
+
+  // If user prefers reduced motion, return plain wrapper without animation
+  if (shouldReduceMotion) {
+    return <div className={className} style={style as React.CSSProperties}>{children}</div>
+  }
+
   return (
     <motion.div
       whileHover={{ scale }}
@@ -291,8 +343,17 @@ export function Shake({
   trigger = false,
   duration = 0.5,
   intensity = 10,
+  className,
+  style,
   ...props
 }: ShakeProps) {
+  const shouldReduceMotion = useReducedMotion()
+
+  // If user prefers reduced motion, return plain wrapper without animation
+  if (shouldReduceMotion) {
+    return <div className={className} style={style as React.CSSProperties}>{children}</div>
+  }
+
   return (
     <motion.div
       animate={
@@ -321,8 +382,17 @@ export function Pulse({
   children,
   scale = 1.05,
   duration = 1,
+  className,
+  style,
   ...props
 }: PulseProps) {
+  const shouldReduceMotion = useReducedMotion()
+
+  // If user prefers reduced motion, return plain wrapper without animation
+  if (shouldReduceMotion) {
+    return <div className={className} style={style as React.CSSProperties}>{children}</div>
+  }
+
   return (
     <motion.div
       animate={{
