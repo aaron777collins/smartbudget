@@ -1,0 +1,25 @@
+# Browser Support Configuration for SmartBudget
+# This configuration aligns with the official support statement in BETA_TESTING.md
+# Supported: Latest versions of Chrome, Firefox, Safari, and Edge
+# NOT supported: Internet Explorer
+
+# Production browsers
+# Target modern browsers with good ES2017+ and CSS support
+> 0.5%
+last 2 versions
+not dead
+not IE 11
+
+# Explicitly include modern browsers
+Chrome >= 90
+Firefox >= 88
+Safari >= 14
+Edge >= 90
+
+# Mobile browsers
+iOS >= 14
+Android >= 90
+
+# Exclude old and unsupported browsers
+not IE 11
+not op_mini all
