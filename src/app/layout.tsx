@@ -7,7 +7,11 @@ import { ErrorBoundary } from "@/components/error-boundary";
 import { SentryUserContext } from "@/components/sentry-user-context";
 import { Toaster } from "sonner";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({
+  subsets: ["latin"],
+  display: 'swap',
+  variable: '--font-inter',
+});
 
 export const metadata: Metadata = {
   title: "SmartBudget - Personal Finance Management",
