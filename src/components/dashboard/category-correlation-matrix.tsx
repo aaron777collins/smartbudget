@@ -75,9 +75,11 @@ export function CategoryCorrelationMatrix({ timeframe }: CategoryCorrelationMatr
     const container = containerRef.current;
     const containerWidth = container.clientWidth;
 
-    // Calculate dimensions
-    const cellSize = 70;
-    const labelSize = 150;
+    // Calculate responsive dimensions based on viewport
+    const isMobile = containerWidth < 640;
+    const isTablet = containerWidth >= 640 && containerWidth < 1024;
+    const cellSize = isMobile ? 50 : isTablet ? 60 : 70;
+    const labelSize = isMobile ? 100 : 150;
     const margin = { top: labelSize, right: 20, bottom: 20, left: labelSize };
 
     const categories = data.categories;
@@ -243,11 +245,11 @@ export function CategoryCorrelationMatrix({ timeframe }: CategoryCorrelationMatr
       .attr('pointer-events', 'none')
       .text(d => (d.correlation * 100).toFixed(0) + '%');
 
-    // Add legend
-    const legendWidth = 200;
+    // Add legend (responsive sizing)
+    const legendWidth = isMobile ? 150 : 200;
     const legendHeight = 20;
-    const legendX = width - legendWidth - margin.right;
-    const legendY = 20;
+    const legendX = isMobile ? margin.left : (width - legendWidth - margin.right);
+    const legendY = isMobile ? (height - margin.bottom - 50) : 20;
 
     const legendScale = d3.scaleLinear()
       .domain([0, 100])

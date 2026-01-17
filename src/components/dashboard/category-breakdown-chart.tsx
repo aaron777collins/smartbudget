@@ -204,7 +204,7 @@ export function CategoryBreakdownChart({ timeframe }: CategoryBreakdownChartProp
           <CardDescription>
             Current month spending by category
           </CardDescription>
-        <div className="mt-2 grid grid-cols-2 gap-4 text-sm">
+        <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
           <div>
             <span className="text-muted-foreground">Total Spending: </span>
             <span className="font-semibold font-mono">{formatCurrency(data.totalSpending)}</span>
@@ -228,7 +228,7 @@ export function CategoryBreakdownChart({ timeframe }: CategoryBreakdownChartProp
                     cy="50%"
                     labelLine={false}
                     label={CustomLabel as never}
-                    outerRadius={120}
+                    outerRadius="80%"
                     fill="#8884d8"
                     dataKey="amount"
                     animationBegin={0}

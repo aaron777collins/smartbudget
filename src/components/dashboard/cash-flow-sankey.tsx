@@ -261,7 +261,7 @@ export function CashFlowSankey({ timeframe }: CashFlowSankeyProps) {
         <CardDescription>
           Income sources flowing to expenses (Current Month)
         </CardDescription>
-        <div className="flex gap-4 mt-2 text-sm">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mt-2 text-sm">
           <div>
             <span className="text-muted-foreground">Total Income: </span>
             <span className="font-semibold text-success">

@@ -73,10 +73,12 @@ export function CategoryHeatmap({ timeframe }: CategoryHeatmapProps) {
     const container = containerRef.current;
     const containerWidth = container.clientWidth;
 
-    // Calculate dimensions based on data
-    const cellSize = 60;
-    const categoryLabelWidth = 180;
-    const monthLabelHeight = 60;
+    // Calculate responsive dimensions based on viewport
+    const isMobile = containerWidth < 640;
+    const isTablet = containerWidth >= 640 && containerWidth < 1024;
+    const cellSize = isMobile ? 45 : isTablet ? 50 : 60;
+    const categoryLabelWidth = isMobile ? 120 : 180;
+    const monthLabelHeight = isMobile ? 50 : 60;
     const margin = { top: monthLabelHeight, right: 20, bottom: 20, left: categoryLabelWidth };
 
     const categories = data.data;
@@ -233,11 +235,11 @@ export function CategoryHeatmap({ timeframe }: CategoryHeatmapProps) {
       });
     });
 
-    // Add legend
-    const legendWidth = 200;
+    // Add legend (responsive sizing)
+    const legendWidth = isMobile ? 150 : 200;
     const legendHeight = 20;
-    const legendX = width - legendWidth - margin.right;
-    const legendY = 20;
+    const legendX = isMobile ? margin.left : (width - legendWidth - margin.right);
+    const legendY = isMobile ? (height - margin.bottom - 50) : 20;
 
     const legendScale = d3.scaleLinear()
       .domain([0, data.scale.max])

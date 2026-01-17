@@ -159,7 +159,7 @@ export function SpendingTrendsChart({ timeframe }: SpendingTrendsChartProps) {
         <CardDescription>
           Monthly spending by category (Last {data.summary.totalMonths} months)
         </CardDescription>
-        <div className="mt-2 grid grid-cols-2 gap-4 text-sm">
+        <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
           <div>
             <span className="text-muted-foreground">Average Monthly: </span>
             <span className="font-semibold font-mono">
@@ -171,7 +171,7 @@ export function SpendingTrendsChart({ timeframe }: SpendingTrendsChartProps) {
             <span className="font-semibold font-mono">
               {formatCurrency(data.summary.highestMonth.total)}
             </span>
-            <span> ({data.summary.highestMonth.month})</span>
+            <span className="hidden sm:inline"> ({data.summary.highestMonth.month})</span>
           </div>
         </div>
       </CardHeader>
@@ -181,7 +181,7 @@ export function SpendingTrendsChart({ timeframe }: SpendingTrendsChartProps) {
             <ResponsiveContainer width="100%" height={400}>
               <AreaChart
                 data={data.chartData}
-                margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
               >
               <defs>
                 {data.categories.map((category, index) => {
