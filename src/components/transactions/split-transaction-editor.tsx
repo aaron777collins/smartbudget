@@ -346,6 +346,7 @@ export function SplitTransactionEditor({
           size="sm"
           onClick={addSplit}
           className="flex-1"
+          aria-label="Add new split"
         >
           <Plus className="mr-2 h-4 w-4" />
           Add Split
@@ -355,6 +356,7 @@ export function SplitTransactionEditor({
           size="sm"
           onClick={handleDistributeEvenly}
           className="flex-1"
+          aria-label="Distribute amount evenly across splits"
         >
           Distribute Evenly
         </Button>

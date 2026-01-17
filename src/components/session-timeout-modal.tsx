@@ -94,6 +94,7 @@ export function SessionTimeoutModal() {
           <button
             onClick={resetActivity}
             className="flex-1 rounded-lg bg-primary px-4 py-2 font-medium text-white transition-colors hover:bg-primary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 "
+            aria-label="Continue session"
           >
             Continue Session
           </button>
@@ -102,6 +103,7 @@ export function SessionTimeoutModal() {
               signOut({ callbackUrl: '/auth/signin?session_expired=true' })
             }
             className="rounded-lg border border-border px-4 py-2 font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 "
+            aria-label="Logout"
           >
             Logout
           </button>

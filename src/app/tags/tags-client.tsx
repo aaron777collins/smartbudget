@@ -271,6 +271,7 @@ export default function TagsClient() {
                         size="icon"
                         className="h-7 w-7"
                         onClick={() => openEditDialog(tag)}
+                        aria-label={`Edit tag ${tag.name}`}
                       >
                         <Edit className="h-3.5 w-3.5" />
                       </Button>
@@ -279,6 +280,7 @@ export default function TagsClient() {
                         size="icon"
                         className="h-7 w-7"
                         onClick={() => openDeleteDialog(tag)}
+                        aria-label={`Delete tag ${tag.name}`}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
@@ -334,6 +336,7 @@ export default function TagsClient() {
                     style={{ backgroundColor: preset.value }}
                     onClick={() => setFormColor(preset.value)}
                     title={preset.name}
+                    aria-label={`Select ${preset.name} color`}
                   />
                 ))}
               </div>
@@ -392,6 +395,7 @@ export default function TagsClient() {
                     style={{ backgroundColor: preset.value }}
                     onClick={() => setFormColor(preset.value)}
                     title={preset.name}
+                    aria-label={`Select ${preset.name} color`}
                   />
                 ))}
               </div>

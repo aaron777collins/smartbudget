@@ -376,6 +376,7 @@ export function AccountFormDialog({ open, onClose, account }: AccountFormDialogP
                             ? 'border-primary bg-primary/10'
                             : 'border-border hover:bg-accent'
                         }`}
+                        aria-label={`Select ${option.label} icon`}
                       >
                         <IconComponent className="h-4 w-4" />
                         <span className="text-sm">{option.label}</span>
