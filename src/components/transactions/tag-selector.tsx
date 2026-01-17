@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/popover';
 import { Plus, X, Check } from 'lucide-react';
 import { toast } from 'sonner';
+import { getContrastTextColor } from '@/lib/design-tokens';
 
 interface Tag {
   id: string;
@@ -77,23 +78,29 @@ export function TagSelector({ selectedTags, onChange }: TagSelectorProps) {
     <div className="space-y-2">
       {/* Selected Tags Display */}
       <div className="flex flex-wrap gap-2">
-        {selectedTags.map((tag) => (
-          <Badge
-            key={tag.id}
-            style={{ backgroundColor: tag.color }}
-            className="text-white pr-1"
-          >
-            #{tag.name}
-            <button
-              type="button"
-              onClick={() => removeTag(tag.id)}
-              className="ml-1 hover:bg-white/20 rounded-full p-2"
-              aria-label={`Remove tag ${tag.name}`}
+        {selectedTags.map((tag) => {
+          const textColor = getContrastTextColor(tag.color);
+          return (
+            <Badge
+              key={tag.id}
+              style={{
+                backgroundColor: tag.color,
+                color: textColor
+              }}
+              className="pr-1"
             >
-              <X className="h-4 w-4" />
-            </button>
-          </Badge>
-        ))}
+              #{tag.name}
+              <button
+                type="button"
+                onClick={() => removeTag(tag.id)}
+                className="ml-1 hover:bg-black/10 dark:hover:bg-white/10 rounded-full p-2"
+                aria-label={`Remove tag ${tag.name}`}
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </Badge>
+          );
+        })}
 
         {/* Add Tag Button */}
         <Popover open={open} onOpenChange={setOpen}>

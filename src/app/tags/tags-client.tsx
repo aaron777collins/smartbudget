@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { HoverScale } from '@/components/ui/animated';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { getContrastTextColor } from '@/lib/design-tokens';
 import {
   Dialog,
   DialogContent,
@@ -254,17 +255,21 @@ export default function TagsClient() {
         </Card>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {tags.map((tag) => (
-            <HoverScale key={tag.id} scale={1.02}>
-              <Card className="h-full hover:shadow-lg transition-all duration-200">
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <Badge
-                      style={{ backgroundColor: tag.color }}
-                      className="text-white"
-                    >
-                      #{tag.name}
-                    </Badge>
+          {tags.map((tag) => {
+            const textColor = getContrastTextColor(tag.color);
+            return (
+              <HoverScale key={tag.id} scale={1.02}>
+                <Card className="h-full hover:shadow-lg transition-all duration-200">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <Badge
+                        style={{
+                          backgroundColor: tag.color,
+                          color: textColor
+                        }}
+                      >
+                        #{tag.name}
+                      </Badge>
                     <div className="flex gap-1">
                       <Button
                         variant="ghost"
@@ -295,7 +300,8 @@ export default function TagsClient() {
                 </CardContent>
               </Card>
             </HoverScale>
-          ))}
+            );
+          })}
         </div>
       )}
 

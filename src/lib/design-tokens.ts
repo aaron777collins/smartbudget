@@ -255,3 +255,119 @@ export function getChartColorByIndex(index: number, theme?: 'light' | 'dark'): s
   const colors = extendedChartColors[activeTheme];
   return colors[index % colors.length];
 }
+
+/**
+ * Calculate relative luminance of an RGB color
+ * Used for WCAG contrast ratio calculations
+ * @param r - Red value (0-255)
+ * @param g - Green value (0-255)
+ * @param b - Blue value (0-255)
+ * @returns Relative luminance value (0-1)
+ */
+function getLuminance(r: number, g: number, b: number): number {
+  const [rs, gs, bs] = [r, g, b].map((c) => {
+    const sRGB = c / 255;
+    return sRGB <= 0.03928 ? sRGB / 12.92 : Math.pow((sRGB + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+}
+
+/**
+ * Parse hex color to RGB components
+ * Supports 3-digit (#RGB) and 6-digit (#RRGGBB) formats
+ * @param hex - Hex color string (with or without #)
+ * @returns RGB object or null if invalid
+ */
+function parseHexColor(hex: string): { r: number; g: number; b: number } | null {
+  const cleanHex = hex.replace('#', '');
+
+  // 3-digit hex (e.g., #FFF)
+  if (cleanHex.length === 3) {
+    const r = parseInt(cleanHex[0] + cleanHex[0], 16);
+    const g = parseInt(cleanHex[1] + cleanHex[1], 16);
+    const b = parseInt(cleanHex[2] + cleanHex[2], 16);
+    return { r, g, b };
+  }
+
+  // 6-digit hex (e.g., #FFFFFF)
+  if (cleanHex.length === 6) {
+    const r = parseInt(cleanHex.substring(0, 2), 16);
+    const g = parseInt(cleanHex.substring(2, 4), 16);
+    const b = parseInt(cleanHex.substring(4, 6), 16);
+    return { r, g, b };
+  }
+
+  return null;
+}
+
+/**
+ * Determine whether white or black text provides better contrast on a given background color
+ * Uses WCAG contrast ratio calculation (minimum 4.5:1 for AA compliance)
+ *
+ * @param backgroundColor - Hex color string (e.g., '#FF5733', '#3B82F6')
+ * @returns 'white' or 'black' - the text color with better contrast
+ *
+ * @example
+ * getContrastTextColor('#3B82F6') // returns 'white' (light blue background)
+ * getContrastTextColor('#FFD700') // returns 'black' (gold background)
+ */
+export function getContrastTextColor(backgroundColor: string): 'white' | 'black' {
+  const rgb = parseHexColor(backgroundColor);
+
+  // Fallback to white if parsing fails
+  if (!rgb) return 'white';
+
+  const bgLuminance = getLuminance(rgb.r, rgb.g, rgb.b);
+
+  // Luminance values for pure white (1) and pure black (0)
+  const whiteLuminance = 1;
+  const blackLuminance = 0;
+
+  // Calculate contrast ratios
+  const whiteContrast = (whiteLuminance + 0.05) / (bgLuminance + 0.05);
+  const blackContrast = (bgLuminance + 0.05) / (blackLuminance + 0.05);
+
+  // Return the color with higher contrast
+  return whiteContrast > blackContrast ? 'white' : 'black';
+}
+
+/**
+ * Convert hex color to rgba format with specified opacity
+ * More reliable than appending opacity to hex string
+ *
+ * @param hexColor - Hex color string (e.g., '#FF5733', '#3B82F6')
+ * @param opacity - Opacity value between 0 and 1 (default: 0.12)
+ * @returns RGBA color string
+ *
+ * @example
+ * hexToRgba('#3B82F6', 0.12) // returns 'rgba(59, 130, 246, 0.12)'
+ */
+export function hexToRgba(hexColor: string, opacity: number = 0.12): string {
+  const rgb = parseHexColor(hexColor);
+
+  // Fallback to transparent if parsing fails
+  if (!rgb) return `rgba(0, 0, 0, ${opacity})`;
+
+  return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity})`;
+}
+
+/**
+ * Get category badge colors with proper contrast for both light and dark modes
+ * Uses a subtle background with full color text for better readability
+ *
+ * @param categoryColor - Hex color string for the category
+ * @returns Object with backgroundColor and color properties for inline styles
+ *
+ * @example
+ * const styles = getCategoryBadgeColors('#3B82F6');
+ * <Badge style={styles}>Category Name</Badge>
+ */
+export function getCategoryBadgeColors(categoryColor: string): {
+  backgroundColor: string;
+  color: string;
+} {
+  return {
+    backgroundColor: hexToRgba(categoryColor, 0.12),
+    color: categoryColor,
+  };
+}

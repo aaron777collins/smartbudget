@@ -19,6 +19,7 @@ import { Calendar, DollarSign, Store, FileText, Tag, Trash2, Search, Loader2, Sp
 import { CategorySelector } from './category-selector';
 import { SplitTransactionEditor } from './split-transaction-editor';
 import { TagSelector } from './tag-selector';
+import { getCategoryBadgeColors } from '@/lib/design-tokens';
 
 interface Transaction {
   id: string;
@@ -707,10 +708,7 @@ export function TransactionDetailDialog({
                         </div>
                         <Badge
                           variant="secondary"
-                          style={{
-                            backgroundColor: `${transaction.category.color}20`,
-                            color: transaction.category.color,
-                          }}
+                          style={getCategoryBadgeColors(transaction.category.color)}
                         >
                           {transaction.category.name}
                           {transaction.subcategory &&

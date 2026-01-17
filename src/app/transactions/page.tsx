@@ -27,6 +27,7 @@ import { ExportDialog } from '@/components/transactions/export-dialog';
 import { Search, Filter, Download, Plus, Pencil, Trash2, Repeat, X } from 'lucide-react';
 import { Badge as FilterBadge } from '@/components/ui/badge';
 import { ScreenReaderAnnouncer } from '@/components/ui/screen-reader-announcer';
+import { getCategoryBadgeColors } from '@/lib/design-tokens';
 
 interface Transaction {
   id: string;
@@ -488,10 +489,7 @@ export default function TransactionsPage() {
                           {transaction.category && (
                             <Badge
                               variant="secondary"
-                              style={{
-                                backgroundColor: `${transaction.category.color}20`,
-                                color: transaction.category.color,
-                              }}
+                              style={getCategoryBadgeColors(transaction.category.color)}
                               className="text-xs"
                             >
                               {transaction.category.name}
@@ -512,10 +510,7 @@ export default function TransactionsPage() {
                       {transaction.category ? (
                         <Badge
                           variant="secondary"
-                          style={{
-                            backgroundColor: `${transaction.category.color}20`,
-                            color: transaction.category.color,
-                          }}
+                          style={getCategoryBadgeColors(transaction.category.color)}
                         >
                           {transaction.category.name}
                         </Badge>
